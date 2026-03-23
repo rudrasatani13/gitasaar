@@ -1,7 +1,8 @@
 // src/utils/geminiApi.js
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_KEY || 'AIzaSyD8l0wfb5Hvd2OXEPMeAB5Fz_QL7XZlmzU';
+// Ab API key sirf .env se aayegi, koi hardcoded string nahi
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_KEY;
 
 const LANG_INSTRUCTIONS = {
   hinglish: `Respond in Hinglish (natural mix of Hindi + English). Talk like a wise best friend — "bhai", "yaar", "dekh" use karo naturally. Keep it real, relatable, desi vibe.`,
@@ -122,6 +123,7 @@ function getChat(language) {
     currentLanguage = lang;
   }
   if (!genAI) {
+    if (!GEMINI_API_KEY) console.warn("Gemini API Key is missing!");
     genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   }
   if (!chatSession) {

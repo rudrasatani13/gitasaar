@@ -18,8 +18,9 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from 'react-native';
 
+// Yahan bhi ab EXPO_PUBLIC variable use kar rahe hain
 const firebaseConfig = {
-  apiKey: "AIzaSyA6ugChvd3XLkCgZYsfJ3WnOWTo_KzHBwE",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: "gitasaar2004.firebaseapp.com",
   projectId: "gitasaar2004",
   storageBucket: "gitasaar2004.firebasestorage.app",
@@ -67,7 +68,6 @@ export async function loginWithGoogle() {
       const result = await signInWithPopup(auth, provider);
       return { success: true, user: result.user };
     } else {
-      // Native - needs expo-auth-session setup (future)
       return { success: false, error: 'Google login phone pe APK build ke baad available hoga' };
     }
   } catch (e) {
@@ -88,7 +88,6 @@ export async function loginWithApple() {
       const result = await signInWithPopup(auth, provider);
       return { success: true, user: result.user };
     } else {
-      // Native iOS - needs expo-apple-authentication (future)
       return { success: false, error: 'Apple login sirf iOS pe available hai' };
     }
   } catch (e) {
@@ -104,7 +103,6 @@ let confirmationResult = null;
 export async function sendPhoneOTP(phoneNumber) {
   try {
     if (Platform.OS === 'web') {
-      // Setup invisible recaptcha
       if (!window.recaptchaVerifier) {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
@@ -112,7 +110,6 @@ export async function sendPhoneOTP(phoneNumber) {
         });
       }
 
-      // Format phone number (add +91 if not present)
       let formatted = phoneNumber.trim();
       if (!formatted.startsWith('+')) {
         formatted = '+91' + formatted.replace(/^0/, '');
@@ -127,7 +124,6 @@ export async function sendPhoneOTP(phoneNumber) {
     let msg = e.message;
     if (msg.includes('invalid-phone-number')) msg = 'Phone number galat hai. +91XXXXXXXXXX format use karo.';
     if (msg.includes('too-many-requests')) msg = 'Bahut zyada attempts. Thodi der baad try karo.';
-    // Reset recaptcha on error
     if (window.recaptchaVerifier) {
       try { window.recaptchaVerifier.clear(); } catch(err) {}
       window.recaptchaVerifier = null;

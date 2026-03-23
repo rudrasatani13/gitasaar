@@ -7,12 +7,15 @@ import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
 import { tapLight } from '../utils/haptics';
 
-const ELEVEN_API_KEY = process.env.EXPO_PUBLIC_ELEVEN_KEY || 'sk_6826fd83d8b5cae619e901a50f6bae2b9071137dc11a3007';
+// Ab API key sirf .env se aayegi
+const ELEVEN_API_KEY = process.env.EXPO_PUBLIC_ELEVEN_KEY;
 const VOICE_ID = 'S5P5Y6sMPfFCbxqUJ3F4'; // "Adam" - deep calm male voice
 const MODEL_ID = 'eleven_multilingual_v2'; // Supports Hindi/Sanskrit
 
 async function generateSpeech(text) {
   try {
+    if (!ELEVEN_API_KEY) throw new Error("ElevenLabs API Key is missing");
+    
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
       method: 'POST',
       headers: {

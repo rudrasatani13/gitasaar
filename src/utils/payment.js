@@ -2,7 +2,8 @@
 // Razorpay for India + International
 import { Platform } from 'react-native';
 
-const RAZORPAY_KEY = process.env.EXPO_PUBLIC_RAZORPAY_KEY || '""" + content.split("';
+// Ab API key sirf .env se aayegi
+const RAZORPAY_KEY = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
 
 const PLANS = {
   india: {
@@ -65,6 +66,11 @@ async function startPayment(planType, userEmail, userName, onSuccess, onFailure)
 
   await loadRazorpay();
   if (!window.Razorpay) { onFailure('Payment service not available'); return; }
+
+  if (!RAZORPAY_KEY) {
+    onFailure('Payment Config Error. Check API Keys.');
+    return;
+  }
 
   const options = {
     key: RAZORPAY_KEY,
