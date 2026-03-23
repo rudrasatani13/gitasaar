@@ -1,20 +1,66 @@
+// App.js
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useFonts, NotoSans_400Regular, NotoSans_500Medium, NotoSans_700Bold } from '@expo-google-fonts/noto-sans';
+import { NotoSerifDevanagari_400Regular, NotoSerifDevanagari_700Bold } from '@expo-google-fonts/noto-serif-devanagari';
+import * as Notifications from 'expo-notifications';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+import { ProfileProvider } from './src/theme/ProfileContext';
+import { BookmarkProvider } from './src/theme/BookmarkContext';
+import { TrackerProvider } from './src/theme/TrackerContext';
+import { JournalProvider } from './src/theme/JournalContext';
+import { ChatHistoryProvider } from "./src/theme/ChatHistoryContext";
+import { ReadingGoalProvider } from "./src/theme/ReadingGoalContext";
+import { OfflineProvider } from './src/theme/OfflineContext';
+import { PremiumProvider } from './src/theme/PremiumContext';
+import { initSecurity } from './src/utils/security';
+import AppNavigator from './src/navigation/AppNavigator';
 
-export default function App() {
+function AppContent() {
+  React.useEffect(() => { try { initSecurity(); } catch(e) {} }, []);
+  React.useEffect(() => { if (typeof document !== "undefined") { document.body.style.margin="0"; document.body.style.padding="0"; document.body.style.overflow="hidden"; document.body.style.background="#FDF8EF"; document.documentElement.style.height="100%"; document.body.style.height="100%"; const root=document.getElementById("root"); if(root){root.style.height="100%";root.style.width="100%"} } }, []);
+  const { colors } = useTheme();
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('Notification tapped:', response.notification.request.content.data);
+    });
+    return () => sub.remove();
+  }, []);
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style={colors.statusBar} />
+      <AppNavigator />
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+
+  const [fontsLoaded] = useFonts({
+    NotoSans_400Regular, NotoSans_500Medium, NotoSans_700Bold,
+    NotoSerifDevanagari_400Regular, NotoSerifDevanagari_700Bold,
+  });
+  if (!fontsLoaded) return null;
+
+  return (
+    <ThemeProvider>
+    <OfflineProvider>
+      <ProfileProvider>
+        <BookmarkProvider>
+          <TrackerProvider>
+            <JournalProvider>
+              <ReadingGoalProvider>
+              <PremiumProvider>
+              <ChatHistoryProvider>
+                <AppContent />
+              </ChatHistoryProvider>
+              </PremiumProvider>
+              </ReadingGoalProvider>
+            </JournalProvider>
+          </TrackerProvider>
+        </BookmarkProvider>
+      </ProfileProvider>
+    </OfflineProvider>
+    </ThemeProvider>
+  );
+}

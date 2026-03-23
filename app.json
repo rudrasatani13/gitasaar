@@ -1,28 +1,40 @@
 {
   "expo": {
     "name": "GitaSaar",
-    "slug": "GitaSaar",
+    "backgroundColor": "#FDF8EF",
+    "slug": "gitasaar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FFF8E7",
+      "resizeMode": "contain"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gitasaar.app"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#FFF8E7"
+      },
+      "package": "com.gitasaar.app"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "plugins": [
+      "expo-font",
+      "expo-asset",
+      "expo-sharing",
+      "expo-image",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "85d8646e-9b30-43e9-9079-fe83b92f88ba"
+      }
     }
   }
 }

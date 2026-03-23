@@ -1,0 +1,192 @@
+// src/navigation/AppNavigator.js
+import React, { useState, useEffect, useRef } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Animated, Platform, ActivityIndicator, TouchableOpacity, Text } from 'react-native';
+import AnimatedTabIcon from '../components/AnimatedTabIcon';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../theme/ThemeContext';
+import { useTranslation } from '../theme/useTranslation';
+import { onAuthChange } from '../utils/firebase';
+
+import SplashScreen from '../screens/SplashScreen';
+import AuthScreen from '../screens/AuthScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import ProfileSetupScreen from '../screens/ProfileSetupScreen';
+import HomeScreen from '../screens/HomeScreen';
+import ChatScreen from '../screens/ChatScreen';
+import VerseLibraryScreen from '../screens/VerseLibraryScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import JournalScreen from '../screens/JournalScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import BookmarksScreen from '../screens/BookmarksScreen';
+import ProfileEditScreen from '../screens/ProfileEditScreen';
+import LanguageScreen from "../screens/LanguageScreen";
+import VerseOfDayScreen from "../screens/VerseOfDayScreen";
+import StreakScreen from "../screens/StreakScreen";
+import MoodTrackerScreen from "../screens/MoodTrackerScreen";
+import VerseReminderScreen from "../screens/VerseReminderScreen";
+import CommunityScreen from "../screens/CommunityScreen";
+import AboutScreen from "../screens/AboutScreen";
+import PremiumScreen from "../screens/PremiumScreen";
+import QuizScreen from "../screens/QuizScreen";
+import ChatHistoryScreen from "../screens/ChatHistoryScreen";
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const TAB_CONFIG = [
+  { name: 'Home', icon: 'om', tKey: 'home' },
+  { name: 'Journal', icon: 'notebook-edit-outline', tKey: 'journal' },
+  { name: 'Verses', icon: 'book-open-page-variant-outline', tKey: 'verses' },
+  { name: 'Chat', icon: 'chat-processing-outline', tKey: 'chat' },
+  { name: 'Settings', icon: 'cog-outline', tKey: 'settings' },
+];
+
+function TabButton({ route, focused, onPress, C }) {
+  const { tr } = useTranslation();
+  const scale = useRef(new Animated.Value(1)).current;
+  const bgOpacity = useRef(new Animated.Value(0)).current;
+  const iconScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(iconScale, { toValue: focused ? 1.05 : 1, friction: 8, tension: 60, useNativeDriver: true }),
+      Animated.timing(bgOpacity, { toValue: focused ? 1 : 0, duration: 120, useNativeDriver: true }),
+    ]).start();
+  }, [focused]);
+
+  const onPressIn = () => Animated.spring(scale, { toValue: 0.85, friction: 5, useNativeDriver: true }).start();
+  const onPressOut = () => Animated.spring(scale, { toValue: 1, friction: 3, useNativeDriver: true }).start();
+  const tabConfig = TAB_CONFIG.find(t => t.name === route.name);
+  const label = tr(tabConfig?.tKey || 'home');
+
+  return (
+    <Animated.View style={{ flex: 1, transform: [{ scale }] }}>
+      <TouchableOpacity onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut} activeOpacity={1}
+        style={{ alignItems: 'center', paddingVertical: 6 }}>
+        <View style={{ alignItems: 'center', justifyContent: 'center', width: 48, height: 30 }}>
+          <Animated.View style={{ position: 'absolute', width: 56, height: 34, borderRadius: 17, backgroundColor: C.primarySoft, opacity: bgOpacity }} />
+          <Animated.View style={{ transform: [{ scale: iconScale }] }}>
+            <AnimatedTabIcon name={route.name} focused={focused} color={focused ? C.primary : C.textMuted} size={22} />
+          </Animated.View>
+        </View>
+        <Text style={{ fontSize: 10, fontWeight: focused ? '700' : '500', marginTop: 3, color: focused ? C.primary : C.textMuted }}>{label}</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
+function CustomTabBar({ state, descriptors, navigation }) {
+  const { colors: C } = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', backgroundColor: C.bgCard, paddingTop: 6, paddingBottom: Platform.OS === 'ios' ? 26 : 10, ...C.shadow }}>
+      {state.routes.map((route, index) => {
+        const focused = state.index === index;
+        const onPress = () => {
+          const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+          if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+        };
+        return <TabButton key={route.key} route={route} focused={focused} onPress={onPress} C={C} />;
+      })}
+    </View>
+  );
+}
+
+function MainTabs() {
+  return (
+    <Tab.Navigator tabBar={(props) => <CustomTabBar {...props} />} screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Journal" component={JournalScreen} />
+      <Tab.Screen name="Verses" component={VerseLibraryScreen} />
+      <Tab.Screen name="Chat" component={ChatScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+    </Tab.Navigator>
+  );
+}
+
+function LoadingScreen() {
+  const { colors: C } = useTheme();
+  return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: C.bgPrimary }}><ActivityIndicator size="large" color={C.primary} /></View>;
+}
+
+export default function AppNavigator() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [setupDone, setSetupDone] = useState(false);
+  const [onboarded, setOnboarded] = useState(false);
+
+  useEffect(() => {
+    const unsub = onAuthChange(async (u) => {
+      setUser(u);
+      if (u) {
+        // Simple: check if setup done
+        const localDone = await AsyncStorage.getItem('@gitasaar_setup_done');
+        const localOnboarded = await AsyncStorage.getItem('@gitasaar_onboarded');
+        setSetupDone(localDone === 'true');
+        setOnboarded(localOnboarded === 'true');
+      } else {
+        setSetupDone(false);
+        setOnboarded(false);
+      }
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  if (loading) return <LoadingScreen />;
+
+  const extras = (
+    <>
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="Bookmarks" component={BookmarksScreen} options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="ProfileEdit" component={ProfileEditScreen} options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="VerseOfDay" component={VerseOfDayScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="Streak" component={StreakScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="MoodTracker" component={MoodTrackerScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="VerseReminder" component={VerseReminderScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="Community" component={CommunityScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="About" component={AboutScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="Premium" component={PremiumScreen} options={{ animation: "slide_from_bottom", animationDuration: 300 }} />
+      <Stack.Screen name="Quiz" component={QuizScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="ChatHistory" component={ChatHistoryScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="Language" component={LanguageScreen} options={{ animation: 'slide_from_right' }} />
+    </>
+  );
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade_from_bottom', animationDuration: 250 }}>
+        {user ? (
+          setupDone ? (
+            <><Stack.Screen name="Main" component={MainTabs} />{extras}</>
+          ) : !onboarded ? (
+            <>
+              <Stack.Scrn name="Onboarding" component={OnboardingScreen} />
+              <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+              <Stack.Screen name="Main" component={MainTabs} />
+              {extras}
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+              <Stack.Screen name="Main" component={MainTabs} />
+              {extras}
+            </>
+          )
+        ) : (
+          <>
+            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Auth" component={AuthScreen} />
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+            <Stack.Screen name="Main" component={MainTabs} />
+            {extras}
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}

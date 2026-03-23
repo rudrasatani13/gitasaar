@@ -1,0 +1,310 @@
+import AppLogo from "../components/AppLogo";
+// src/screens/AuthScreen.js
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Animated, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { isValidEmail, sanitizeInput } from '../utils/security';
+import { useTheme } from '../theme/ThemeContext';
+import { FontSizes } from '../theme/colors';
+import { login, signup, loginWithGoogle, loginWithApple, sendPhoneOTP, verifyPhoneOTP } from '../utils/firebase';
+
+export default function AuthScreen({ navigation }) {
+  const { colors: C } = useTheme();
+  const [mode, setMode] = useState('login'); // login, signup, phone, otp
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState('');
+
+  const headerOpacity = useRef(new Animated.Value(0)).current;
+  const headerY = useRef(new Animated.Value(-20)).current;
+  const formOpacity = useRef(new Animated.Value(0)).current;
+  const formY = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(headerOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.spring(headerY, { toValue: 0, friction: 8, useNativeDriver: true }),
+      ]),
+      Animated.parallel([
+        Animated.timing(formOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.spring(formY, { toValue: 0, friction: 8, useNativeDriver: true }),
+      ]),
+    ]).start();
+  }, []);
+
+  const animateSwitch = (callback) => {
+    Animated.timing(formOpacity, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
+      callback();
+      Animated.timing(formOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+    });
+  };
+
+  // Email login/signup
+  const handleEmailAuth = async () => {
+    if (!email.trim() || !password.trim()) return Alert.alert('Error', 'Email aur password daalein');
+    if (password.length < 6) return Alert.alert('Error', 'Password kam se kam 6 characters');
+    setLoading(true);
+    const result = isLogin ? await login(email.trim(), password) : await signup(email.trim(), password);
+    setLoading(false);
+    if (!result.success) {
+      let msg = result.error;
+      if (msg.includes('user-not-found')) msg = 'Account nahi mila. Signup karo pehle.';
+      if (msg.includes('wrong-password') || msg.includes('invalid-credential')) msg = 'Galat password.';
+      if (msg.includes('email-already-in-use')) msg = 'Email already registered hai. Login karo.';
+      if (msg.includes('invalid-email')) msg = 'Email format galat hai.';
+      Alert.alert('Error', msg);
+    }
+  };
+
+  // Google
+  const handleGoogle = async () => {
+    setLoadingProvider('google');
+    const result = await loginWithGoogle();
+    setLoadingProvider('');
+    if (!result.success) Alert.alert('Google Login', result.error);
+  };
+
+  // Apple
+  const handleApple = async () => {
+    setLoadingProvider('apple');
+    const result = await loginWithApple();
+    setLoadingProvider('');
+    if (!result.success) Alert.alert('Apple Login', result.error);
+  };
+
+  // Phone - Send OTP
+  const handleSendOTP = async () => {
+    if (!phone.trim() || phone.trim().length < 10) return Alert.alert('Error', '10 digit phone number daalo');
+    setLoading(true);
+    const result = await sendPhoneOTP(phone.trim());
+    setLoading(false);
+    if (result.success) {
+      animateSwitch(() => setMode('otp'));
+    } else {
+      Alert.alert('Error', result.error);
+    }
+  };
+
+  // Phone - Verify OTP
+  const handleVerifyOTP = async () => {
+    if (!otp.trim() || otp.trim().length < 6) return Alert.alert('Error', '6 digit OTP daalo');
+    setLoading(true);
+    const result = await verifyPhoneOTP(otp.trim());
+    setLoading(false);
+    if (!result.success) Alert.alert('Error', result.error);
+  };
+
+  const isLogin = mode === 'login';
+  const isSignup = mode === 'signup';
+  const isPhone = mode === 'phone';
+  const isOtp = mode === 'otp';
+  const isEmailMode = isLogin || isSignup;
+
+  return (
+    <LinearGradient colors={C.gradientWarm} style={{ flex: 1 }}>
+      {/* Invisible recaptcha container for phone auth */}
+      {Platform.OS === 'web' && <View nativeID="recaptcha-container" />}
+
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
+
+          {/* Header */}
+          <Animated.View style={{ alignItems: 'center', marginBottom: 32, opacity: headerOpacity, transform: [{ translateY: headerY }] }}>
+            <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: C.primarySoft, borderWidth: 2, borderColor: C.borderGoldStrong, justifyContent: 'center', alignItems: 'center', marginBottom: 14 }}>
+              <AppLogo size={50} />
+            </View>
+            <Text style={{ fontSize: FontSizes.xxxl, fontWeight: '700', color: C.textPrimary }}>GitaSaar</Text>
+            <Text style={{ fontSize: FontSizes.lg, color: C.primary, marginTop: 2 }}>{'गीता सार'}</Text>
+            <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, marginTop: 8 }}>
+              {isOtp ? 'OTP verify karo' : isPhone ? 'Phone se login karo' : isLogin ? 'Welcome back' : 'Begin your spiritual journey'}
+            </Text>
+          </Animated.View>
+
+          {/* Form */}
+          <Animated.View style={{ opacity: formOpacity, transform: [{ translateY: formY }] }}>
+
+            {/* ===== EMAIL MODE ===== */}
+            {isEmailMode && (
+              <>
+                {/* Toggle Login/Signup */}
+                <View style={{ flexDirection: 'row', backgroundColor: C.bgSecondary, borderRadius: 14, padding: 4, marginBottom: 20 }}>
+                  <TouchableOpacity onPress={() => !isLogin && animateSwitch(() => setMode('login'))}
+                    style={{ flex: 1, paddingVertical: 11, borderRadius: 12, backgroundColor: isLogin ? C.bgCard : 'transparent', alignItems: 'center', ...(isLogin ? C.shadowLight : {}) }}>
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: isLogin ? '700' : '500', color: isLogin ? C.primary : C.textMuted }}>Login</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => !isSignup && animateSwitch(() => setMode('signup'))}
+                    style={{ flex: 1, paddingVertical: 11, borderRadius: 12, backgroundColor: isSignup ? C.bgCard : 'transparent', alignItems: 'center', ...(isSignup ? C.shadowLight : {}) }}>
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: isSignup ? '700' : '500', color: isSignup ? C.primary : C.textMuted }}>Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Email */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, marginBottom: 12, borderWidth: 1.5, borderColor: C.border }}>
+                  <MaterialCommunityIcons name="email-outline" size={20} color={C.textMuted} />
+                  <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, paddingVertical: 15, paddingHorizontal: 12, outlineStyle: 'none', outlineWidth: 0 }}
+                    placeholder="Email address" placeholderTextColor={C.textMuted}
+                    value={email} onChangeText={setEmail}
+                    keyboardType="email-address" autoCapitalize="none" />
+                </View>
+
+                {/* Password */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, marginBottom: 18, borderWidth: 1.5, borderColor: C.border }}>
+                  <MaterialCommunityIcons name="lock-outline" size={20} color={C.textMuted} />
+                  <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, paddingVertical: 15, paddingHorizontal: 12, outlineStyle: 'none', outlineWidth: 0 }}
+                    placeholder="Password (min 6 chars)" placeholderTextColor={C.textMuted}
+                    value={password} onChangeText={setPassword}
+                    secureTextEntry={!showPassword} autoCapitalize="none" />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <MaterialCommunityIcons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={C.textMuted} />
+                  </TouchableOpacity>
+                </View>
+                {!isLogin && (
+                  <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.bgInput, borderRadius: 14, paddingHorizontal: 16, borderWidth: 1.5, borderColor: C.border, marginBottom: 12, marginTop: 12 }}>
+                    <MaterialCommunityIcons name="lock-check-outline" size={18} color={C.textMuted} />
+                    <TextInput style={{ flex: 1, fontSize: 15, color: C.textPrimary, paddingVertical: 14, paddingHorizontal: 12, outlineStyle: "none" }}
+                      placeholder="Confirm Password" placeholderTextColor={C.textMuted}
+                      value={confirmPassword} onChangeText={setConfirmPassword}
+                      secureTextEntry autoCapitalize="none" />
+                  </View>
+                )}
+
+                {/* Submit */}
+                <TouchableOpacity onPress={handleEmailAuth} disabled={loading} activeOpacity={0.85}>
+                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1 }}>
+                    <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textOnPrimary }}>
+                      {loading ? 'Please wait...' : isLogin ? 'Login' : 'Create Account'}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* ===== PHONE MODE ===== */}
+            {isPhone && (
+              <>
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, marginBottom: 18, borderWidth: 1.5, borderColor: C.border }}>
+                  <Text style={{ fontSize: FontSizes.md, color: C.textMuted, marginRight: 4 }}>+91</Text>
+                  <View style={{ width: 1, height: 24, backgroundColor: C.border, marginRight: 8 }} />
+                  <TextInput style={{ flex: 1, fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 15, outlineStyle: 'none', outlineWidth: 0, letterSpacing: 1 }}
+                    placeholder="Phone number" placeholderTextColor={C.textMuted}
+                    value={phone} onChangeText={setPhone}
+                    keyboardType="phone-pad" maxLength={10} />
+                </View>
+
+                <TouchableOpacity onPress={handleSendOTP} disabled={loading} activeOpacity={0.85}>
+                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1 }}>
+                    <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textOnPrimary }}>
+                      {loading ? 'Sending OTP...' : 'Send OTP'}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => animateSwitch(() => setMode('login'))} style={{ alignItems: 'center', marginTop: 16 }}>
+                  <Text style={{ fontSize: FontSizes.sm, color: C.primary, fontWeight: '600' }}>Email se login karo</Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* ===== OTP MODE ===== */}
+            {isOtp && (
+              <>
+                <View style={{ backgroundColor: C.bgSecondary, borderRadius: 12, padding: 14, marginBottom: 18, flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                  <MaterialCommunityIcons name="message-text-outline" size={18} color={C.peacockBlue} />
+                  <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, flex: 1 }}>OTP bhej diya gaya hai +91{phone} par</Text>
+                </View>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, marginBottom: 18, borderWidth: 1.5, borderColor: C.border }}>
+                  <MaterialCommunityIcons name="shield-key-outline" size={20} color={C.textMuted} />
+                  <TextInput style={{ flex: 1, fontSize: FontSizes.xl, color: C.textPrimary, paddingVertical: 15, paddingHorizontal: 12, textAlign: 'center', letterSpacing: 8, outlineStyle: 'none', outlineWidth: 0 }}
+                    placeholder="------" placeholderTextColor={C.border}
+                    value={otp} onChangeText={setOtp}
+                    keyboardType="number-pad" maxLength={6} autoFocus />
+                </View>
+
+                <TouchableOpacity onPress={handleVerifyOTP} disabled={loading} activeOpacity={0.85}>
+                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1 }}>
+                    <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textOnPrimary }}>
+                      {loading ? 'Verifying...' : 'Verify OTP'}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 16 }}>
+                  <TouchableOpacity onPress={() => { setOtp(''); handleSendOTP(); }}>
+                    <Text style={{ fontSize: FontSizes.sm, color: C.primary, fontWeight: '600' }}>Resend OTP</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => animateSwitch(() => { setMode('phone'); setOtp(''); })}>
+                    <Text style={{ fontSize: FontSizes.sm, color: C.textMuted }}>Change Number</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+
+            {/* ===== DIVIDER + SOCIAL ===== */}
+            {isEmailMode && (
+              <>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 22, gap: 12 }}>
+                  <View style={{ flex: 1, height: 1, backgroundColor: C.divider }} />
+                  <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }}>or continue with</Text>
+                  <View style={{ flex: 1, height: 1, backgroundColor: C.divider }} />
+                </View>
+
+                {/* Social buttons */}
+                <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+                  {/* Google */}
+                  <TouchableOpacity onPress={handleGoogle} disabled={!!loadingProvider} activeOpacity={0.8}
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, borderWidth: 1.5, borderColor: C.border, opacity: loadingProvider === 'google' ? 0.7 : 1 }}>
+                    <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>
+                      {loadingProvider === 'google' ? 'Wait...' : 'Google'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Apple */}
+                  <TouchableOpacity onPress={handleApple} disabled={!!loadingProvider} activeOpacity={0.8}
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, borderWidth: 1.5, borderColor: C.border, opacity: loadingProvider === 'apple' ? 0.7 : 1 }}>
+                    <MaterialCommunityIcons name="apple" size={20} color={C.textPrimary} />
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>
+                      {loadingProvider === 'apple' ? 'Wait...' : 'Apple'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Phone */}
+                  <TouchableOpacity onPress={() => animateSwitch(() => setMode('phone'))} activeOpacity={0.8}
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, borderWidth: 1.5, borderColor: C.border }}>
+                    <MaterialCommunityIcons name="phone-outline" size={20} color={C.peacockBlue} />
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>Phone</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Switch mode */}
+                <TouchableOpacity onPress={() => animateSwitch(() => setMode(isLogin ? 'signup' : 'login'))} style={{ alignItems: 'center', paddingVertical: 6 }}>
+                  <Text style={{ fontSize: FontSizes.sm, color: C.textMuted }}>
+                    {isLogin ? "Don't have an account? " : "Already have an account? "}
+                    <Text style={{ color: C.primary, fontWeight: '700' }}>{isLogin ? 'Sign Up' : 'Login'}</Text>
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </Animated.View>
+
+          {/* Bottom ornament */}
+          <View style={{ alignItems: 'center', marginTop: 30, paddingBottom: 20 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ width: 20, height: 1, backgroundColor: C.primary, opacity: 0.3 }} />
+              <View style={{ width: 5, height: 5, backgroundColor: C.primary, opacity: 0.3, transform: [{ rotate: '45deg' }] }} />
+              <View style={{ width: 20, height: 1, backgroundColor: C.primary, opacity: 0.3 }} />
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
+  );
+}
