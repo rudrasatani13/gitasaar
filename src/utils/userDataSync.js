@@ -9,15 +9,13 @@ try {
   if (app) firestore = { db: getFirestore(app), doc, setDoc, getDoc };
 } catch (e) {}
 
-const SYNC_KEYS = [
+// 1. CORE KEYS (Chhota data jo jaldi load hona chahiye)
+const CORE_KEYS = [
   '@gitasaar_streak',
   '@gitasaar_progress',
   '@gitasaar_read_dates',
-  '@gitasaar_bookmarks_v2',
   '@gitasaar_bm_folders',
-  '@gitasaar_journal',
   '@gitasaar_moods',
-  '@gitasaar_chat_history',
   '@gitasaar_premium',
   '@gitasaar_daily_usage',
   '@gitasaar_med_sessions',
@@ -26,6 +24,13 @@ const SYNC_KEYS = [
   '@gitasaar_setup_done',
   '@gitasaar_onboarded',
   'profileData',
+];
+
+// 2. HEAVY KEYS (Bada data jisko alag files mein save karenge)
+const HEAVY_KEYS = [
+  '@gitasaar_journal',
+  '@gitasaar_bookmarks_v2',
+  '@gitasaar_chat_history'
 ];
 
 // Event Emitter Contexts ko update karne ke liye
@@ -42,18 +47,27 @@ let currentUid = null;
 export async function backupToCloud(uid) {
   if (!firestore || !uid) return false;
   try {
-    const data = {};
-    for (const key of SYNC_KEYS) {
+    // A. Pehle Core Data save karo
+    const coreData = { _lastSync: new Date().toISOString(), _version: 2 };
+    for (const key of CORE_KEYS) {
       const value = await AsyncStorage.getItem(key);
-      if (value !== null) data[key] = value;
+      if (value !== null) coreData[key] = value;
     }
-    data._lastSync = new Date().toISOString();
-    data._version = 1;
+    const coreRef = firestore.doc(firestore.db, 'userData', uid);
+    await firestore.setDoc(coreRef, coreData, { merge: true });
 
-    const ref = firestore.doc(firestore.db, 'userData', uid);
-    await firestore.setDoc(ref, data, { merge: true });
+    // B. Ab Heavy Data ko alag alag documents (sub-collections) mein save karo
+    for (const key of HEAVY_KEYS) {
+      const value = await AsyncStorage.getItem(key);
+      if (value !== null) {
+        // Path banega: userData/{uid}/heavyData/{key_name}
+        const heavyRef = firestore.doc(firestore.db, 'userData', uid, 'heavyData', key);
+        await firestore.setDoc(heavyRef, { data: value, updatedAt: new Date().toISOString() }, { merge: true });
+      }
+    }
     return true;
   } catch (e) {
+    console.log('Backup error:', e.message);
     return false;
   }
 }
@@ -63,20 +77,35 @@ export async function restoreFromCloud(uid) {
   currentUid = uid;
   if (!firestore || !uid) { notifySync(); return false; }
   try {
-    const ref = firestore.doc(firestore.db, 'userData', uid);
-    const snap = await firestore.getDoc(ref);
+    // A. Core Data Restore karo
+    const coreRef = firestore.doc(firestore.db, 'userData', uid);
+    const coreSnap = await firestore.getDoc(coreRef);
     
-    if (snap.exists()) {
-      const data = snap.data();
-      for (const key of SYNC_KEYS) {
+    if (coreSnap.exists()) {
+      const data = coreSnap.data();
+      for (const key of CORE_KEYS) {
         if (data[key] !== undefined && data[key] !== null) {
           await AsyncStorage.setItem(key, data[key]);
         }
       }
     }
+
+    // B. Heavy Data Restore karo
+    for (const key of HEAVY_KEYS) {
+      const heavyRef = firestore.doc(firestore.db, 'userData', uid, 'heavyData', key);
+      const heavySnap = await firestore.getDoc(heavyRef);
+      if (heavySnap.exists()) {
+        const heavyData = heavySnap.data();
+        if (heavyData.data) {
+          await AsyncStorage.setItem(key, heavyData.data);
+        }
+      }
+    }
+
     notifySync(); // Data restore hone ke baad app ko update karo
     return true;
   } catch (e) {
+    console.log('Restore error:', e.message);
     notifySync();
     return false;
   }

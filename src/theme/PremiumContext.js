@@ -1,21 +1,21 @@
 // src/theme/PremiumContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { secureSet, secureGet } from '../utils/security';
+import { auth } from '../utils/firebase';
+import { onSyncComplete, autoSync } from '../utils/userDataSync';
 
 const PremiumContext = createContext();
 const PREMIUM_KEY = '@gitasaar_premium';
 const USAGE_KEY = '@gitasaar_daily_usage';
 
-// Free tier limits
+// 🛑 NAYI SMART FREE TIER LIMITS 🛑
 const FREE_LIMITS = {
-  chatMessages: 10,    // per day
-  quizPlays: 1,         // per day
-  shareTemplates: 2,    // saffron + minimal only
-  bookmarkFolders: 1,   // only favorites
-  audioRecitation: false,
-  exportJournal: false,
-  adFree: false,
+  chatMessages: 5,        // Din mein 5 baar AI se baat
+  audioRecitations: 3,    // Din mein 3 shloka audio sunna
+  quizPlays: 1,           // Din mein 1 quiz
+  exportJournal: true,    // Sabke liye free (Trust building)
+  bookmarkFolders: 4,     // 4 default folders free
+  adFree: false,          // Free users ko aage chal ke ads dikhayenge
 };
 
 const FREE_TEMPLATES = ['saffron', 'minimal'];
@@ -24,10 +24,31 @@ export function PremiumProvider({ children }) {
   const [isPremium, setIsPremium] = useState(false);
   const [planType, setPlanType] = useState(null); // 'monthly' | 'yearly'
   const [expiryDate, setExpiryDate] = useState(null);
-  const [usage, setUsage] = useState({ chatMessages: 0, quizPlays: 0, date: '' });
+  const [usage, setUsage] = useState({ chatMessages: 0, audioRecitations: 0, quizPlays: 0, date: '' });
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+
+    // Jab doosre device se cloud data aaye, toh limits update karo
+    const unsubSync = onSyncComplete(() => {
+      load();
+    });
+
+    // Logout par state clear karo (Taaki doosre user ka data mix na ho)
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        setIsPremium(false);
+        setPlanType(null);
+        setExpiryDate(null);
+        setUsage({ chatMessages: 0, audioRecitations: 0, quizPlays: 0, date: '' });
+      }
+    });
+
+    return () => { unsubSync(); unsubAuth(); };
+  }, []);
+
+  const getTodayDate = () => new Date().toDateString(); // Gives "Mon Mar 24 2026"
 
   const load = async () => {
     try {
@@ -36,9 +57,9 @@ export function PremiumProvider({ children }) {
         AsyncStorage.getItem(USAGE_KEY),
       ]);
 
+      // 1. Check Premium Status
       if (premData) {
         const p = JSON.parse(premData);
-        // Check if subscription expired
         if (p.expiryDate && new Date(p.expiryDate) > new Date()) {
           setIsPremium(true);
           setPlanType(p.planType);
@@ -47,68 +68,109 @@ export function PremiumProvider({ children }) {
           setIsPremium(false);
           await AsyncStorage.removeItem(PREMIUM_KEY);
         }
+      } else {
+        setIsPremium(false);
       }
 
+      // 2. Check Daily Usage
+      const today = getTodayDate();
       if (usageData) {
         const u = JSON.parse(usageData);
-        const today = new Date().toDateString();
         if (u.date === today) {
-          // Same day - keep usage
-          setUsage(u);
+          // Same day - keep usage (Purana data rakhlo)
+          // Ensure audioRecitations exists for older users upgrading to this version
+          setUsage({
+            chatMessages: u.chatMessages || 0,
+            audioRecitations: u.audioRecitations || 0,
+            quizPlays: u.quizPlays || 0,
+            date: u.date
+          });
         } else {
-          // New day - reset usage
-          const fresh = { chatMessages: 0, quizPlays: 0, date: today };
+          // New day (Raat ke 12 baj gaye) - Reset kar do sab 0 pe
+          const fresh = { chatMessages: 0, audioRecitations: 0, quizPlays: 0, date: today };
           setUsage(fresh);
           await AsyncStorage.setItem(USAGE_KEY, JSON.stringify(fresh));
         }
       } else {
-        const fresh = { chatMessages: 0, quizPlays: 0, date: new Date().toDateString() };
+        // Pheli baar app kholi hai
+        const fresh = { chatMessages: 0, audioRecitations: 0, quizPlays: 0, date: today };
         setUsage(fresh);
+        await AsyncStorage.setItem(USAGE_KEY, JSON.stringify(fresh));
       }
     } catch (e) {}
     setLoaded(true);
   };
 
   const saveUsage = async (updated) => {
-    try { await AsyncStorage.setItem(USAGE_KEY, JSON.stringify(updated)); } catch (e) {}
+    try { 
+      await AsyncStorage.setItem(USAGE_KEY, JSON.stringify(updated)); 
+      // Auto-Sync to Firebase (5 sec debounce ke sath taaki crash na ho)
+      if (auth.currentUser) autoSync(auth.currentUser.uid); 
+    } catch (e) {}
   };
 
-  // Track chat message usage
+  // ==========================================
+  // --- FEATURE CHECKERS (Use these in app) ---
+  // ==========================================
+
+  // 1. Chat Messages (Runs when user clicks SEND)
   const useChatMessage = () => {
     if (isPremium) return true;
     if (usage.chatMessages >= FREE_LIMITS.chatMessages) return false;
-    const updated = { ...usage, chatMessages: usage.chatMessages + 1, date: new Date().toDateString() };
+    
+    const updated = { ...usage, chatMessages: usage.chatMessages + 1, date: getTodayDate() };
     setUsage(updated);
     saveUsage(updated);
     return true;
   };
 
-  // Track quiz play usage
+  // 2. Audio Recitation (Runs when user clicks PLAY)
+  const useAudioPlay = () => {
+    if (isPremium) return true;
+    if (usage.audioRecitations >= FREE_LIMITS.audioRecitations) return false;
+    
+    const updated = { ...usage, audioRecitations: usage.audioRecitations + 1, date: getTodayDate() };
+    setUsage(updated);
+    saveUsage(updated);
+    return true;
+  };
+
+  // 3. Quiz Plays (Runs when user clicks START QUIZ)
   const useQuizPlay = () => {
     if (isPremium) return true;
     if (usage.quizPlays >= FREE_LIMITS.quizPlays) return false;
-    const updated = { ...usage, quizPlays: usage.quizPlays + 1, date: new Date().toDateString() };
+    
+    const updated = { ...usage, quizPlays: usage.quizPlays + 1, date: getTodayDate() };
     setUsage(updated);
     saveUsage(updated);
     return true;
   };
 
-  // Check if template is available
+  // 4. Share Templates
   const isTemplateAvailable = (templateId) => {
     if (isPremium) return true;
     return FREE_TEMPLATES.includes(templateId);
   };
 
-  // Check feature access
-  const canUseAudio = isPremium;
-  const canExportJournal = isPremium;
-  const canUseAllFolders = isPremium;
-  const isAdFree = isPremium;
+  // 5. Bookmark Folders
+  const canAddFolder = (currentFolderCount) => {
+    if (isPremium) return true;
+    return currentFolderCount < FREE_LIMITS.bookmarkFolders;
+  };
 
-  const chatRemaining = isPremium ? 999 : Math.max(0, FREE_LIMITS.chatMessages - usage.chatMessages);
-  const quizRemaining = isPremium ? 999 : Math.max(0, FREE_LIMITS.quizPlays - usage.quizPlays);
+  // Static Feature access flags (Direct checks for UI rendering)
+  const canExportJournal = isPremium || FREE_LIMITS.exportJournal;
+  const isAdFree = isPremium || FREE_LIMITS.adFree;
 
-  // Activate premium (called after successful payment)
+  // Remaining counters for UI (Kitne bache hain dikhane ke liye)
+  const chatRemaining = isPremium ? 'Unlimited' : Math.max(0, FREE_LIMITS.chatMessages - usage.chatMessages);
+  const audioRemaining = isPremium ? 'Unlimited' : Math.max(0, FREE_LIMITS.audioRecitations - usage.audioRecitations);
+  const quizRemaining = isPremium ? 'Unlimited' : Math.max(0, FREE_LIMITS.quizPlays - usage.quizPlays);
+
+  // ==========================================
+  // --- SUBSCRIPTION MANAGEMENT ---
+  // ==========================================
+
   const activatePremium = async (plan) => {
     const expiry = new Date();
     if (plan === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
@@ -118,25 +180,26 @@ export function PremiumProvider({ children }) {
     setIsPremium(true);
     setPlanType(plan);
     setExpiryDate(expiry.toISOString());
+    
     await AsyncStorage.setItem(PREMIUM_KEY, JSON.stringify(premData));
-    await secureSet('premium_backup', JSON.stringify(premData));
+    if (auth.currentUser) autoSync(auth.currentUser.uid); // Turant cloud sync
   };
 
-  // Cancel premium
   const cancelPremium = async () => {
     setIsPremium(false);
     setPlanType(null);
     setExpiryDate(null);
     await AsyncStorage.removeItem(PREMIUM_KEY);
+    if (auth.currentUser) autoSync(auth.currentUser.uid);
   };
 
   return (
     <PremiumContext.Provider value={{
       isPremium, planType, expiryDate, usage, loaded,
       FREE_LIMITS, FREE_TEMPLATES,
-      useChatMessage, useQuizPlay, isTemplateAvailable,
-      canUseAudio, canExportJournal, canUseAllFolders, isAdFree,
-      chatRemaining, quizRemaining,
+      useChatMessage, useAudioPlay, useQuizPlay, isTemplateAvailable, canAddFolder,
+      canExportJournal, isAdFree,
+      chatRemaining, audioRemaining, quizRemaining,
       activatePremium, cancelPremium,
     }}>
       {children}

@@ -13,13 +13,12 @@ export default function ProfileEditScreen({ navigation }) {
   const { colors: C } = useTheme();
   const { profile, updateProfile, profilePhoto } = useProfile();
   const [name, setName] = useState(profile.name || '');
-  const [tempPhoto, setTempPhoto] = useState(null); // Temporary photo before save
+  const [tempPhoto, setTempPhoto] = useState(null); 
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const userEmail = auth.currentUser ? auth.currentUser.email : 'guest@gitasaar.app';
 
-  // What to display - temp photo (unsaved) or saved profile photo
   const displayPhoto = tempPhoto !== null ? tempPhoto : profilePhoto;
   const isRealPhoto = displayPhoto && !displayPhoto.startsWith('avatar_');
 
@@ -35,7 +34,7 @@ export default function ProfileEditScreen({ navigation }) {
       aspect: [1, 1],
       quality: 0.7,
     });
-    if (!result.canceled && result.assets[0]) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       setTempPhoto(result.assets[0].uri);
     }
   };
@@ -51,7 +50,7 @@ export default function ProfileEditScreen({ navigation }) {
       aspect: [1, 1],
       quality: 0.7,
     });
-    if (!result.canceled && result.assets[0]) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       setTempPhoto(result.assets[0].uri);
     }
   };
@@ -127,7 +126,7 @@ export default function ProfileEditScreen({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
-        {/* Photo */}
+        {/* Photo Section */}
         <View style={{ alignItems: 'center', marginBottom: 28 }}>
           <TouchableOpacity onPress={showPhotoOptions} activeOpacity={0.8}>
             <View style={{ width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: C.borderGoldStrong, overflow: 'hidden', backgroundColor: C.primarySoft, justifyContent: 'center', alignItems: 'center' }}>
@@ -157,10 +156,9 @@ export default function ProfileEditScreen({ navigation }) {
               </TouchableOpacity>
             )}
           </View>
-          <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 10 }}>Square crop automatic hai</Text>
         </View>
 
-        {/* Name */}
+        {/* Name Section */}
         <View style={{ marginBottom: 20 }}>
           <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1, marginBottom: 8 }}>DISPLAY NAME</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, borderWidth: 1.5, borderColor: C.border }}>
@@ -174,7 +172,7 @@ export default function ProfileEditScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Email */}
+        {/* Email Section */}
         <View style={{ marginBottom: 20 }}>
           <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1, marginBottom: 8 }}>EMAIL</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgSecondary, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 16, borderWidth: 1, borderColor: C.border }}>
@@ -206,27 +204,6 @@ export default function ProfileEditScreen({ navigation }) {
                 );
               })}
             </View>
-          </View>
-        )}
-
-        {/* Preview */}
-        <View style={{ marginTop: 10 }}>
-          <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1, marginBottom: 12 }}>PREVIEW</Text>
-          <View style={{ backgroundColor: C.bgCard, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: C.border, gap: 12, ...C.shadowLight }}>
-            <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: C.primarySoft, borderWidth: 1.5, borderColor: C.borderGoldStrong, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
-              {renderPhoto(48)}
-            </View>
-            <View>
-              <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: C.textPrimary }}>{name.trim() || 'User'}</Text>
-              <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }}>{userEmail}</Text>
-            </View>
-          </View>
-        </View>
-
-        {tempPhoto !== null && (
-          <View style={{ backgroundColor: C.saffronSoft, borderRadius: 12, padding: 12, marginTop: 16, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <MaterialCommunityIcons name="information-outline" size={16} color={C.saffron} />
-            <Text style={{ fontSize: FontSizes.sm, color: C.saffron, fontWeight: '500', flex: 1 }}>Changes unsaved. Save button dabao!</Text>
           </View>
         )}
 

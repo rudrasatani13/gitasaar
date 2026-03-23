@@ -1,67 +1,65 @@
 // src/theme/OfflineContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { View, Text, Animated, Platform } from 'react-native';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { Animated, Text, Platform } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const OfflineContext = createContext();
 
-let NetInfo = null;
-try { NetInfo = require('@react-native-community/netinfo'); } catch (e) {}
-
 export function OfflineProvider({ children }) {
-  const [isOnline, setIsOnline] = useState(true);
-  const bannerY = React.useRef(new Animated.Value(-60)).current;
+  const [isOffline, setIsOffline] = useState(false);
+  
+  // Banner ko animate (slide up/down) karne ke liye
+  const slideAnim = useRef(new Animated.Value(-150)).current;
 
   useEffect(() => {
-    // Web: use navigator.onLine
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      const update = () => setIsOnline(navigator.onLine);
-      window.addEventListener('online', update);
-      window.addEventListener('offline', update);
-      setIsOnline(navigator.onLine);
-      return () => {
-        window.removeEventListener('online', update);
-        window.removeEventListener('offline', update);
-      };
-    }
+    // Ye function lagataar net check karta rahega
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const offline = state.isConnected === false;
+      setIsOffline(offline);
 
-    // Native: use NetInfo
-    if (NetInfo && NetInfo.addEventListener) {
-      const unsubscribe = NetInfo.addEventListener(state => {
-        setIsOnline(state.isConnected);
-      });
-      return unsubscribe;
-    }
+      // Animation trigger karo
+      Animated.spring(slideAnim, {
+        toValue: offline ? 0 : -150, // 0 = Screen par dikhao, -150 = Upar chupa do
+        useNativeDriver: true,
+        friction: 8,
+        tension: 40,
+      }).start();
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  // Animate banner
-  useEffect(() => {
-    Animated.spring(bannerY, {
-      toValue: isOnline ? -60 : 0,
-      friction: 8,
-      useNativeDriver: true,
-    }).start();
-  }, [isOnline]);
-
   return (
-    <OfflineContext.Provider value={{ isOnline }}>
+    <OfflineContext.Provider value={{ isOffline }}>
       {children}
-      {/* Offline Banner */}
-      <Animated.View style={{
-        position: 'absolute', top: 0, left: 0, right: 0,
-        transform: [{ translateY: bannerY }],
-        zIndex: 9999,
-      }}>
-        <View style={{
-          backgroundColor: '#D63B2F', paddingTop: Platform.OS === 'ios' ? 50 : 30,
-          paddingBottom: 10, paddingHorizontal: 20,
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-        }}>
-          <MaterialCommunityIcons name="wifi-off" size={16} color="#FFF" />
-          <Text style={{ fontSize: 13, fontWeight: '600', color: '#FFF' }}>
-            You're offline — Verses & Journal still work!
-          </Text>
-        </View>
+      
+      {/* GLOBAL OFFLINE BANNER */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: Platform.OS === 'ios' ? 50 : 40,
+          alignSelf: 'center',
+          backgroundColor: '#2C2C2E', // Premium Dark Gray background
+          paddingVertical: 10,
+          paddingHorizontal: 20,
+          borderRadius: 20,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          transform: [{ translateY: slideAnim }],
+          zIndex: 9999, // Hamesha sabse upar rahega
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 5,
+          elevation: 8,
+        }}
+      >
+        <MaterialCommunityIcons name="wifi-off" size={18} color="#FF6B6B" />
+        <Text style={{ color: '#FFF', fontSize: 13, fontWeight: '600', letterSpacing: 0.5 }}>
+          You are offline. Saved verses available.
+        </Text>
       </Animated.View>
     </OfflineContext.Provider>
   );

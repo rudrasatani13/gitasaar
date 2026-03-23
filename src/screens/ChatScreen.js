@@ -4,13 +4,10 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Keyboard
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useChatHistory } from "../theme/ChatHistoryContext";
 import { useTheme } from '../theme/ThemeContext';
-import { usePremium } from "../theme/PremiumContext";
 import { useProfile } from '../theme/ProfileContext';
 import { useTranslation } from '../theme/useTranslation';
 import { FontSizes } from '../theme/colors';
-import { sanitizeInput, checkRateLimit } from '../utils/security';
 import { sendMessageToGemini, resetChat } from '../utils/geminiApi';
 // flute image loaded via require
 import VoiceInput from '../components/VoiceInput';
@@ -34,7 +31,6 @@ function TypingDots() {
   const d2 = useRef(new Animated.Value(0.3)).current;
   const d3 = useRef(new Animated.Value(0.3)).current;
   const { colors: C } = useTheme();
-  const { saveConversation } = useChatHistory();
   useEffect(() => {
     const go = (d, delay) => Animated.loop(Animated.sequence([Animated.delay(delay), Animated.timing(d, { toValue: 1, duration: 300, useNativeDriver: true }), Animated.timing(d, { toValue: 0.3, duration: 300, useNativeDriver: true }), Animated.delay(600)])).start();
     go(d1, 0); go(d2, 200); go(d3, 400);
@@ -137,8 +133,6 @@ function MessageBubble({ item, C, tr, isLatest }) {
 
 export default function ChatScreen() {
   const { colors: C } = useTheme();
-  const { saveConversation } = useChatHistory();
-  const { useChatMessage, chatRemaining, isPremium } = usePremium();
   const navigation = useNavigation();
   const { profile } = useProfile();
   const { tr } = useTranslation();
@@ -157,8 +151,6 @@ export default function ChatScreen() {
   };
 
   const sendMessage = async (text) => {
-    if (!isPremium && chatRemaining <= 0) { setMessages(prev => [...prev, { id: Date.now().toString(), type: "ai", text: "Your 10 free messages for today are over! Upgrade to GitaSaar Premium for unlimited spiritual guidance.", verse: null, advice: null, time: new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}), isLimit: true }]); return; }
-    if (!isPremium) useChatMessage();
     const msg = text || inputText.trim();
     if (!msg || isTyping) return;
     setShowSuggestions(false);
@@ -171,8 +163,6 @@ export default function ChatScreen() {
     if (result.success) {
       setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime }]);
     } else {
-      // Save to chat history
-      saveConversation(msg, result.data.text);
       setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.error || 'Kuch gadbad ho gayi.', verse: null, advice: null, time: aiTime }]);
     }
     setIsTyping(false);
@@ -250,8 +240,8 @@ export default function ChatScreen() {
         <View style={{ backgroundColor: C.bgCard, borderTopWidth: 1, borderTopColor: C.borderLight, paddingHorizontal: 16, paddingTop: 10, paddingBottom: Platform.OS === 'ios' ? 28 : 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, backgroundColor: C.bgInput, borderRadius: 24, borderWidth: 1.5, borderColor: C.border, paddingHorizontal: 18, paddingVertical: 12, maxHeight: 100, minHeight: 44, outlineStyle: 'none', outlineWidth: 0 }}
-              placeholder={chatRemaining <= 0 && !isPremium ? 'Daily limit reached — Upgrade to Premium' : tr('askAnything')} placeholderTextColor={C.textMuted}
-              value={inputText} onChangeText={setInputText} multiline maxLength={500} editable={(isPremium || chatRemaining > 0) && !isTyping} />
+              placeholder={tr('askAnything')} placeholderTextColor={C.textMuted}
+              value={inputText} onChangeText={setInputText} multiline maxLength={500} editable={!isTyping} />
             {!inputText.trim() && (
               <VoiceInput onResult={(text) => { setInputText(text); }} onAutoSend={(text) => { sendMessage(text); }} disabled={isTyping} />
             )}
