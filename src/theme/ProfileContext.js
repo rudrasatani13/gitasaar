@@ -4,46 +4,55 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth } from '../utils/firebase';
+import { onSyncComplete } from '../utils/userDataSync';
 
 const ProfileContext = createContext();
 const PROFILE_KEY = '@gitasaar_profile';
 const PHOTO_KEY = '@gitasaar_photo';
 
-// Firestore instance
 let db = null;
-try { db = getFirestore(); } catch (e) { console.log('Firestore init error:', e); }
+try { db = getFirestore(); } catch (e) { }
 
 export function ProfileProvider({ children }) {
   const [profile, setProfile] = useState({ name: '', photo: null, language: 'english' });
   const [photoBase64, setPhotoBase64] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => { loadProfile(); }, []);
+  useEffect(() => { 
+    loadProfile(); 
+    
+    const unsubSync = onSyncComplete(() => {
+      loadProfile();
+    });
+
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        setProfile({ name: '', photo: null, language: 'english' });
+        setPhotoBase64(null);
+      }
+    });
+
+    return () => { unsubSync(); unsubAuth(); };
+  }, []);
 
   const getUid = () => auth.currentUser?.uid || null;
 
-  // Load from Firestore first, then AsyncStorage fallback
   const loadProfile = async () => {
     try {
       let p = { name: '', photo: null, language: 'english' };
-
-      // Try Firestore first (cross-device sync)
       const uid = getUid();
+      
       if (uid && db) {
         try {
           const snap = await getDoc(doc(db, 'users', uid));
           if (snap.exists()) {
             const fireData = snap.data();
             p = { ...p, ...fireData };
-            // Save to local AsyncStorage too
             await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(p));
           }
-        } catch (e) {
-          console.log('Firestore load error:', e);
-        }
+        } catch (e) {}
       }
 
-      // Fallback to AsyncStorage
       if (!p.name) {
         const localData = await AsyncStorage.getItem(PROFILE_KEY);
         if (localData) {
@@ -52,18 +61,15 @@ export function ProfileProvider({ children }) {
         }
       }
 
-      // Load photo from local storage (photos stay device-specific, too large for Firestore)
       const photoData = await AsyncStorage.getItem(PHOTO_KEY);
       if (photoData) setPhotoBase64(photoData);
+      else setPhotoBase64(null);
 
       setProfile(p);
-    } catch (e) {
-      console.log('Profile load error:', e);
-    }
+    } catch (e) {}
     setLoaded(true);
   };
 
-  // Convert image URI to base64 (device-local only)
   const uriToBase64 = async (uri) => {
     try {
       if (Platform.OS === 'web') {
@@ -94,7 +100,6 @@ export function ProfileProvider({ children }) {
   const updateProfile = async (updates) => {
     let finalUpdates = { ...updates };
 
-    // Handle photo (device-local only, not synced to Firestore)
     if (updates.photo !== undefined) {
       if (updates.photo === null) {
         setPhotoBase64(null);
@@ -121,10 +126,8 @@ export function ProfileProvider({ children }) {
     const updated = { ...profile, ...finalUpdates };
     setProfile(updated);
 
-    // Save to AsyncStorage
     try { await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(updated)); } catch (e) {}
 
-    // Sync to Firestore (name, language, birthdate, referral - NOT photo)
     const uid = getUid();
     if (uid && db) {
       try {
@@ -137,9 +140,7 @@ export function ProfileProvider({ children }) {
           updatedAt: new Date().toISOString(),
         };
         await setDoc(doc(db, 'users', uid), syncData, { merge: true });
-      } catch (e) {
-        console.log('Firestore sync error:', e);
-      }
+      } catch (e) {}
     }
   };
 

@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../theme/ThemeContext';
 import { useTranslation } from '../theme/useTranslation';
 import { onAuthChange } from '../utils/firebase';
+import { restoreFromCloud, onUserLogout } from '../utils/userDataSync';
 
 import SplashScreen from '../screens/SplashScreen';
 import AuthScreen from '../screens/AuthScreen';
@@ -119,21 +120,36 @@ export default function AppNavigator() {
   const [onboarded, setOnboarded] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const unsub = onAuthChange(async (u) => {
-      setUser(u);
+      if (!isMounted) return;
+      setLoading(true);
       if (u) {
-        // Simple: check if setup done
+        // Pura cloud data pehle download/restore hone do
+        await restoreFromCloud(u.uid);
+        
         const localDone = await AsyncStorage.getItem('@gitasaar_setup_done');
         const localOnboarded = await AsyncStorage.getItem('@gitasaar_onboarded');
-        setSetupDone(localDone === 'true');
-        setOnboarded(localOnboarded === 'true');
+        if (isMounted) {
+          setSetupDone(localDone === 'true');
+          setOnboarded(localOnboarded === 'true');
+          setUser(u);
+        }
       } else {
-        setSetupDone(false);
-        setOnboarded(false);
+        // Logout karne pe data clear hone do aur usko null set karo
+        await onUserLogout();
+        if (isMounted) {
+          setSetupDone(false);
+          setOnboarded(false);
+          setUser(null);
+        }
       }
-      setLoading(false);
+      if (isMounted) setLoading(false);
     });
-    return unsub;
+    return () => {
+      isMounted = false;
+      unsub();
+    };
   }, []);
 
   if (loading) return <LoadingScreen />;
@@ -164,7 +180,7 @@ export default function AppNavigator() {
             <><Stack.Screen name="Main" component={MainTabs} />{extras}</>
           ) : !onboarded ? (
             <>
-              <Stack.Scrn name="Onboarding" component={OnboardingScreen} />
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
               <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
               <Stack.Screen name="Main" component={MainTabs} />
               {extras}

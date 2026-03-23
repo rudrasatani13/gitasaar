@@ -1,5 +1,4 @@
 // src/utils/userDataSync.js
-// Syncs all local data to Firestore per-user (UID based)
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let firestore = null;
@@ -10,7 +9,6 @@ try {
   if (app) firestore = { db: getFirestore(app), doc, setDoc, getDoc };
 } catch (e) {}
 
-// All keys to sync
 const SYNC_KEYS = [
   '@gitasaar_streak',
   '@gitasaar_progress',
@@ -30,6 +28,16 @@ const SYNC_KEYS = [
   'profileData',
 ];
 
+// Event Emitter Contexts ko update karne ke liye
+const syncListeners = new Set();
+export const onSyncComplete = (callback) => {
+  syncListeners.add(callback);
+  return () => syncListeners.delete(callback);
+};
+const notifySync = () => syncListeners.forEach(cb => cb());
+
+let currentUid = null;
+
 // ============ BACKUP TO FIRESTORE ============
 export async function backupToCloud(uid) {
   if (!firestore || !uid) return false;
@@ -44,40 +52,32 @@ export async function backupToCloud(uid) {
 
     const ref = firestore.doc(firestore.db, 'userData', uid);
     await firestore.setDoc(ref, data, { merge: true });
-    console.log('Backup done:', Object.keys(data).length, 'keys');
     return true;
   } catch (e) {
-    console.log('Backup error:', e.message);
     return false;
   }
 }
 
 // ============ RESTORE FROM FIRESTORE ============
 export async function restoreFromCloud(uid) {
-  if (!firestore || !uid) return false;
+  currentUid = uid;
+  if (!firestore || !uid) { notifySync(); return false; }
   try {
     const ref = firestore.doc(firestore.db, 'userData', uid);
     const snap = await firestore.getDoc(ref);
     
-    if (!snap.exists()) {
-      console.log('No cloud data found for user');
-      return false;
-    }
-
-    const data = snap.data();
-    let restored = 0;
-
-    for (const key of SYNC_KEYS) {
-      if (data[key] !== undefined && data[key] !== null) {
-        await AsyncStorage.setItem(key, data[key]);
-        restored++;
+    if (snap.exists()) {
+      const data = snap.data();
+      for (const key of SYNC_KEYS) {
+        if (data[key] !== undefined && data[key] !== null) {
+          await AsyncStorage.setItem(key, data[key]);
+        }
       }
     }
-
-    console.log('Restored:', restored, 'keys from cloud');
+    notifySync(); // Data restore hone ke baad app ko update karo
     return true;
   } catch (e) {
-    console.log('Restore error:', e.message);
+    notifySync();
     return false;
   }
 }
@@ -92,39 +92,28 @@ export async function clearLocalData() {
       k === 'chatHistory'
     );
     if (userKeys.length > 0) await AsyncStorage.multiRemove(userKeys);
+    notifySync(); // Clear hone ke baad screens update karo
     return true;
   } catch (e) { return false; }
 }
 
 // ============ AUTO SYNC ============
-// Call this periodically or on important actions
 let lastSyncTime = 0;
-const SYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const SYNC_INTERVAL = 5 * 1000; // 5 Seconds cooldown
 
 export async function autoSync(uid) {
   if (!uid) return;
   const now = Date.now();
-  if (now - lastSyncTime < SYNC_INTERVAL) return; // Too soon
+  if (now - lastSyncTime < SYNC_INTERVAL) return;
   lastSyncTime = now;
   await backupToCloud(uid);
 }
 
-// ============ ON LOGIN FLOW ============
-export async function onUserLogin(uid, isNewUser) {
-  if (isNewUser) {
-    // New user - start fresh, no restore needed
-    await clearLocalData();
-    return 'fresh';
-  } else {
-    // Returning user - try restore from cloud
-    const restored = await restoreFromCloud(uid);
-    return restored ? 'restored' : 'fresh';
-  }
-}
-
 // ============ ON LOGOUT FLOW ============
-export async function onUserLogout(uid) {
-  // Backup current data before clearing
-  if (uid) await backupToCloud(uid);
+export async function onUserLogout() {
+  if (currentUid) {
+    await backupToCloud(currentUid); // Logout se pehle last data save karo
+  }
   await clearLocalData();
+  currentUid = null;
 }

@@ -1,16 +1,15 @@
 // src/theme/TrackerContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth } from '../utils/firebase';
+import { autoSync, onSyncComplete } from '../utils/userDataSync';
 
 const TrackerContext = createContext();
 
 const STREAK_KEY = '@gitasaar_streak';
 const PROGRESS_KEY = '@gitasaar_progress';
 
-function getToday() {
-  return new Date().toISOString().split('T')[0]; // "2026-03-21"
-}
-
+function getToday() { return new Date().toISOString().split('T')[0]; }
 function getYesterday() {
   const d = new Date();
   d.setDate(d.getDate() - 1);
@@ -20,11 +19,25 @@ function getYesterday() {
 export function TrackerProvider({ children }) {
   const [streak, setStreak] = useState({ count: 0, lastDate: '', bestStreak: 0 });
   const [readDates, setReadDates] = useState([]);
-  const [readVerses, setReadVerses] = useState({}); // { "2_47": true, "3_35": true }
+  const [readVerses, setReadVerses] = useState({});
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     loadData();
+
+    const unsubSync = onSyncComplete(() => {
+      loadData();
+    });
+
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        setStreak({ count: 0, lastDate: '', bestStreak: 0 });
+        setReadDates([]);
+        setReadVerses({});
+      }
+    });
+
+    return () => { unsubSync(); unsubAuth(); };
   }, []);
 
   const loadData = async () => {
@@ -35,20 +48,17 @@ export function TrackerProvider({ children }) {
       let s = streakData ? JSON.parse(streakData) : { count: 0, lastDate: '', bestStreak: 0 };
       const p = progressData ? JSON.parse(progressData) : {};
 
-      // Update streak on app open
       const today = getToday();
       const yesterday = getYesterday();
 
       if (s.lastDate === today) {
-        // Already opened today, no change
+        // already opened today
       } else if (s.lastDate === yesterday) {
-        // Consecutive day! Increase streak
         s.count += 1;
         s.lastDate = today;
         if (s.count > s.bestStreak) s.bestStreak = s.count;
         await AsyncStorage.setItem(STREAK_KEY, JSON.stringify(s));
       } else {
-        // Streak broken or first time
         s.count = 1;
         s.lastDate = today;
         if (s.count > s.bestStreak) s.bestStreak = s.count;
@@ -57,24 +67,25 @@ export function TrackerProvider({ children }) {
 
       setStreak(s);
       setReadVerses(p);
-    } catch (e) {
-      console.log('Tracker load error:', e);
-    }
-    const datesData = await AsyncStorage.getItem('@gitasaar_read_dates');
+    } catch (e) { }
+
+    try {
+      const datesData = await AsyncStorage.getItem('@gitasaar_read_dates');
       if (datesData) setReadDates(JSON.parse(datesData));
-      setLoaded(true);
+      else setReadDates([]);
+    } catch (e) {}
+
+    setLoaded(true);
   };
 
-  // Mark a verse as read
   const markVerseRead = async (chapter, verse) => {
     const key = chapter + '_' + verse;
-    if (readVerses[key]) return; // Already read
+    if (readVerses[key]) return;
 
     const updated = { ...readVerses, [key]: true };
     setReadVerses(updated);
     try {
       await AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(updated));
-      // Track read dates for calendar
       const today = new Date().toISOString().split('T')[0];
       const datesData = await AsyncStorage.getItem('@gitasaar_read_dates');
       let dates = datesData ? JSON.parse(datesData) : [];
@@ -83,34 +94,27 @@ export function TrackerProvider({ children }) {
         await AsyncStorage.setItem('@gitasaar_read_dates', JSON.stringify(dates));
         setReadDates(dates);
       }
+      const uid = auth.currentUser?.uid;
+      if (uid) autoSync(uid);
     } catch (e) {}
   };
 
-  // Check if verse is read
-  const isVerseRead = (chapter, verse) => {
-    return !!readVerses[chapter + '_' + verse];
-  };
+  const isVerseRead = (chapter, verse) => !!readVerses[chapter + '_' + verse];
 
-  // Get chapter progress
   const getChapterProgress = (chapterNum, totalVerses) => {
     let count = 0;
-    Object.keys(readVerses).forEach((key) => {
-      if (key.startsWith(chapterNum + '_')) count++;
-    });
+    Object.keys(readVerses).forEach((key) => { if (key.startsWith(chapterNum + '_')) count++; });
     return { read: count, total: totalVerses, percent: totalVerses > 0 ? Math.round((count / totalVerses) * 100) : 0 };
   };
 
-  // Total stats
   const totalRead = Object.keys(readVerses).length;
   const totalPercent = Math.round((totalRead / 700) * 100);
 
-  // Get streak week (last 7 days with activity)
   const getStreakWeek = () => {
     const days = [];
     const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0=Sun
-    // Start from Sunday of current week
+    const dayOfWeek = today.getDay();
     const sunday = new Date(today);
     sunday.setDate(today.getDate() - dayOfWeek);
     for (let i = 0; i < 7; i++) {
