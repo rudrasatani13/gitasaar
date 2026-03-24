@@ -107,6 +107,14 @@ export function TrackerProvider({ children }) {
     return { read: count, total: totalVerses, percent: totalVerses > 0 ? Math.round((count / totalVerses) * 100) : 0 };
   };
 
+  // Generate progress object for VerseLibraryScreen
+  const progress = {};
+  Object.keys(readVerses).forEach((key) => {
+    const [chapter, verse] = key.split('_');
+    if (!progress[chapter]) progress[chapter] = [];
+    progress[chapter].push(parseInt(verse));
+  });
+
   const totalRead = Object.keys(readVerses).length;
   const totalPercent = Math.round((totalRead / 700) * 100);
 
@@ -134,7 +142,7 @@ export function TrackerProvider({ children }) {
 
   return (
     <TrackerContext.Provider value={{
-      streak, totalRead, totalPercent, readVerses, readDates,
+      streak, totalRead, totalPercent, readVerses, readDates, progress,
       markVerseRead, isVerseRead, getChapterProgress, getStreakWeek, loaded,
     }}>
       {children}
