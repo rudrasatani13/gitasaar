@@ -13,7 +13,9 @@ import { sendMessageToGemini, resetChat } from '../utils/geminiApi';
 import VoiceInput from '../components/VoiceInput';
 import TypeWriter from '../components/TypeWriter';
 import { ChatBackground, ResponseImage } from '../components/SpiritualBackground';
-import { tapMedium } from '../utils/haptics';
+import { tapMedium, tapError } from '../utils/haptics'; // Added tapError for limits
+import { usePremium } from '../theme/PremiumContext'; // NAYA: Premium limits ke liye
+import { PremiumBanner } from '../components/PremiumGate'; // NAYA: Limit banner dikhane ke liye
 
 const WELCOME = {
   id: 'welcome', type: 'ai', time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
@@ -136,6 +138,12 @@ export default function ChatScreen() {
   const navigation = useNavigation();
   const { profile } = useProfile();
   const { tr } = useTranslation();
+  
+  // --- NAYA PAYWALL LOGIC ---
+  const { useChatMessage, chatRemaining, isPremium } = usePremium();
+  const [showPaywall, setShowPaywall] = useState(false);
+  // --------------------------
+
   const [messages, setMessages] = useState([WELCOME]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -146,26 +154,42 @@ export default function ChatScreen() {
   const handleNewChat = () => {
     Alert.alert('New Chat', 'Naya chat start karna hai? Purana chat clear ho jayega.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'New Chat', onPress: () => { resetChat(); setMessages([WELCOME]); setShowSuggestions(true); } },
+      { text: 'New Chat', onPress: () => { resetChat(); setMessages([WELCOME]); setShowSuggestions(true); setShowPaywall(false); } },
     ]);
   };
 
   const sendMessage = async (text) => {
     const msg = text || inputText.trim();
     if (!msg || isTyping) return;
+
+    // --- LIMIT CHECK KARO ---
+    const canChat = useChatMessage();
+    if (!canChat) {
+      tapError();
+      setShowPaywall(true); // Limit khatam, banner dikhao
+      return;
+    }
+    // ------------------------
+
+    setShowPaywall(false);
     setShowSuggestions(false);
     const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
     setMessages((p) => [...p, { id: Date.now().toString(), type: 'user', text: msg, time: now }]);
     setInputText('');
     setIsTyping(true);
+    
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+
     const result = await sendMessageToGemini(msg, currentLang);
     const aiTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    
     if (result.success) {
       setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime }]);
     } else {
       setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.error || 'Kuch gadbad ho gayi.', verse: null, advice: null, time: aiTime }]);
     }
     setIsTyping(false);
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
   return (
@@ -178,6 +202,9 @@ export default function ChatScreen() {
         <LinearGradient colors={C.gradientHeader} style={{ paddingTop: 54, paddingBottom: 12, paddingHorizontal: 20 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingRight: 5 }}>
+                <MaterialCommunityIcons name="arrow-left" size={24} color={C.textPrimary} />
+              </TouchableOpacity>
               <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.primarySoft, borderWidth: 1.5, borderColor: C.borderGoldStrong, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
                 <Image source={require('../../assets/images/flute.png')} style={{ width: 32, height: 32, borderRadius: 16 }} resizeMode='cover' />
               </View>
@@ -238,10 +265,36 @@ export default function ChatScreen() {
       {/* Input */}
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0}>
         <View style={{ backgroundColor: C.bgCard, borderTopWidth: 1, borderTopColor: C.borderLight, paddingHorizontal: 16, paddingTop: 10, paddingBottom: Platform.OS === 'ios' ? 28 : 12 }}>
+          
+          {/* NAYA PAYWALL BANNER: Jab limit hit ho */}
+          {showPaywall && (
+            <View style={{ marginBottom: 12 }}>
+               <PremiumBanner 
+                 title="Daily Wisdom Reached" 
+                 subtitle="Upgrade to Premium for unlimited deep conversations with Krishna." 
+                 icon="chat-alert" 
+               />
+            </View>
+          )}
+
+          {/* FREE USER CHAT COUNTER */}
+          {!isPremium && !showPaywall && (
+            <View style={{ alignItems: 'center', marginBottom: 8 }}>
+               <Text style={{ fontSize: 11, color: chatRemaining <= 2 ? '#D63B2F' : C.textMuted, fontWeight: '600' }}>
+                 {chatRemaining} free messages left today
+               </Text>
+            </View>
+          )}
+
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, backgroundColor: C.bgInput, borderRadius: 24, borderWidth: 1.5, borderColor: C.border, paddingHorizontal: 18, paddingVertical: 12, maxHeight: 100, minHeight: 44, outlineStyle: 'none', outlineWidth: 0 }}
               placeholder={tr('askAnything')} placeholderTextColor={C.textMuted}
-              value={inputText} onChangeText={setInputText} multiline maxLength={500} editable={!isTyping} />
+              value={inputText} 
+              onChangeText={(text) => {
+                 setInputText(text);
+                 if (showPaywall) setShowPaywall(false); // Type karte hi banner hide karo
+              }} 
+              multiline maxLength={500} editable={!isTyping} />
             {!inputText.trim() && (
               <VoiceInput onResult={(text) => { setInputText(text); }} onAutoSend={(text) => { sendMessage(text); }} disabled={isTyping} />
             )}
