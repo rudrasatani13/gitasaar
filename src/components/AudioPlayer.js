@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
-import { Audio } from 'expo-av'; // ✨ NAYA: Audio import kiya
 import { usePremium } from '../theme/PremiumContext';
 import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
@@ -21,6 +20,17 @@ const hashString = (str) => {
     hash |= 0;
   }
   return Math.abs(hash).toString();
+};
+
+const cleanText = (text) => {
+  if (!text) return text;
+  // Remove verse references like ||1-1||, 1.1, [1.1], etc.
+  return text
+    .replace(/\|\|[\d\-\.]+\|\|/g, '')  // Remove ||1-1||
+    .replace(/\b\d+\.\d+\b/g, '')        // Remove 1.1
+    .replace(/\[\d+\.\d+\]/g, '')        // Remove [1.1]
+    .replace(/\s+/g, ' ')                // Clean up extra spaces
+    .trim();
 };
 
 async function generateSpeech(text, label) {
@@ -81,6 +91,7 @@ function stopWebAudio() {
 
 async function playNative(source) {
   try {
+    const { Audio } = require('expo-av');
     let uri = source.uri;
 
     if (!source.isLocal && source.blob) {
@@ -122,24 +133,6 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
   const waveAnims = [ useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current ];
   const stoppedRef = useRef(false);
 
-  // ✨ NAYA: Background Audio Configuration setup
-  useEffect(() => {
-    const setupAudio = async () => {
-      if (Platform.OS !== 'web') {
-        try {
-          await Audio.setAudioModeAsync({
-            playsInSilentModeIOS: true,
-            staysActiveInBackground: true, // App minimize hone par chalte rahega
-            shouldRouteThroughEarpiece: false,
-          });
-        } catch (e) {
-          console.log("Audio mode setup error:", e);
-        }
-      }
-    };
-    setupAudio();
-  }, []);
-
   useEffect(() => {
     if (isPlaying) {
       waveAnims.forEach((anim, i) => {
@@ -156,13 +149,6 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
       waveAnims.forEach(a => { a.stopAnimation(); a.setValue(0.3); });
     }
   }, [isPlaying]);
-
-  // Clean up audio when component unmounts
-  useEffect(() => {
-    return () => {
-      stop();
-    };
-  }, []);
 
   const stop = () => {
     stoppedRef.current = true;
@@ -183,12 +169,13 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
   const playPart = async (text, label) => {
     if (stoppedRef.current) return;
     setCurrentPart(label);
-    const source = await generateSpeech(text, label);
+    const cleanedText = cleanText(text);
+    const source = await generateSpeech(cleanedText, label);
     if (!source || stoppedRef.current) return;
-    
+
     if (Platform.OS === 'web') await playBlobWeb(source.blob);
     else await playNative(source);
-    
+
     if (!stoppedRef.current) await new Promise(r => setTimeout(r, 400));
   };
 
@@ -235,7 +222,8 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
     setIsPlaying(true);
     setCurrentPart(label);
 
-    const source = await generateSpeech(text, label);
+    const cleanedText = cleanText(text);
+    const source = await generateSpeech(cleanedText, label);
     if (source && !stoppedRef.current) {
       if (Platform.OS === 'web') await playBlobWeb(source.blob);
       else await playNative(source);
