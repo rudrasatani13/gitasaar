@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
+import { Audio } from 'expo-av'; // ✨ NAYA: Audio import kiya
 import { usePremium } from '../theme/PremiumContext';
 import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
@@ -80,7 +81,6 @@ function stopWebAudio() {
 
 async function playNative(source) {
   try {
-    const { Audio } = require('expo-av');
     let uri = source.uri;
 
     if (!source.isLocal && source.blob) {
@@ -122,6 +122,24 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
   const waveAnims = [ useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current, useRef(new Animated.Value(0.3)).current ];
   const stoppedRef = useRef(false);
 
+  // ✨ NAYA: Background Audio Configuration setup
+  useEffect(() => {
+    const setupAudio = async () => {
+      if (Platform.OS !== 'web') {
+        try {
+          await Audio.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: true, // App minimize hone par chalte rahega
+            shouldRouteThroughEarpiece: false,
+          });
+        } catch (e) {
+          console.log("Audio mode setup error:", e);
+        }
+      }
+    };
+    setupAudio();
+  }, []);
+
   useEffect(() => {
     if (isPlaying) {
       waveAnims.forEach((anim, i) => {
@@ -138,6 +156,13 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
       waveAnims.forEach(a => { a.stopAnimation(); a.setValue(0.3); });
     }
   }, [isPlaying]);
+
+  // Clean up audio when component unmounts
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, []);
 
   const stop = () => {
     stoppedRef.current = true;
