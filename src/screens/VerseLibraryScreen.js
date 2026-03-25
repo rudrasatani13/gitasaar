@@ -8,6 +8,7 @@ import { useTracker } from '../theme/TrackerContext';
 import { FontSizes } from '../theme/colors';
 import { KrishnaVersesBackground } from "../components/SpiritualBackground";
 import ShlokaCard from '../components/ShlokaCard';
+import GlassCard from '../components/GlassCard';
 
 let gitaData = null;
 try { gitaData = require('../data/gitaDatabase.json'); } catch (e) {}
@@ -94,10 +95,10 @@ export default function VerseLibraryScreen({ navigation }) {
       <KrishnaVersesBackground />
       
       {/* Header */}
-      <View style={{ paddingTop: 50, paddingBottom: 15, paddingHorizontal: 20, backgroundColor: C.bgCard, borderBottomWidth: 1, borderBottomColor: C.borderLight, ...C.shadowLight, zIndex: 10 }}>
+      <View style={{ paddingTop: 50, paddingBottom: 15, paddingHorizontal: 20, backgroundColor: C.bgPrimary, borderBottomWidth: 1, borderBottomColor: C.glassBorder, zIndex: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 15 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.bgSecondary, justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
               <MaterialCommunityIcons name="arrow-left" size={24} color={C.textPrimary} />
             </TouchableOpacity>
             <View>
@@ -105,13 +106,13 @@ export default function VerseLibraryScreen({ navigation }) {
               <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontWeight: '600' }}>All 700 Verses</Text>
             </View>
           </View>
-          <View style={{ width: 45, height: 45, borderRadius: 22.5, backgroundColor: C.primarySoft, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: C.borderGold }}>
+          <View style={{ width: 45, height: 45, borderRadius: 22.5, backgroundColor: C.glassBg, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: C.glassBorderGold }}>
             <MaterialCommunityIcons name="book-open-page-variant" size={22} color={C.primary} />
           </View>
         </View>
 
         {/* Overall Progress Bar */}
-        <View style={{ backgroundColor: C.bgSecondary, borderRadius: 12, padding: 12, marginBottom: 15, borderWidth: 1, borderColor: C.borderLight }}>
+        <GlassCard noPadding style={{ borderRadius: 12, padding: 12, marginBottom: 15 }} intensity={35}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: C.textPrimary }}>Overall Progress</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -119,13 +120,13 @@ export default function VerseLibraryScreen({ navigation }) {
               <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontWeight: '600' }}>({overallProgress.completed}/{overallProgress.total})</Text>
             </View>
           </View>
-          <View style={{ height: 8, backgroundColor: C.bgPrimary, borderRadius: 4, overflow: 'hidden' }}>
+          <View style={{ height: 8, backgroundColor: C.glassBg, borderRadius: 4, overflow: 'hidden' }}>
             <View style={{ width: `${overallProgress.percentage}%`, height: '100%', backgroundColor: C.primary, borderRadius: 4 }} />
           </View>
-        </View>
+        </GlassCard>
 
         {/* Search Bar */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgInput, borderRadius: 16, paddingHorizontal: 16, height: 50, borderWidth: 1, borderColor: C.border }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.glassInputBg, borderRadius: 16, paddingHorizontal: 16, height: 50, borderWidth: 1, borderColor: C.glassBorder }}>
           <MaterialCommunityIcons name="magnify" size={22} color={C.textMuted} />
           <TextInput
             style={{ flex: 1, marginLeft: 10, fontSize: FontSizes.md, color: C.textPrimary, height: '100%', outlineStyle: 'none' }}
@@ -143,9 +144,9 @@ export default function VerseLibraryScreen({ navigation }) {
           )}
         </View>
 
-        {/* Search Suggestions - Show on Focus */}
+        {/* Search Suggestions */}
         {showSuggestions && searchQuery.length === 0 && (
-          <View style={{ marginTop: 12, backgroundColor: C.bgCard, borderRadius: 12, padding: 8, borderWidth: 1, borderColor: C.borderLight }}>
+          <GlassCard style={{ marginTop: 12, borderRadius: 12, padding: 8 }} intensity={35}>
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingBottom: 8 }}>
               <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontWeight: '600' }}>Popular Searches</Text>
             </View>
@@ -154,14 +155,14 @@ export default function VerseLibraryScreen({ navigation }) {
                 <TouchableOpacity
                   key={suggestion.query}
                   onPress={() => setSearchQuery(suggestion.query)}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: C.bgSecondary, borderRadius: 20, borderWidth: 1, borderColor: C.border }}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: C.glassBg, borderRadius: 20, borderWidth: 1, borderColor: C.glassBorder }}
                 >
                   <MaterialCommunityIcons name={suggestion.icon} size={14} color={C.primary} />
                   <Text style={{ fontSize: FontSizes.xs, color: C.textPrimary, fontWeight: '600' }}>{suggestion.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
+          </GlassCard>
         )}
       </View>
 
@@ -177,119 +178,71 @@ export default function VerseLibraryScreen({ navigation }) {
           const progressPct = (completedCount / ch.verses) * 100;
           
           return (
-            <View key={ch.number} style={{ marginBottom: 12, backgroundColor: C.bgCard, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: isExpanded ? C.primary : C.borderLight, ...C.shadowLight }}>
-              <TouchableOpacity 
-                onPress={() => setExpandedChapter(isExpanded ? null : ch.number)}
-                style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}
-                activeOpacity={0.7}
-              >
-                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: isExpanded ? C.primary : C.bgSecondary, justifyContent: 'center', alignItems: 'center', marginRight: 16 }}>
-                  <Text style={{ fontSize: FontSizes.lg, fontWeight: 'bold', color: isExpanded ? C.textOnPrimary : C.textPrimary }}>{ch.number}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary, marginBottom: 2 }}>{ch.name}</Text>
-                  <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontStyle: 'italic', marginBottom: 6 }}>{ch.theme}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <View style={{ flex: 1, height: 4, backgroundColor: C.bgSecondary, borderRadius: 2, overflow: 'hidden' }}>
-                      <View style={{ width: `${progressPct}%`, height: '100%', backgroundColor: C.success }} />
-                    </View>
-                    <Text style={{ fontSize: 10, color: C.textMuted, fontWeight: '600' }}>{completedCount}/{ch.verses}</Text>
+            <View key={ch.number} style={{ marginBottom: 12 }}>
+              <GlassCard noPadding style={{ borderRadius: 20, overflow: 'hidden' }} intensity={40}>
+                <TouchableOpacity
+                  onPress={() => setExpandedChapter(isExpanded ? null : ch.number)}
+                  style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}
+                  activeOpacity={0.7}
+                >
+                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: isExpanded ? C.primary : C.glassBg, justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1, borderColor: isExpanded ? C.primary : C.glassBorder }}>
+                    <Text style={{ fontSize: FontSizes.lg, fontWeight: 'bold', color: isExpanded ? C.textOnPrimary : C.textPrimary }}>{ch.number}</Text>
                   </View>
-                </View>
-                <MaterialCommunityIcons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={24} color={C.textMuted} />
-              </TouchableOpacity>
-
-              {isExpanded && (
-                <View style={{ backgroundColor: C.bgPrimary, borderTopWidth: 1, borderTopColor: C.borderLight, padding: 8 }}>
-                  {gitaData && gitaData[ch.number] ? (
-                    Array.from({ length: ch.verses }, (_, i) => i + 1).map((num) => {
-                      const vNum = num.toString();
-                      const verseData = gitaData[ch.number][vNum];
-                      if (!verseData) return null;
-
-                      const isRead = progress?.[ch.number]?.includes(num);
-
-                      return (
-                        <TouchableOpacity
-                          key={vNum}
-                          onPress={() => handleVerseClick(ch.number, vNum)}
-                          style={{
-                            marginBottom: 8,
-                            backgroundColor: C.bgCard,
-                            borderRadius: 16,
-                            padding: 14,
-                            borderWidth: 1,
-                            borderColor: isRead ? C.success + '30' : C.borderLight,
-                            flexDirection: 'row',
-                            gap: 12,
-                            alignItems: 'flex-start',
-                            ...C.shadowLight
-                          }}
-                          activeOpacity={0.7}
-                        >
-                          {/* Verse Number Badge */}
-                          <View style={{
-                            minWidth: 42,
-                            height: 42,
-                            borderRadius: 12,
-                            backgroundColor: isRead ? C.success + '15' : C.primarySoft,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderWidth: 1.5,
-                            borderColor: isRead ? C.success : C.borderGold
-                          }}>
-                            <Text style={{ fontSize: FontSizes.md, fontWeight: '800', color: isRead ? C.success : C.primary }}>{vNum}</Text>
-                          </View>
-
-                          {/* Verse Content */}
-                          <View style={{ flex: 1, gap: 6 }}>
-                            {/* Sanskrit Text */}
-                            <Text
-                              style={{
-                                fontSize: FontSizes.md,
-                                color: C.textSanskrit,
-                                lineHeight: 22,
-                                fontWeight: '500'
-                              }}
-                              numberOfLines={2}
-                            >
-                              {verseData.sanskrit.replace(/\n/g, ' ')}
-                            </Text>
-
-                            {/* Translation Preview */}
-                            <Text
-                              style={{
-                                fontSize: FontSizes.sm,
-                                color: C.textMuted,
-                                lineHeight: 20,
-                                fontStyle: 'italic'
-                              }}
-                              numberOfLines={2}
-                            >
-                              {verseData.hindi || verseData.english}
-                            </Text>
-                          </View>
-
-                          {/* Status Icon */}
-                          <View style={{ alignSelf: 'center' }}>
-                            {isRead ? (
-                              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.success + '20', justifyContent: 'center', alignItems: 'center' }}>
-                                <MaterialCommunityIcons name="check" size={16} color={C.success} />
-                              </View>
-                            ) : (
-                              <MaterialCommunityIcons name="chevron-right" size={20} color={C.textMuted} />
-                            )}
-                          </View>
-                        </TouchableOpacity>
-                      );
-                    })
-                  ) : (
-                    <View style={{ padding: 20, alignItems: 'center' }}>
-                      <Text style={{ color: C.textMuted }}>Shlokas loading error. Run fetchVerses.js</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary, marginBottom: 2 }}>{ch.name}</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontStyle: 'italic', marginBottom: 6 }}>{ch.theme}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={{ flex: 1, height: 4, backgroundColor: C.glassBg, borderRadius: 2, overflow: 'hidden' }}>
+                        <View style={{ width: `${progressPct}%`, height: '100%', backgroundColor: C.success }} />
+                      </View>
+                      <Text style={{ fontSize: 10, color: C.textMuted, fontWeight: '600' }}>{completedCount}/{ch.verses}</Text>
                     </View>
-                  )}
-                </View>
-              )}
+                  </View>
+                  <MaterialCommunityIcons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={24} color={C.textMuted} />
+                </TouchableOpacity>
+
+                {isExpanded && (
+                  <View style={{ backgroundColor: C.glassBg, borderTopWidth: 1, borderTopColor: C.glassBorder, padding: 8 }}>
+                    {gitaData && gitaData[ch.number] ? (
+                      Array.from({ length: ch.verses }, (_, i) => i + 1).map((num) => {
+                        const vNum = num.toString();
+                        const verseData = gitaData[ch.number][vNum];
+                        if (!verseData) return null;
+                        const isRead = progress?.[ch.number]?.includes(num);
+                        return (
+                          <TouchableOpacity
+                            key={vNum}
+                            onPress={() => handleVerseClick(ch.number, vNum)}
+                            style={{ marginBottom: 8, backgroundColor: isRead ? C.success + '08' : C.glassBg, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: isRead ? C.success + '30' : C.glassBorder, flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}
+                            activeOpacity={0.7}
+                          >
+                            <View style={{ minWidth: 42, height: 42, borderRadius: 12, backgroundColor: isRead ? C.success + '15' : C.glassBg, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: isRead ? C.success : C.glassBorderGold }}>
+                              <Text style={{ fontSize: FontSizes.md, fontWeight: '800', color: isRead ? C.success : C.primary }}>{vNum}</Text>
+                            </View>
+                            <View style={{ flex: 1, gap: 6 }}>
+                              <Text style={{ fontSize: FontSizes.md, color: C.textSanskrit, lineHeight: 22, fontWeight: '500' }} numberOfLines={2}>{verseData.sanskrit.replace(/\n/g, ' ')}</Text>
+                              <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, lineHeight: 20, fontStyle: 'italic' }} numberOfLines={2}>{verseData.hindi || verseData.english}</Text>
+                            </View>
+                            <View style={{ alignSelf: 'center' }}>
+                              {isRead ? (
+                                <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.success + '20', justifyContent: 'center', alignItems: 'center' }}>
+                                  <MaterialCommunityIcons name="check" size={16} color={C.success} />
+                                </View>
+                              ) : (
+                                <MaterialCommunityIcons name="chevron-right" size={20} color={C.textMuted} />
+                              )}
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      })
+                    ) : (
+                      <View style={{ padding: 20, alignItems: 'center' }}>
+                        <Text style={{ color: C.textMuted }}>Shlokas loading error. Run fetchVerses.js</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </GlassCard>
             </View>
           );
         })}
@@ -298,16 +251,14 @@ export default function VerseLibraryScreen({ navigation }) {
 
       {/* Full Verse & Audio Modal */}
       <Modal visible={selectedVerse !== null} animationType="slide" transparent onRequestClose={() => setSelectedVerse(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: C.bgPrimary, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: '85%' }}>
-            <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: C.border, alignSelf: 'center', marginBottom: 12 }} />
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: C.bgPrimary, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: '85%', borderTopWidth: 1, borderColor: C.glassBorder }}>
+            <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: C.glassBorder, alignSelf: 'center', marginBottom: 12 }} />
             <TouchableOpacity style={{ alignSelf: 'flex-end', padding: 8, marginBottom: 4 }} onPress={() => setSelectedVerse(null)}>
               <MaterialCommunityIcons name="close-circle" size={28} color={C.textMuted} />
             </TouchableOpacity>
-            
             {selectedVerse && (
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-                {/* Yahan Audio Player apne aap aa jayega ShlokaCard ke andar se */}
                 <ShlokaCard verse={selectedVerse} animate={false} />
               </ScrollView>
             )}

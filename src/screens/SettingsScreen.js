@@ -129,30 +129,31 @@ export default function SettingsScreen() {
   return (
     <LinearGradient colors={C.gradientWarm} style={{ flex: 1 }}>
       <GaneshSettingsBackground />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 60 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 60, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         <View style={{ marginBottom: 24 }}>
           <Text style={{ fontSize: FontSizes.xxxl, fontWeight: '700', color: C.textPrimary }}>{tr('settings')}</Text>
         </View>
 
         {/* Profile */}
-        <TouchableOpacity onPress={() => navigation.navigate('ProfileEdit')} activeOpacity={0.8}
-          style={{ backgroundColor: C.bgCard, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: C.border, gap: 12, marginBottom: 20, ...C.shadowLight }}>
-          <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: C.primarySoft, borderWidth: 1.5, borderColor: C.borderGoldStrong, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
-            {renderAvatar(56)}
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: C.textPrimary, textTransform: 'capitalize' }}>{userName}</Text>
-            <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 2 }}>{userEmail}</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
-              <View style={{ backgroundColor: C.primarySoft, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 }}>
-                <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: C.primary }}>Free Plan</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('ProfileEdit')} activeOpacity={0.8}>
+          <GlassCard style={{ marginBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }} intensity={45}>
+            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: C.glassBg, borderWidth: 1.5, borderColor: C.glassBorderGold, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+              {renderAvatar(56)}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: C.textPrimary, textTransform: 'capitalize' }}>{userName}</Text>
+              <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 2 }}>{userEmail}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+                <View style={{ backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorderGold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 }}>
+                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: C.primary }}>Free Plan</Text>
+                </View>
               </View>
             </View>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <Text style={{ fontSize: FontSizes.xs, color: C.primary, fontWeight: '500' }}>Edit</Text>
-            <MaterialCommunityIcons name="chevron-right" size={18} color={C.primary} />
-          </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text style={{ fontSize: FontSizes.xs, color: C.primary, fontWeight: '500' }}>Edit</Text>
+              <MaterialCommunityIcons name="chevron-right" size={18} color={C.primary} />
+            </View>
+          </GlassCard>
         </TouchableOpacity>
 
         {/* Premium */}
@@ -174,7 +175,7 @@ export default function SettingsScreen() {
 
         {/* Preferences */}
         <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 12 }}>{tr('preferences')}</Text>
-        <View style={{ backgroundColor: C.bgCard, borderRadius: 16, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 12 }}>
+        <GlassCard noPadding style={{ marginBottom: 12, borderRadius: 16 }} intensity={40}>
           <SettingRow C={C} icon="translate" label={tr('language')} sublabel={langLabel}
             onPress={() => navigation.navigate('Language')}
             right={<MaterialCommunityIcons name="chevron-right" size={18} color={C.textMuted} />} />
@@ -186,11 +187,11 @@ export default function SettingsScreen() {
           <SettingRow C={C} icon={isDark ? 'weather-night' : 'white-balance-sunny'} label={tr('darkMode')} sublabel={isDark ? 'On' : 'Off'}
             right={<Switch value={isDark} onValueChange={toggleTheme}
               trackColor={{ false: C.border, true: C.primarySoft }} thumbColor={isDark ? C.primary : C.textMuted} />} isLast />
-        </View>
+        </GlassCard>
 
         {/* Time Picker */}
         {showTimePicker && (
-          <View style={{ backgroundColor: C.bgCard, borderRadius: 16, padding: 20, marginBottom: 12, borderWidth: 1.5, borderColor: C.primary }}>
+          <GlassCard style={{ marginBottom: 12 }} intensity={45}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary }}>Set Time</Text>
               <TouchableOpacity onPress={() => setShowTimePicker(false)}><MaterialCommunityIcons name="close" size={18} color={C.textMuted} /></TouchableOpacity>
@@ -221,7 +222,7 @@ export default function SettingsScreen() {
             <TouchableOpacity onPress={handleTimeSave} style={{ backgroundColor: C.primary, borderRadius: 12, paddingVertical: 14, alignItems: 'center' }}>
               <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textOnPrimary }}>Save Time</Text>
             </TouchableOpacity>
-          </View>
+          </GlassCard>
         )}
         {timeSaved && !showTimePicker && (
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#E8F5E9', borderRadius: 12, paddingVertical: 10, marginBottom: 12 }}>
@@ -232,7 +233,7 @@ export default function SettingsScreen() {
 
         {/* About */}
         <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 12, marginTop: 12 }}>{tr('about')}</Text>
-        <View style={{ backgroundColor: C.bgCard, borderRadius: 16, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 24 }}>
+        <GlassCard noPadding style={{ marginBottom: 24, borderRadius: 16 }} intensity={40}>
           <SettingRow C={C} icon="star-outline" label="Rate GitaSaar" sublabel="Share your experience" onPress={handleRate} />
           <SettingRow C={C} icon="bell-ring-outline" label="Verse Reminders" sublabel="Daily shloka notifications" onPress={() => navigation.navigate("VerseReminder")}
           />
@@ -246,13 +247,14 @@ export default function SettingsScreen() {
             right={<MaterialCommunityIcons name="chevron-right" size={18} color={C.textMuted} />} />
           <SettingRow C={C} icon="information-outline" label="Version"
             right={<Text style={{ fontSize: FontSizes.sm, color: C.textMuted }}>2.0.0</Text>} isLast />
-        </View>
+        </GlassCard>
 
         {/* Logout */}
-        <TouchableOpacity onPress={handleLogout} activeOpacity={0.8}
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: isDark ? '#3A1515' : '#FFF0F0', borderRadius: 16, paddingVertical: 16, marginBottom: 24, borderWidth: 1, borderColor: isDark ? '#5A2020' : '#FFD0D0' }}>
-          <MaterialCommunityIcons name="logout" size={20} color={C.vermillion} />
-          <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.vermillion }}>{tr('logout')}</Text>
+        <TouchableOpacity onPress={handleLogout} activeOpacity={0.8}>
+          <GlassCard noPadding style={{ marginBottom: 24, borderRadius: 16, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }} intensity={35}>
+            <MaterialCommunityIcons name="logout" size={20} color={C.vermillion} />
+            <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.vermillion }}>{tr('logout')}</Text>
+          </GlassCard>
         </TouchableOpacity>
 
         <View style={{ alignItems: 'center', paddingVertical: 24, gap: 4 }}>

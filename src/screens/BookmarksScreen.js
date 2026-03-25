@@ -8,6 +8,7 @@ import { usePremium } from '../theme/PremiumContext';
 import { useBookmarks } from '../theme/BookmarkContext';
 import { FontSizes } from '../theme/colors';
 import ShlokaCard from '../components/ShlokaCard';
+import GlassCard from '../components/GlassCard';
 
 export default function BookmarksScreen({ navigation }) {
   const { colors: C } = useTheme();
@@ -47,10 +48,10 @@ export default function BookmarksScreen({ navigation }) {
   return (
     <LinearGradient colors={C.gradientWarm} style={{ flex: 1 }}>
       {/* Header */}
-      <View style={{ paddingTop: 56, paddingBottom: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: C.border }}>
+      <View style={{ paddingTop: 56, paddingBottom: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: C.glassBorder }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.primarySoft, justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
               <MaterialCommunityIcons name="arrow-left" size={20} color={C.primary} />
             </TouchableOpacity>
             <View>
@@ -58,7 +59,7 @@ export default function BookmarksScreen({ navigation }) {
               <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }}>{bookmarkCount} saved verses</Text>
             </View>
           </View>
-          <TouchableOpacity onPress={() => { if (isPremium) setShowAddFolder(!showAddFolder); else { if (typeof window !== 'undefined') window.alert('Custom folders are a Premium feature!'); } }} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.primarySoft, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: C.borderGold }}>
+          <TouchableOpacity onPress={() => { if (isPremium) setShowAddFolder(!showAddFolder); else { if (typeof window !== 'undefined') window.alert('Custom folders are a Premium feature!'); } }} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.glassBg, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: C.glassBorderGold }}>
             <MaterialCommunityIcons name="folder-plus-outline" size={18} color={C.primary} />
           </TouchableOpacity>
         </View>
@@ -66,8 +67,8 @@ export default function BookmarksScreen({ navigation }) {
 
       {/* Add folder input */}
       {showAddFolder && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingVertical: 12, backgroundColor: C.bgSecondary, borderBottomWidth: 1, borderBottomColor: C.border }}>
-          <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, backgroundColor: C.bgCard, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: C.border, outlineStyle: 'none' }}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingVertical: 12, backgroundColor: C.glassBg, borderBottomWidth: 1, borderBottomColor: C.glassBorder }}>
+          <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, backgroundColor: C.glassInputBg, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: C.glassBorder, outlineStyle: 'none' }}
             placeholder="Folder name..." placeholderTextColor={C.textMuted}
             value={newFolderName} onChangeText={setNewFolderName} autoFocus />
           <TouchableOpacity onPress={handleAddFolder} style={{ backgroundColor: C.primary, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 }}>
@@ -77,10 +78,10 @@ export default function BookmarksScreen({ navigation }) {
       )}
 
       {/* Folder tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: 52, borderBottomWidth: 1, borderBottomColor: C.borderLight }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: 52, borderBottomWidth: 1, borderBottomColor: C.glassBorder }}>
         <View style={{ flexDirection: 'row', gap: 6, paddingHorizontal: 20, paddingVertical: 10 }}>
           <TouchableOpacity onPress={() => setActiveFolder('all')}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: activeFolder === 'all' ? C.primarySoft : C.bgCard, borderWidth: 1, borderColor: activeFolder === 'all' ? C.primary : C.border }}>
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: activeFolder === 'all' ? C.glassBg : 'transparent', borderWidth: 1, borderColor: activeFolder === 'all' ? C.glassBorderGold : C.glassBorder }}>
             <MaterialCommunityIcons name="bookmark-multiple" size={14} color={activeFolder === 'all' ? C.primary : C.textMuted} />
             <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: activeFolder === 'all' ? C.primary : C.textMuted }}>All ({bookmarkCount})</Text>
           </TouchableOpacity>
@@ -90,7 +91,7 @@ export default function BookmarksScreen({ navigation }) {
             return (
               <TouchableOpacity key={f.id} onPress={() => { if (f.id === 'favorites' || isPremium) setActiveFolder(f.id); else { if (typeof window !== 'undefined') window.alert('Custom folders are a Premium feature!'); } }}
                 onLongPress={() => f.id.startsWith('custom_') ? handleDeleteFolder(f.id) : null}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: active ? f.color + '15' : C.bgCard, borderWidth: 1, borderColor: active ? f.color : C.border }}>
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: active ? f.color + '15' : 'transparent', borderWidth: 1, borderColor: active ? f.color : C.glassBorder }}>
                 <MaterialCommunityIcons name={f.icon} size={14} color={active ? f.color : C.textMuted} />
                 <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: active ? f.color : C.textMuted }}>{f.name} ({count})</Text>
               </TouchableOpacity>
@@ -144,7 +145,7 @@ export default function BookmarksScreen({ navigation }) {
             </View>
           ))
         )}
-        <View style={{ height: 30 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
     </LinearGradient>
   );

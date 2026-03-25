@@ -1,31 +1,113 @@
 // src/components/GlassCard.js
 import React from 'react';
-import { View, Platform } from 'react-native';
+import { View, Platform, StyleSheet } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useTheme } from '../theme/ThemeContext';
 
-export default function GlassCard({ children, style, borderGlow = false, noPadding = false }) {
+/**
+ * GlassCard — Glassmorphism card for the entire app.
+ * Uses BlurView on native iOS/Android, backdropFilter on web.
+ *
+ * Props:
+ *  intensity   — blur intensity (default 50)
+ *  noPadding   — remove default padding
+ *  style       — additional styles
+ *  noBlur      — skip blur (for performance-sensitive areas)
+ */
+export default function GlassCard({
+  children,
+  style,
+  noPadding = false,
+  intensity = 50,
+  noBlur = false,
+}) {
   const { colors: C, isDark } = useTheme();
 
-  const glassStyle = {
-    backgroundColor: isDark ? 'rgba(30, 24, 20, 0.65)' : 'rgba(255, 255, 255, 0.55)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: isDark ? 'rgba(224, 168, 80, 0.12)' : 'rgba(255, 255, 255, 0.8)',
-    padding: noPadding ? 0 : 18,
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-    } : {}),
-    ...C.shadowLight,
-    ...(borderGlow ? {
-      borderColor: isDark ? 'rgba(224, 168, 80, 0.25)' : 'rgba(194, 136, 64, 0.25)',
-      ...C.shadowGold,
-    } : {}),
-  };
+  const borderColor = C.glassBorder;
 
+  const containerStyle = [
+    styles.base,
+    {
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor,
+      padding: noPadding ? 0 : 18,
+      overflow: 'hidden',
+    },
+    C.shadowLight,
+    style,
+  ];
+
+  // Web: use backdropFilter CSS
+  if (Platform.OS === 'web') {
+    return (
+      <View
+        style={[
+          containerStyle,
+          {
+            backgroundColor: C.glassBg,
+            backdropFilter: `blur(${intensity}px)`,
+            WebkitBackdropFilter: `blur(${intensity}px)`,
+          },
+        ]}
+      >
+        {/* Top shimmer line */}
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            backgroundColor: C.glassHighlight,
+          }}
+        />
+        {children}
+      </View>
+    );
+  }
+
+  // Native: BlurView with tint
+  if (!noBlur) {
+    return (
+      <BlurView
+        intensity={intensity}
+        tint={isDark ? 'dark' : 'light'}
+        style={[containerStyle, { backgroundColor: 'transparent' }]}
+      >
+        {/* Translucent overlay for color tinting */}
+        <View
+          style={[
+            StyleSheet.absoluteFillObject,
+            { backgroundColor: C.glassBg, borderRadius: 20 },
+          ]}
+        />
+        {/* Top shimmer highlight */}
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            backgroundColor: C.glassHighlight,
+          }}
+        />
+        {children}
+      </BlurView>
+    );
+  }
+
+  // Fallback: no blur, just translucent
   return (
-    <View style={[glassStyle, style]}>
+    <View style={[containerStyle, { backgroundColor: C.glassBgStrong }]}>
       {children}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  base: {
+    position: 'relative',
+  },
+});

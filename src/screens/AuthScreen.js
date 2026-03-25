@@ -8,6 +8,8 @@ import { isValidEmail, sanitizeInput } from '../utils/security';
 import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
 import { login, signup, loginWithGoogle, loginWithApple, sendPhoneOTP, verifyPhoneOTP } from '../utils/firebase';
+import GlassCard from '../components/GlassCard';
+import GlassInput from '../components/GlassInput';
 
 export default function AuthScreen({ navigation }) {
   const { colors: C } = useTheme();
@@ -117,7 +119,7 @@ export default function AuthScreen({ navigation }) {
 
           {/* Header */}
           <Animated.View style={{ alignItems: 'center', marginBottom: 32, opacity: headerOpacity, transform: [{ translateY: headerY }] }}>
-            <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: C.primarySoft, borderWidth: 2, borderColor: C.borderGoldStrong, justifyContent: 'center', alignItems: 'center', marginBottom: 14 }}>
+            <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: C.glassBg, borderWidth: 2, borderColor: C.glassBorderGold, justifyContent: 'center', alignItems: 'center', marginBottom: 14 }}>
               <AppLogo size={50} />
             </View>
             <Text style={{ fontSize: FontSizes.xxxl, fontWeight: '700', color: C.textPrimary }}>GitaSaar</Text>
@@ -129,12 +131,13 @@ export default function AuthScreen({ navigation }) {
 
           {/* Form */}
           <Animated.View style={{ opacity: formOpacity, transform: [{ translateY: formY }] }}>
+            <GlassCard style={{ marginBottom: 8 }} intensity={50}>
 
             {/* ===== EMAIL MODE ===== */}
             {isEmailMode && (
               <>
                 {/* Toggle Login/Signup */}
-                <View style={{ flexDirection: 'row', backgroundColor: C.bgSecondary, borderRadius: 14, padding: 4, marginBottom: 20 }}>
+                <View style={{ flexDirection: 'row', backgroundColor: C.glassBg, borderRadius: 14, padding: 4, marginBottom: 20, borderWidth: 1, borderColor: C.glassBorder }}>
                   <TouchableOpacity onPress={() => !isLogin && animateSwitch(() => setMode('login'))}
                     style={{ flex: 1, paddingVertical: 11, borderRadius: 12, backgroundColor: isLogin ? C.bgCard : 'transparent', alignItems: 'center', ...(isLogin ? C.shadowLight : {}) }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: isLogin ? '700' : '500', color: isLogin ? C.primary : C.textMuted }}>Login</Text>
@@ -146,33 +149,35 @@ export default function AuthScreen({ navigation }) {
                 </View>
 
                 {/* Email */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, marginBottom: 12, borderWidth: 1.5, borderColor: C.border }}>
-                  <MaterialCommunityIcons name="email-outline" size={20} color={C.textMuted} />
-                  <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, paddingVertical: 15, paddingHorizontal: 12, outlineStyle: 'none', outlineWidth: 0 }}
-                    placeholder="Email address" placeholderTextColor={C.textMuted}
-                    value={email} onChangeText={setEmail}
-                    keyboardType="email-address" autoCapitalize="none" />
-                </View>
+                <GlassInput
+                  leftIcon={<MaterialCommunityIcons name="email-outline" size={20} color={C.textMuted} />}
+                  placeholder="Email address"
+                  value={email} onChangeText={setEmail}
+                  keyboardType="email-address" autoCapitalize="none"
+                  style={{ marginBottom: 4 }}
+                />
 
                 {/* Password */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, marginBottom: 18, borderWidth: 1.5, borderColor: C.border }}>
-                  <MaterialCommunityIcons name="lock-outline" size={20} color={C.textMuted} />
-                  <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, paddingVertical: 15, paddingHorizontal: 12, outlineStyle: 'none', outlineWidth: 0 }}
-                    placeholder="Password (min 6 chars)" placeholderTextColor={C.textMuted}
-                    value={password} onChangeText={setPassword}
-                    secureTextEntry={!showPassword} autoCapitalize="none" />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <MaterialCommunityIcons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={C.textMuted} />
-                  </TouchableOpacity>
-                </View>
+                <GlassInput
+                  leftIcon={<MaterialCommunityIcons name="lock-outline" size={20} color={C.textMuted} />}
+                  rightIcon={
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                      <MaterialCommunityIcons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={C.textMuted} />
+                    </TouchableOpacity>
+                  }
+                  placeholder="Password (min 6 chars)"
+                  value={password} onChangeText={setPassword}
+                  secureTextEntry={!showPassword} autoCapitalize="none"
+                  style={{ marginBottom: 4 }}
+                />
                 {!isLogin && (
-                  <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.bgInput, borderRadius: 14, paddingHorizontal: 16, borderWidth: 1.5, borderColor: C.border, marginBottom: 12, marginTop: 12 }}>
-                    <MaterialCommunityIcons name="lock-check-outline" size={18} color={C.textMuted} />
-                    <TextInput style={{ flex: 1, fontSize: 15, color: C.textPrimary, paddingVertical: 14, paddingHorizontal: 12, outlineStyle: "none" }}
-                      placeholder="Confirm Password" placeholderTextColor={C.textMuted}
-                      value={confirmPassword} onChangeText={setConfirmPassword}
-                      secureTextEntry autoCapitalize="none" />
-                  </View>
+                  <GlassInput
+                    leftIcon={<MaterialCommunityIcons name="lock-check-outline" size={18} color={C.textMuted} />}
+                    placeholder="Confirm Password"
+                    value={confirmPassword} onChangeText={setConfirmPassword}
+                    secureTextEntry autoCapitalize="none"
+                    style={{ marginBottom: 4 }}
+                  />
                 )}
 
                 {/* Submit */}
@@ -189,14 +194,17 @@ export default function AuthScreen({ navigation }) {
             {/* ===== PHONE MODE ===== */}
             {isPhone && (
               <>
-                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, marginBottom: 18, borderWidth: 1.5, borderColor: C.border }}>
-                  <Text style={{ fontSize: FontSizes.md, color: C.textMuted, marginRight: 4 }}>+91</Text>
-                  <View style={{ width: 1, height: 24, backgroundColor: C.border, marginRight: 8 }} />
-                  <TextInput style={{ flex: 1, fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 15, outlineStyle: 'none', outlineWidth: 0, letterSpacing: 1 }}
-                    placeholder="Phone number" placeholderTextColor={C.textMuted}
-                    value={phone} onChangeText={setPhone}
-                    keyboardType="phone-pad" maxLength={10} />
-                </View>
+                <GlassInput
+                  leftIcon={<>
+                    <Text style={{ fontSize: FontSizes.md, color: C.textMuted, marginRight: 4 }}>+91</Text>
+                    <View style={{ width: 1, height: 24, backgroundColor: C.glassBorder, marginRight: 8 }} />
+                  </>}
+                  placeholder="Phone number"
+                  value={phone} onChangeText={setPhone}
+                  keyboardType="phone-pad" maxLength={10}
+                  inputStyle={{ fontSize: FontSizes.lg, letterSpacing: 1 }}
+                  style={{ marginBottom: 4 }}
+                />
 
                 <TouchableOpacity onPress={handleSendOTP} disabled={loading} activeOpacity={0.85}>
                   <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1 }}>
@@ -215,18 +223,21 @@ export default function AuthScreen({ navigation }) {
             {/* ===== OTP MODE ===== */}
             {isOtp && (
               <>
-                <View style={{ backgroundColor: C.bgSecondary, borderRadius: 12, padding: 14, marginBottom: 18, flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                  <MaterialCommunityIcons name="message-text-outline" size={18} color={C.peacockBlue} />
-                  <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, flex: 1 }}>OTP bhej diya gaya hai +91{phone} par</Text>
-                </View>
+                <GlassCard style={{ marginBottom: 14 }} noPadding intensity={35}>
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', padding: 14 }}>
+                    <MaterialCommunityIcons name="message-text-outline" size={18} color={C.peacockBlue} />
+                    <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, flex: 1 }}>OTP bhej diya gaya hai +91{phone} par</Text>
+                  </View>
+                </GlassCard>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, marginBottom: 18, borderWidth: 1.5, borderColor: C.border }}>
-                  <MaterialCommunityIcons name="shield-key-outline" size={20} color={C.textMuted} />
-                  <TextInput style={{ flex: 1, fontSize: FontSizes.xl, color: C.textPrimary, paddingVertical: 15, paddingHorizontal: 12, textAlign: 'center', letterSpacing: 8, outlineStyle: 'none', outlineWidth: 0 }}
-                    placeholder="------" placeholderTextColor={C.border}
-                    value={otp} onChangeText={setOtp}
-                    keyboardType="number-pad" maxLength={6} autoFocus />
-                </View>
+                <GlassInput
+                  leftIcon={<MaterialCommunityIcons name="shield-key-outline" size={20} color={C.textMuted} />}
+                  placeholder="------"
+                  value={otp} onChangeText={setOtp}
+                  keyboardType="number-pad" maxLength={6} autoFocus
+                  inputStyle={{ fontSize: FontSizes.xl, textAlign: 'center', letterSpacing: 8 }}
+                  style={{ marginBottom: 4 }}
+                />
 
                 <TouchableOpacity onPress={handleVerifyOTP} disabled={loading} activeOpacity={0.85}>
                   <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1 }}>
@@ -260,27 +271,32 @@ export default function AuthScreen({ navigation }) {
                 <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
                   {/* Google */}
                   <TouchableOpacity onPress={handleGoogle} disabled={!!loadingProvider} activeOpacity={0.8}
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, borderWidth: 1.5, borderColor: C.border, opacity: loadingProvider === 'google' ? 0.7 : 1 }}>
-                    <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
-                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>
-                      {loadingProvider === 'google' ? 'Wait...' : 'Google'}
-                    </Text>
+                    style={{ flex: 1, opacity: loadingProvider === 'google' ? 0.7 : 1 }}>
+                    <GlassCard noPadding style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }} intensity={35}>
+                      <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
+                      <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>
+                        {loadingProvider === 'google' ? 'Wait...' : 'Google'}
+                      </Text>
+                    </GlassCard>
                   </TouchableOpacity>
 
                   {/* Apple */}
                   <TouchableOpacity onPress={handleApple} disabled={!!loadingProvider} activeOpacity={0.8}
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, borderWidth: 1.5, borderColor: C.border, opacity: loadingProvider === 'apple' ? 0.7 : 1 }}>
-                    <MaterialCommunityIcons name="apple" size={20} color={C.textPrimary} />
-                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>
-                      {loadingProvider === 'apple' ? 'Wait...' : 'Apple'}
-                    </Text>
+                    style={{ flex: 1, opacity: loadingProvider === 'apple' ? 0.7 : 1 }}>
+                    <GlassCard noPadding style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }} intensity={35}>
+                      <MaterialCommunityIcons name="apple" size={20} color={C.textPrimary} />
+                      <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>
+                        {loadingProvider === 'apple' ? 'Wait...' : 'Apple'}
+                      </Text>
+                    </GlassCard>
                   </TouchableOpacity>
 
                   {/* Phone */}
-                  <TouchableOpacity onPress={() => animateSwitch(() => setMode('phone'))} activeOpacity={0.8}
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, borderWidth: 1.5, borderColor: C.border }}>
-                    <MaterialCommunityIcons name="phone-outline" size={20} color={C.peacockBlue} />
-                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>Phone</Text>
+                  <TouchableOpacity onPress={() => animateSwitch(() => setMode('phone'))} activeOpacity={0.8} style={{ flex: 1 }}>
+                    <GlassCard noPadding style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }} intensity={35}>
+                      <MaterialCommunityIcons name="phone-outline" size={20} color={C.peacockBlue} />
+                      <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>Phone</Text>
+                    </GlassCard>
                   </TouchableOpacity>
                 </View>
 
@@ -293,6 +309,7 @@ export default function AuthScreen({ navigation }) {
                 </TouchableOpacity>
               </>
             )}
+            </GlassCard>
           </Animated.View>
 
           {/* Bottom ornament */}

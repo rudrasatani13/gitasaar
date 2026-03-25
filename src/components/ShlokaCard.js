@@ -1,22 +1,24 @@
 // src/components/ShlokaCard.js
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useBookmarks } from '../theme/BookmarkContext';
 import { useTracker } from '../theme/TrackerContext';
 import { FontSizes } from '../theme/colors';
 import ShareCardModal from './ShareCardModal';
-import AudioPlayer from './AudioPlayer'; // ✨ NAYA: AudioPlayer import kiya
+import AudioPlayer from './AudioPlayer';
+import GlassCard from './GlassCard';
 
 export default function ShlokaCard({ verse, animate }) {
-  const { colors: C } = useTheme();
+  const { colors: C, isDark } = useTheme();
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const { markVerseRead } = useTracker();
   const [showShare, setShowShare] = useState(false);
 
   const fadeIn = useRef(new Animated.Value(animate ? 0 : 1)).current;
-  const slideUp = useRef(new Animated.Value(animate ? 20 : 0)).current;
+  const slideUp = useRef(new Animated.Value(animate ? 24 : 0)).current;
   const bookmarkScale = useRef(new Animated.Value(1)).current;
 
   const verseId = verse.chapter + '.' + verse.verse;
@@ -26,10 +28,9 @@ export default function ShlokaCard({ verse, animate }) {
     if (animate) {
       Animated.parallel([
         Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }),
-        Animated.spring(slideUp, { toValue: 0, friction: 8, useNativeDriver: true }),
+        Animated.spring(slideUp, { toValue: 0, friction: 8, tension: 55, useNativeDriver: true }),
       ]).start();
     }
-    // Mark verse as read when opened
     if (verse.chapter && verse.verseNumber) {
       markVerseRead(verse.chapter, verse.verseNumber);
     }
@@ -37,74 +38,119 @@ export default function ShlokaCard({ verse, animate }) {
 
   const handleBookmark = () => {
     Animated.sequence([
-      Animated.spring(bookmarkScale, { toValue: 1.4, friction: 3, useNativeDriver: true }),
-      Animated.spring(bookmarkScale, { toValue: 1, friction: 5, useNativeDriver: true })
+      Animated.spring(bookmarkScale, { toValue: 1.45, friction: 3, useNativeDriver: true }),
+      Animated.spring(bookmarkScale, { toValue: 1, friction: 5, useNativeDriver: true }),
     ]).start();
     toggleBookmark(verse);
   };
 
   return (
-    <Animated.View style={{ opacity: fadeIn, transform: [{ translateY: slideUp }], marginBottom: 16 }}>
-      <View style={{ backgroundColor: C.bgCardElevated, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: C.border, ...C.shadow }}>
-        {/* Top Accent Line */}
-        <View style={{ height: 4, backgroundColor: C.primary }} />
+    <Animated.View style={{ opacity: fadeIn, transform: [{ translateY: slideUp }], marginBottom: 20 }}>
+      <GlassCard noPadding style={{ borderRadius: 24, overflow: 'hidden' }} intensity={55}>
+
+        {/* Gradient top accent */}
+        <LinearGradient
+          colors={C.gradientTemple}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+          style={{ height: 5 }}
+        />
 
         <View style={{ padding: 20 }}>
-          {/* Header: Chapter & Theme */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: C.primarySoft, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: C.borderGold }}>
-              <MaterialCommunityIcons name="book-open-page-variant" size={14} color={C.primary} />
-              <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: C.primary, letterSpacing: 0.5 }}>
+
+          {/* Chapter badge + theme */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+            <LinearGradient
+              colors={isDark ? ['rgba(224,168,80,0.20)', 'rgba(224,168,80,0.08)'] : ['rgba(194,136,64,0.18)', 'rgba(194,136,64,0.05)']}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: C.glassBorderGold }}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+            >
+              <MaterialCommunityIcons name="book-open-page-variant" size={13} color={C.primary} />
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: C.primary, letterSpacing: 0.8 }}>
                 CHAPTER {verse.chapter} • VERSE {verse.verse}
               </Text>
-            </View>
+            </LinearGradient>
             {verse.theme && (
-              <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontStyle: 'italic', fontWeight: '500' }}>
+              <Text style={{ fontSize: 11, color: C.textMuted, fontStyle: 'italic', fontWeight: '500', maxWidth: 110, textAlign: 'right' }} numberOfLines={1}>
                 {verse.theme}
               </Text>
             )}
           </View>
 
-          {/* Sanskrit Text */}
-          <View style={{ backgroundColor: C.bgSecondary, borderRadius: 12, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: C.borderLight }}>
-            <Text style={{ fontSize: FontSizes.lg, color: C.textSanskrit, lineHeight: 32, textAlign: 'center', fontWeight: '500' }}>
-              {verse.sanskrit}
-            </Text>
+          {/* Sanskrit text — rich warm bubble */}
+          <View style={{ borderRadius: 18, overflow: 'hidden', marginBottom: 14 }}>
+            <LinearGradient
+              colors={isDark
+                ? ['rgba(224,168,80,0.15)', 'rgba(0,0,0,0.8)']
+                : ['rgba(253,240,210,0.90)', 'rgba(255,248,230,0.70)']}
+              style={{ padding: 20, alignItems: 'center', borderWidth: 1, borderColor: C.glassBorderGold, borderRadius: 18 }}
+            >
+              {/* Om watermark */}
+              <Text style={{ position: 'absolute', fontSize: 80, color: C.primary, opacity: 0.05, fontWeight: '900' }}>ॐ</Text>
+              <Text style={{
+                fontSize: FontSizes.lg,
+                color: isDark ? '#FFCC80' : '#8D5A00',
+                lineHeight: 34,
+                textAlign: 'center',
+                fontWeight: '600',
+                letterSpacing: 0.5,
+              }}>
+                {verse.sanskrit}
+              </Text>
+            </LinearGradient>
           </View>
 
           {/* Transliteration */}
           {verse.transliteration && (
-            <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, fontStyle: 'italic', textAlign: 'center', marginBottom: 16, lineHeight: 22, paddingHorizontal: 10 }}>
+            <Text style={{
+              fontSize: 13,
+              color: C.textMuted,
+              fontStyle: 'italic',
+              textAlign: 'center',
+              marginBottom: 18,
+              lineHeight: 20,
+              paddingHorizontal: 8,
+              letterSpacing: 0.2,
+            }}>
               {verse.transliteration}
             </Text>
           )}
 
-          {/* Divider */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <View style={{ flex: 1, height: 1, backgroundColor: C.divider }} />
-            <View style={{ width: 6, height: 6, backgroundColor: C.primary, opacity: 0.4, transform: [{ rotate: '45deg' }] }} />
-            <View style={{ flex: 1, height: 1, backgroundColor: C.divider }} />
+          {/* Gold divider with diamond */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: C.glassBorderGold, opacity: 0.5 }} />
+            <MaterialCommunityIcons name="rhombus" size={10} color={C.primary} />
+            <View style={{ flex: 1, height: 1, backgroundColor: C.glassBorderGold, opacity: 0.5 }} />
           </View>
 
           {/* Translations */}
-          <View style={{ gap: 10 }}>
+          <View style={{ gap: 12 }}>
             {verse.hindi && (
-              <Text style={{ fontSize: FontSizes.md, color: C.textSecondary, lineHeight: 24, textAlign: 'justify' }}>
-                <Text style={{ fontWeight: '700', color: C.textPrimary }}>हिंदी: </Text>
-                {verse.hindi}
-              </Text>
+              <View style={{ backgroundColor: C.glassBg, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: C.glassBorder }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: C.primary }} />
+                  <Text style={{ fontSize: 10, fontWeight: '800', color: C.primary, letterSpacing: 1 }}>हिंदी</Text>
+                </View>
+                <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, lineHeight: 22 }}>
+                  {verse.hindi}
+                </Text>
+              </View>
             )}
             {verse.english && (
-              <Text style={{ fontSize: FontSizes.md, color: C.textMuted, lineHeight: 24, textAlign: 'justify' }}>
-                <Text style={{ fontWeight: '700', color: C.textSecondary }}>English: </Text>
-                {verse.english}
-              </Text>
+              <View style={{ backgroundColor: C.glassBg, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: C.glassBorder }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: C.peacockBlue }} />
+                  <Text style={{ fontSize: 10, fontWeight: '800', color: C.peacockBlue, letterSpacing: 1 }}>ENGLISH</Text>
+                </View>
+                <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, lineHeight: 22 }}>
+                  {verse.english}
+                </Text>
+              </View>
             )}
           </View>
 
-          {/* ✨ NAYA: AUDIO PLAYER INTEGRATION ✨ */}
-          <View style={{ marginTop: 20, marginBottom: 4 }}>
-            <AudioPlayer 
+          {/* Audio Player */}
+          <View style={{ marginTop: 18, marginBottom: 4 }}>
+            <AudioPlayer
               sanskrit={verse.sanskrit}
               transliteration={verse.transliteration}
               hindi={verse.hindi}
@@ -113,32 +159,39 @@ export default function ShlokaCard({ verse, animate }) {
           </View>
 
           {/* Actions */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: C.borderLight }}>
-            <TouchableOpacity onPress={() => setShowShare(true)}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 999, backgroundColor: C.bgSecondary, borderWidth: 1, borderColor: C.border }}>
-              <MaterialCommunityIcons name="share-variant-outline" size={14} color={C.primary} />
-              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: C.primary }}>Share</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18, paddingTop: 14, borderTopWidth: 1, borderTopColor: C.glassBorder }}>
+            <TouchableOpacity onPress={() => setShowShare(true)} activeOpacity={0.8}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder }}>
+              <MaterialCommunityIcons name="share-variant-outline" size={15} color={C.primary} />
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary }}>Share</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity onPress={handleBookmark} activeOpacity={0.7}>
-              <Animated.View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 999, backgroundColor: bookmarked ? C.saffronSoft : C.bgSecondary, borderWidth: 1, borderColor: bookmarked ? C.primary : C.border, transform: [{ scale: bookmarkScale }] }}>
-                <MaterialCommunityIcons name={bookmarked ? 'bookmark' : 'bookmark-outline'} size={16} color={bookmarked ? C.primary : C.textMuted} />
-                <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: bookmarked ? C.primary : C.textMuted }}>
-                  {bookmarked ? 'Saved' : 'Save'}
+              <Animated.View style={{
+                flexDirection: 'row', alignItems: 'center', gap: 6,
+                paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999,
+                backgroundColor: bookmarked ? (isDark ? 'rgba(224,168,80,0.18)' : 'rgba(194,136,64,0.12)') : C.glassBg,
+                borderWidth: 1.5,
+                borderColor: bookmarked ? C.primary : C.glassBorder,
+                transform: [{ scale: bookmarkScale }],
+              }}>
+                <MaterialCommunityIcons
+                  name={bookmarked ? 'bookmark' : 'bookmark-outline'}
+                  size={15}
+                  color={bookmarked ? C.primary : C.textMuted}
+                />
+                <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: bookmarked ? C.primary : C.textMuted }}>
+                  {bookmarked ? 'Saved ✓' : 'Save'}
                 </Text>
               </Animated.View>
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </GlassCard>
 
       {/* Share Modal */}
       {showShare && (
-        <ShareCardModal 
-          visible={showShare} 
-          onClose={() => setShowShare(false)} 
-          verse={verse} 
-        />
+        <ShareCardModal visible={showShare} onClose={() => setShowShare(false)} verse={verse} />
       )}
     </Animated.View>
   );

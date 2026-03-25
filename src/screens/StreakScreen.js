@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useTracker } from '../theme/TrackerContext';
 import { FontSizes } from '../theme/colors';
+import GlassCard from '../components/GlassCard';
 
 const { width } = Dimensions.get('window');
 const CELL = Math.floor((width - 60) / 7);
@@ -104,34 +105,34 @@ export default function StreakScreen({ navigation }) {
 
         {/* Streak Stats */}
         <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginBottom: 20 }}>
-          <View style={{ flex: 1, backgroundColor: C.bgCard, borderRadius: 16, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: C.border }}>
+          <GlassCard noPadding style={{ flex: 1, borderRadius: 16, padding: 16, alignItems: 'center', gap: 4 }} intensity={40}>
             <MaterialCommunityIcons name="fire" size={24} color="#E8793A" />
             <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: C.textPrimary, marginTop: 4 }}>{streak}</Text>
             <Text style={{ fontSize: 10, color: C.textMuted }}>Day Streak</Text>
-          </View>
-          <View style={{ flex: 1, backgroundColor: C.bgCard, borderRadius: 16, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: C.border }}>
+          </GlassCard>
+          <GlassCard noPadding style={{ flex: 1, borderRadius: 16, padding: 16, alignItems: 'center', gap: 4 }} intensity={40}>
             <MaterialCommunityIcons name="book-open-variant" size={24} color={C.primary} />
             <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: C.textPrimary, marginTop: 4 }}>{totalRead}</Text>
             <Text style={{ fontSize: 10, color: C.textMuted }}>Verses Read</Text>
-          </View>
-          <View style={{ flex: 1, backgroundColor: C.bgCard, borderRadius: 16, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: C.border }}>
+          </GlassCard>
+          <GlassCard noPadding style={{ flex: 1, borderRadius: 16, padding: 16, alignItems: 'center', gap: 4 }} intensity={40}>
             <MaterialCommunityIcons name="percent-outline" size={24} color={C.peacockBlue} />
             <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: C.textPrimary, marginTop: 4 }}>{totalPercent}%</Text>
             <Text style={{ fontSize: 10, color: C.textMuted }}>Complete</Text>
-          </View>
+          </GlassCard>
         </View>
 
         {/* Reading Calendar */}
         <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
           <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 12 }}>READING CALENDAR</Text>
-          <View style={{ backgroundColor: C.bgCard, borderRadius: 20, padding: 16, borderWidth: 1, borderColor: C.border }}>
+          <GlassCard noPadding style={{ borderRadius: 20, padding: 16 }} intensity={45}>
             {/* Month nav */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <TouchableOpacity onPress={prevMonth} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: C.bgSecondary, justifyContent: 'center', alignItems: 'center' }}>
+              <TouchableOpacity onPress={prevMonth} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
                 <MaterialCommunityIcons name="chevron-left" size={18} color={C.textMuted} />
               </TouchableOpacity>
               <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary }}>{monthName}</Text>
-              <TouchableOpacity onPress={nextMonth} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: C.bgSecondary, justifyContent: 'center', alignItems: 'center' }}>
+              <TouchableOpacity onPress={nextMonth} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
                 <MaterialCommunityIcons name="chevron-right" size={18} color={C.textMuted} />
               </TouchableOpacity>
             </View>
@@ -153,14 +154,11 @@ export default function StreakScreen({ navigation }) {
                 return (
                   <View key={i} style={{ width: CELL, height: CELL, justifyContent: 'center', alignItems: 'center' }}>
                     {day ? (
-                      <View style={{
-                        width: CELL - 6, height: CELL - 6, borderRadius: (CELL - 6) / 2,
-                        justifyContent: 'center', alignItems: 'center',
-                        backgroundColor: active ? C.primary : today ? C.primarySoft : 'transparent',
-                        borderWidth: today && !active ? 1.5 : 0, borderColor: C.primary,
+                      <View style={{ width: CELL - 6, height: CELL - 6, borderRadius: (CELL - 6) / 2, justifyContent: 'center', alignItems: 'center',
+                        backgroundColor: active ? C.primary : today ? C.glassBg : 'transparent',
+                        borderWidth: today && !active ? 1.5 : 0, borderColor: C.glassBorderGold,
                       }}>
-                        <Text style={{
-                          fontSize: 12, fontWeight: active || today ? '700' : '400',
+                        <Text style={{ fontSize: 12, fontWeight: active || today ? '700' : '400',
                           color: active ? C.textOnPrimary : today ? C.primary : C.textSecondary,
                         }}>{day}</Text>
                       </View>
@@ -177,11 +175,11 @@ export default function StreakScreen({ navigation }) {
                 <Text style={{ fontSize: 10, color: C.textMuted }}>Read</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <View style={{ width: 10, height: 10, borderRadius: 5, borderWidth: 1.5, borderColor: C.primary }} />
+                <View style={{ width: 10, height: 10, borderRadius: 5, borderWidth: 1.5, borderColor: C.glassBorderGold }} />
                 <Text style={{ fontSize: 10, color: C.textMuted }}>Today</Text>
               </View>
             </View>
-          </View>
+          </GlassCard>
         </View>
 
         {/* Badges */}
@@ -191,17 +189,12 @@ export default function StreakScreen({ navigation }) {
             {BADGES.map((b) => {
               const earned = isBadgeEarned(b);
               return (
-                <View key={b.id} style={{
-                  width: (width - 50) / 2, backgroundColor: C.bgCard, borderRadius: 16, padding: 16,
-                  borderWidth: 1.5, borderColor: earned ? b.color + '40' : C.border,
-                  opacity: earned ? 1 : 0.5,
-                }}>
+                <GlassCard key={b.id} noPadding style={{ width: (width - 50) / 2, borderRadius: 16, padding: 16, borderWidth: 1.5, borderColor: earned ? b.color + '40' : C.glassBorder, opacity: earned ? 1 : 0.5 }} intensity={35}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                    <View style={{
-                      width: 40, height: 40, borderRadius: 20,
-                      backgroundColor: earned ? b.color + '15' : C.bgSecondary,
+                    <View style={{ width: 40, height: 40, borderRadius: 20,
+                      backgroundColor: earned ? b.color + '15' : C.glassBg,
                       justifyContent: 'center', alignItems: 'center',
-                      borderWidth: 1.5, borderColor: earned ? b.color + '30' : C.border,
+                      borderWidth: 1.5, borderColor: earned ? b.color + '30' : C.glassBorder,
                     }}>
                       <MaterialCommunityIcons name={b.icon} size={20} color={earned ? b.color : C.textMuted} />
                     </View>
@@ -209,13 +202,13 @@ export default function StreakScreen({ navigation }) {
                   </View>
                   <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: earned ? C.textPrimary : C.textMuted }}>{b.title}</Text>
                   <Text style={{ fontSize: 10, color: C.textMuted, marginTop: 2 }}>{b.desc}</Text>
-                </View>
+                </GlassCard>
               );
             })}
           </View>
         </View>
 
-        <View style={{ height: 20 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
     </LinearGradient>
   );

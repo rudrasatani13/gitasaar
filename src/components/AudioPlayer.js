@@ -8,6 +8,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
 import { tapLight } from '../utils/haptics';
 import { useNavigation } from '@react-navigation/native';
+import GlassCard from './GlassCard';
 
 const ELEVEN_API_KEY = process.env.EXPO_PUBLIC_ELEVEN_KEY;
 const VOICE_ID = 'S5P5Y6sMPfFCbxqUJ3F4'; 
@@ -236,9 +237,9 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
   };
 
   return (
-    <View style={{ backgroundColor: C.bgCard, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: C.border }}>
+    <GlassCard noPadding style={{ borderRadius: 16, padding: 14 }} intensity={40}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <TouchableOpacity onPress={playAll} activeOpacity={0.8} style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: isPlaying ? '#E53935' + '15' : C.primarySoft, borderWidth: 1.5, borderColor: isPlaying ? '#E53935' : C.borderGold, justifyContent: 'center', alignItems: 'center' }}>
+        <TouchableOpacity onPress={playAll} activeOpacity={0.8} style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: isPlaying ? '#E53935' + '18' : C.glassBg, borderWidth: 1.5, borderColor: isPlaying ? '#E53935' : C.glassBorderGold, justifyContent: 'center', alignItems: 'center' }}>
           {isLoading ? <MaterialCommunityIcons name="loading" size={20} color={C.primary} /> : <MaterialCommunityIcons name={isPlaying ? 'stop' : 'play'} size={20} color={isPlaying ? '#E53935' : C.primary} />}
         </TouchableOpacity>
 
@@ -261,24 +262,24 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
 
       <View style={{ flexDirection: 'row', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
         {transliteration && (
-          <TouchableOpacity onPress={() => playSingle(transliteration, 'Shloka')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: currentPart === 'Shloka' ? C.primary + '15' : C.bgSecondary, borderWidth: 1, borderColor: currentPart === 'Shloka' ? C.primary : C.border }}>
+          <TouchableOpacity onPress={() => playSingle(transliteration, 'Shloka')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: currentPart === 'Shloka' ? C.primary + '18' : C.glassBg, borderWidth: 1, borderColor: currentPart === 'Shloka' ? C.glassBorderGold : C.glassBorder }}>
             <MaterialCommunityIcons name="volume-high" size={12} color={currentPart === 'Shloka' ? C.primary : C.textMuted} />
             <Text style={{ fontSize: 10, fontWeight: '600', color: currentPart === 'Shloka' ? C.primary : C.textMuted }}>Shloka</Text>
           </TouchableOpacity>
         )}
         {hindi && (
-          <TouchableOpacity onPress={() => playSingle(hindi, 'Meaning')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: currentPart === 'Meaning' ? C.primary + '15' : C.bgSecondary, borderWidth: 1, borderColor: currentPart === 'Meaning' ? C.primary : C.border }}>
+          <TouchableOpacity onPress={() => playSingle(hindi, 'Meaning')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: currentPart === 'Meaning' ? C.primary + '18' : C.glassBg, borderWidth: 1, borderColor: currentPart === 'Meaning' ? C.glassBorderGold : C.glassBorder }}>
             <MaterialCommunityIcons name="volume-high" size={12} color={currentPart === 'Meaning' ? C.primary : C.textMuted} />
             <Text style={{ fontSize: 10, fontWeight: '600', color: currentPart === 'Meaning' ? C.primary : C.textMuted }}>Meaning</Text>
           </TouchableOpacity>
         )}
         {english && (
-          <TouchableOpacity onPress={() => playSingle(english, 'English')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: currentPart === 'English' ? C.primary + '15' : C.bgSecondary, borderWidth: 1, borderColor: currentPart === 'English' ? C.primary : C.border }}>
+          <TouchableOpacity onPress={() => playSingle(english, 'English')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: currentPart === 'English' ? C.primary + '18' : C.glassBg, borderWidth: 1, borderColor: currentPart === 'English' ? C.glassBorderGold : C.glassBorder }}>
             <MaterialCommunityIcons name="volume-high" size={12} color={currentPart === 'English' ? C.primary : C.textMuted} />
             <Text style={{ fontSize: 10, fontWeight: '600', color: currentPart === 'English' ? C.primary : C.textMuted }}>English</Text>
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </GlassCard>
   );
 }

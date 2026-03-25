@@ -11,6 +11,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useTranslation } from '../theme/useTranslation';
 import { onAuthChange } from '../utils/firebase';
 import { restoreFromCloud, onUserLogout } from '../utils/userDataSync';
+import { BlurView } from 'expo-blur';
 
 import SplashScreen from '../screens/SplashScreen';
 import AuthScreen from '../screens/AuthScreen';
@@ -46,20 +47,16 @@ const TAB_CONFIG = [
   { name: 'Settings', icon: 'cog-outline', tKey: 'settings' },
 ];
 
-function TabButton({ route, focused, onPress, C }) {
+function TabButton({ route, focused, onPress, C, isDark }) {
   const { tr } = useTranslation();
   const scale = useRef(new Animated.Value(1)).current;
-  const bgOpacity = useRef(new Animated.Value(0)).current;
   const iconScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.spring(iconScale, { toValue: focused ? 1.05 : 1, friction: 8, tension: 60, useNativeDriver: true }),
-      Animated.timing(bgOpacity, { toValue: focused ? 1 : 0, duration: 120, useNativeDriver: true }),
-    ]).start();
+    Animated.spring(iconScale, { toValue: focused ? 1.1 : 1, friction: 8, tension: 60, useNativeDriver: true }).start();
   }, [focused]);
 
-  const onPressIn = () => Animated.spring(scale, { toValue: 0.85, friction: 5, useNativeDriver: true }).start();
+  const onPressIn = () => Animated.spring(scale, { toValue: 0.82, friction: 5, useNativeDriver: true }).start();
   const onPressOut = () => Animated.spring(scale, { toValue: 1, friction: 3, useNativeDriver: true }).start();
   const tabConfig = TAB_CONFIG.find(t => t.name === route.name);
   const label = tr(tabConfig?.tKey || 'home');
@@ -67,38 +64,72 @@ function TabButton({ route, focused, onPress, C }) {
   return (
     <Animated.View style={{ flex: 1, transform: [{ scale }] }}>
       <TouchableOpacity onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut} activeOpacity={1}
-        style={{ alignItems: 'center', paddingVertical: 6 }}>
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: 48, height: 30 }}>
-          <Animated.View style={{ position: 'absolute', width: 56, height: 34, borderRadius: 17, backgroundColor: C.primarySoft, opacity: bgOpacity }} />
-          <Animated.View style={{ transform: [{ scale: iconScale }] }}>
-            <AnimatedTabIcon name={route.name} focused={focused} color={focused ? C.primary : C.textMuted} size={22} />
-          </Animated.View>
-        </View>
-        <Text style={{ fontSize: 10, fontWeight: focused ? '700' : '500', marginTop: 3, color: focused ? C.primary : C.textMuted }}>{label}</Text>
+        style={{ alignItems: 'center', paddingVertical: 10, gap: 3 }}>
+        <Animated.View style={{ transform: [{ scale: iconScale }] }}>
+          <AnimatedTabIcon name={route.name} focused={focused} color={focused ? C.primary : isDark ? 'rgba(255,255,255,0.40)' : 'rgba(0,0,0,0.30)'} size={22} />
+        </Animated.View>
+        <Text style={{ fontSize: 10, fontWeight: focused ? '700' : '500', color: focused ? C.primary : isDark ? 'rgba(255,255,255,0.40)' : 'rgba(0,0,0,0.35)', letterSpacing: 0.2 }}>{label}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
 }
 
 function CustomTabBar({ state, descriptors, navigation }) {
-  const { colors: C } = useTheme();
+  const { colors: C, isDark } = useTheme();
   return (
-    <View style={{ flexDirection: 'row', backgroundColor: C.bgCard, paddingTop: 6, paddingBottom: Platform.OS === 'ios' ? 26 : 10, ...C.shadow }}>
-      {state.routes.map((route, index) => {
-        const focused = state.index === index;
-        const onPress = () => {
-          const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-          if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
-        };
-        return <TabButton key={route.key} route={route} focused={focused} onPress={onPress} C={C} />;
-      })}
+    // Floating pill wrapper — sits above the screen
+    <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 28 : 16, left: 20, right: 20, zIndex: 100 }}>
+      {/* Glass pill — clean solid dark background to prevent BlurView grey glow in pure black mode */}
+      <View style={{
+        borderRadius: 36,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(194,136,64,0.20)',
+        backgroundColor: isDark ? C.bgCardElevated : 'transparent',
+      }}>
+        {Platform.OS !== 'web' && !isDark && (
+          <BlurView
+            intensity={70}
+            tint="light"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+        )}
+        <View style={{
+          flexDirection: 'row',
+          backgroundColor: Platform.OS === 'web' && !isDark
+            ? 'rgba(255,252,245,0.88)'
+            : 'transparent',
+          paddingHorizontal: 4,
+          paddingVertical: 2,
+        }}>
+          {state.routes.map((route, index) => {
+            const focused = state.index === index;
+            const onPress = () => {
+              const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+              if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+            };
+            return (
+              <View key={route.key} style={{ flex: 1, borderRadius: 32, overflow: 'hidden', backgroundColor: focused ? (isDark ? 'rgba(224,168,80,0.15)' : 'rgba(194,136,64,0.12)') : 'transparent' }}>
+                <TabButton route={route} focused={focused} onPress={onPress} C={C} isDark={isDark} />
+              </View>
+            );
+          })}
+        </View>
+      </View>
     </View>
   );
 }
 
 function MainTabs() {
   return (
-    <Tab.Navigator tabBar={(props) => <CustomTabBar {...props} />} screenOptions={{ headerShown: false }}>
+    <Tab.Navigator
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+        // Remove the default tab bar space — our tab bar is floating/absolute
+        tabBarStyle: { display: 'none' },
+      }}
+    >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Journal" component={JournalScreen} />
       <Tab.Screen name="Verses" component={VerseLibraryScreen} />

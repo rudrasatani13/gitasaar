@@ -110,7 +110,7 @@ export default function JournalScreen() {
     <LinearGradient colors={C.gradientWarm} style={{ flex: 1 }}>
       <ShivaJournalBackground />
       {/* Header */}
-      <View style={{ paddingTop: 56, paddingBottom: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: C.border }}>
+      <View style={{ paddingTop: 56, paddingBottom: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: C.glassBorder }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View>
             <Text style={{ fontSize: FontSizes.xxl, fontWeight: '700', color: C.textPrimary }}>Journal</Text>
@@ -122,7 +122,7 @@ export default function JournalScreen() {
                 if (!isPremium) { if (typeof window !== 'undefined') window.alert('Export as PDF is a Premium feature. Upgrade to unlock!'); return; }
                 if (typeof window !== 'undefined') window.alert('PDF export coming soon!');
               }}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: C.bgCard, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 999, borderWidth: 1, borderColor: C.border }}>
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: C.glassBg, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 999, borderWidth: 1, borderColor: C.glassBorder }}>
                 <MaterialCommunityIcons name="file-export-outline" size={14} color={C.primary} />
                 <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: C.primary }}>PDF</Text>
                 {!isPremium && <MaterialCommunityIcons name="lock" size={10} color={C.primary} />}
@@ -143,34 +143,34 @@ export default function JournalScreen() {
           {/* Stats Row */}
           {!isWriting && (
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-              <View style={{ flex: 1, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: C.border, gap: 2 }}>
+              <GlassCard noPadding style={{ flex: 1, borderRadius: 14, paddingVertical: 14, alignItems: 'center', gap: 2 }} intensity={35}>
                 <MaterialCommunityIcons name="notebook-outline" size={18} color={C.primary} />
                 <Text style={{ fontSize: FontSizes.xl, fontWeight: '800', color: C.textPrimary }}>{entryCount}</Text>
                 <Text style={{ fontSize: 10, color: C.textMuted }}>Entries</Text>
-              </View>
-              <View style={{ flex: 1, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: C.border, gap: 2 }}>
+              </GlassCard>
+              <GlassCard noPadding style={{ flex: 1, borderRadius: 14, paddingVertical: 14, alignItems: 'center', gap: 2 }} intensity={35}>
                 <MaterialCommunityIcons name="text-box-outline" size={18} color={C.peacockBlue} />
                 <Text style={{ fontSize: FontSizes.xl, fontWeight: '800', color: C.textPrimary }}>{totalWords}</Text>
                 <Text style={{ fontSize: 10, color: C.textMuted }}>Words</Text>
-              </View>
-              <View style={{ flex: 1, backgroundColor: C.bgCard, borderRadius: 14, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: C.border, gap: 2 }}>
+              </GlassCard>
+              <GlassCard noPadding style={{ flex: 1, borderRadius: 14, paddingVertical: 14, alignItems: 'center', gap: 2 }} intensity={35}>
                 <MaterialCommunityIcons name="emoticon-outline" size={18} color={C.saffron} />
                 <Text style={{ fontSize: FontSizes.xl, fontWeight: '800', color: C.textPrimary }}>{MOODS.length}</Text>
                 <Text style={{ fontSize: 10, color: C.textMuted }}>Moods</Text>
-              </View>
+              </GlassCard>
             </View>
           )}
 
           {/* Writing Mode */}
           {isWriting && (
-            <View style={{ backgroundColor: C.bgCard, borderRadius: 20, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: C.border, ...C.shadow }}>
+            <GlassCard noPadding style={{ borderRadius: 20, padding: 20, marginBottom: 20 }} intensity={45}>
               <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary, marginBottom: 12 }}>
                 {editingId ? 'Edit Entry' : 'New Entry'}
               </Text>
 
               {/* Prompt */}
               {!editingId && (
-                <View style={{ backgroundColor: C.bgSecondary, borderRadius: 12, padding: 14, marginBottom: 16, borderLeftWidth: 3, borderLeftColor: C.peacockBlue }}>
+                <View style={{ backgroundColor: C.glassBg, borderRadius: 12, padding: 14, marginBottom: 16, borderLeftWidth: 3, borderLeftColor: C.peacockBlue, borderWidth: 1, borderColor: C.glassBorder }}>
                   <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.peacockBlue, letterSpacing: 1, marginBottom: 4 }}>REFLECTION PROMPT</Text>
                   <Text style={{ fontSize: FontSizes.md, color: C.textPrimary, lineHeight: 22 }}>{todayPrompt}</Text>
                 </View>
@@ -181,11 +181,9 @@ export default function JournalScreen() {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
                 {MOODS.map((m) => (
                   <TouchableOpacity key={m.id} onPress={() => setSelectedMood(selectedMood === m.id ? null : m.id)}
-                    style={{
-                      flexDirection: 'row', alignItems: 'center', gap: 6,
-                      paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999,
-                      backgroundColor: selectedMood === m.id ? m.color + '18' : C.bgSecondary,
-                      borderWidth: 1.5, borderColor: selectedMood === m.id ? m.color + '50' : C.border,
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999,
+                      backgroundColor: selectedMood === m.id ? m.color + '18' : C.glassBg,
+                      borderWidth: 1.5, borderColor: selectedMood === m.id ? m.color + '50' : C.glassBorder,
                     }} activeOpacity={0.7}>
                     <MaterialCommunityIcons name={m.icon} size={16} color={selectedMood === m.id ? m.color : C.textMuted} />
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: selectedMood === m.id ? m.color : C.textMuted }}>{m.label}</Text>
@@ -195,10 +193,9 @@ export default function JournalScreen() {
 
               {/* Text Input */}
               <TextInput
-                style={{
-                  fontSize: FontSizes.md, color: C.textPrimary, lineHeight: 24,
-                  backgroundColor: C.bgInput, borderRadius: 16, padding: 16,
-                  borderWidth: 1, borderColor: C.border, minHeight: 160, textAlignVertical: 'top',
+                style={{ fontSize: FontSizes.md, color: C.textPrimary, lineHeight: 24,
+                  backgroundColor: C.glassInputBg, borderRadius: 16, padding: 16,
+                  borderWidth: 1, borderColor: C.glassBorder, minHeight: 160, textAlignVertical: 'top',
                   outlineStyle: 'none', outlineWidth: 0,
                 }}
                 placeholder="Apne thoughts, feelings, gratitude likh do..."
@@ -206,32 +203,28 @@ export default function JournalScreen() {
                 value={text} onChangeText={setText} multiline autoFocus
               />
 
-              {/* Word count */}
-              <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 6, textAlign: 'right' }}>
-                {getWordCount(text)} words
-              </Text>
+              <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 6, textAlign: 'right' }}>{getWordCount(text)} words</Text>
 
-              {/* Actions */}
               <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
                 <TouchableOpacity onPress={handleCancel}
-                  style={{ paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: C.bgSecondary }}>
+                  style={{ paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder }}>
                   <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textMuted }}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleSave} disabled={!text.trim()}
-                  style={{ paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: text.trim() ? C.primary : C.border }}>
+                  style={{ paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: text.trim() ? C.primary : C.glassBorder }}>
                   <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: text.trim() ? C.textOnPrimary : C.textMuted }}>
                     {editingId ? 'Update' : 'Save Entry'}
                   </Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </GlassCard>
           )}
 
           {/* Search + Filter */}
           {!isWriting && entries.length > 0 && (
             <>
               {/* Search */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 14, paddingHorizontal: 14, marginBottom: 10, borderWidth: 1, borderColor: C.border }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.glassInputBg, borderRadius: 14, paddingHorizontal: 14, marginBottom: 10, borderWidth: 1, borderColor: C.glassBorder }}>
                 <MaterialCommunityIcons name="magnify" size={18} color={C.textMuted} />
                 <TextInput
                   style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, paddingVertical: 12, paddingHorizontal: 10, outlineStyle: 'none', outlineWidth: 0 }}
@@ -249,12 +242,12 @@ export default function JournalScreen() {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
                 <View style={{ flexDirection: 'row', gap: 6 }}>
                   <TouchableOpacity onPress={() => setFilterMood(null)}
-                    style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: !filterMood ? C.primarySoft : C.bgSecondary, borderWidth: 1, borderColor: !filterMood ? C.primary : C.border }}>
+                    style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: !filterMood ? C.glassBg : 'transparent', borderWidth: 1, borderColor: !filterMood ? C.glassBorderGold : C.glassBorder }}>
                     <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: !filterMood ? C.primary : C.textMuted }}>All</Text>
                   </TouchableOpacity>
                   {MOODS.map((m) => (
                     <TouchableOpacity key={m.id} onPress={() => setFilterMood(filterMood === m.id ? null : m.id)}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: filterMood === m.id ? m.color + '18' : C.bgSecondary, borderWidth: 1, borderColor: filterMood === m.id ? m.color + '40' : C.border }}>
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: filterMood === m.id ? m.color + '18' : 'transparent', borderWidth: 1, borderColor: filterMood === m.id ? m.color + '40' : C.glassBorder }}>
                       <MaterialCommunityIcons name={m.icon} size={12} color={filterMood === m.id ? m.color : C.textMuted} />
                       <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: filterMood === m.id ? m.color : C.textMuted }}>{m.label}</Text>
                     </TouchableOpacity>
@@ -291,7 +284,7 @@ export default function JournalScreen() {
               {filtered.map((entry) => {
                 const mood = getMoodData(entry.mood);
                 return (
-                  <View key={entry.id} style={{ backgroundColor: C.bgCard, borderRadius: 16, padding: 18, marginBottom: 12, borderWidth: 1, borderColor: C.border, ...C.shadowLight }}>
+                  <GlassCard key={entry.id} noPadding style={{ borderRadius: 16, padding: 18, marginBottom: 12 }} intensity={40}>
                     {/* Header */}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
@@ -305,7 +298,6 @@ export default function JournalScreen() {
                           </View>
                         )}
                       </View>
-                      {/* Edit + Delete */}
                       <View style={{ flexDirection: 'row', gap: 8 }}>
                         <TouchableOpacity onPress={() => startEdit(entry)} style={{ padding: 4 }}>
                           <MaterialCommunityIcons name="pencil-outline" size={16} color={C.primary} />
@@ -315,11 +307,9 @@ export default function JournalScreen() {
                         </TouchableOpacity>
                       </View>
                     </View>
-                    {/* Text */}
                     <Text style={{ fontSize: FontSizes.md, color: C.textPrimary, lineHeight: 24 }}>{entry.text}</Text>
-                    {/* Word count */}
                     <Text style={{ fontSize: 10, color: C.textMuted, marginTop: 8 }}>{getWordCount(entry.text)} words</Text>
-                  </View>
+                  </GlassCard>
                 );
               })}
             </>
@@ -333,7 +323,7 @@ export default function JournalScreen() {
             </View>
           )}
 
-          <View style={{ height: 30 }} />
+          <View style={{ height: 120 }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
