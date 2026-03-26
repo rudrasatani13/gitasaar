@@ -154,33 +154,28 @@ export default function AppNavigator() {
     let isMounted = true;
     const unsub = onAuthChange(async (u) => {
       if (!isMounted) return;
-      setLoading(true);
       if (u) {
-        // Restore cloud data with a timeout so login never hangs forever
-        try {
-          await Promise.race([
-            restoreFromCloud(u.uid),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
-          ]);
-        } catch (e) { console.log('restoreFromCloud skipped:', e.message); }
-        
+        // Load local data immediately — don't block UI on cloud restore
         const localDone = await AsyncStorage.getItem('@gitasaar_setup_done');
         const localOnboarded = await AsyncStorage.getItem('@gitasaar_onboarded');
         if (isMounted) {
           setSetupDone(localDone === 'true');
           setOnboarded(localOnboarded === 'true');
           setUser(u);
+          setLoading(false);
         }
+        // Restore cloud in background — non-blocking
+        restoreFromCloud(u.uid).catch(e => console.log('restoreFromCloud skipped:', e.message));
       } else {
-        // Logout karne pe data clear hone do aur usko null set karo
-        await onUserLogout();
+        // Fire-and-forget — don't block logout on cloud backup
+        onUserLogout().catch(() => {});
         if (isMounted) {
           setSetupDone(false);
           setOnboarded(false);
           setUser(null);
+          setLoading(false);
         }
       }
-      if (isMounted) setLoading(false);
     });
     return () => {
       isMounted = false;

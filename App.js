@@ -1,5 +1,6 @@
 // App.js
 import React, { useEffect } from 'react';
+import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts, NotoSans_400Regular, NotoSans_500Medium, NotoSans_700Bold } from '@expo-google-fonts/noto-sans';
 import { NotoSerifDevanagari_400Regular, NotoSerifDevanagari_700Bold } from '@expo-google-fonts/noto-serif-devanagari';
@@ -40,7 +41,7 @@ export default function App() {
     NotoSans_400Regular, NotoSans_500Medium, NotoSans_700Bold,
     NotoSerifDevanagari_400Regular, NotoSerifDevanagari_700Bold,
   });
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#FDF8EF' }} />;
 
   return (
     <ThemeProvider>
