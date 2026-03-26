@@ -73,13 +73,15 @@ export default function AuthScreen({ navigation }) {
       const result = isLogin ? await login(email.trim(), password) : await signup(email.trim(), password);
       setLoading(false);
       if (!result.success) {
-        let msg = result.error;
-        if (msg.includes('user-not-found')) msg = 'Account not found. Please sign up first.';
-        else if (msg.includes('account-exists-with-different-credential') || msg.includes('account-exists')) msg = 'This email is linked to Google. Please use the Google login button.';
-        else if (msg.includes('wrong-password') || msg.includes('invalid-credential')) msg = 'Incorrect password. If you signed up with Google, please use the Google button.';
-        else if (msg.includes('email-already-in-use')) msg = 'You already have an account. Please login instead.';
-        else if (msg.includes('invalid-email')) msg = 'Invalid email format.';
-        else if (msg.includes('too-many-requests')) msg = 'Too many attempts. Please reset password or try again later.';
+        const code = result.error || '';
+        let msg;
+        if (code.includes('account-exists-with-different-credential')) msg = 'This email is linked to Google. Please use the Google login button.';
+        else if (code.includes('user-not-found')) msg = 'Account not found. Please sign up first.';
+        else if (code.includes('wrong-password') || code.includes('invalid-credential')) msg = 'Incorrect password. If you signed up with Google, please use the Google button.';
+        else if (code.includes('email-already-in-use')) msg = 'You already have an account. Please login instead.';
+        else if (code.includes('invalid-email')) msg = 'Invalid email format.';
+        else if (code.includes('too-many-requests')) msg = 'Too many attempts. Please reset your password or try again later.';
+        else msg = 'Something went wrong. Please try again.';
         Alert.alert('Error', msg);
       }
     } catch (error) {

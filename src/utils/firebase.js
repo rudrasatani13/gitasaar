@@ -46,7 +46,7 @@ export async function signup(email, password) {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     return { success: true, user: result.user };
   } catch (e) {
-    return { success: false, error: e.message };
+    return { success: false, error: e.code || e.message };
   }
 }
 
@@ -55,7 +55,7 @@ export async function login(email, password) {
     const result = await signInWithEmailAndPassword(auth, email, password);
     return { success: true, user: result.user };
   } catch (e) {
-    return { success: false, error: e.message };
+    return { success: false, error: e.code || e.message };
   }
 }
 
