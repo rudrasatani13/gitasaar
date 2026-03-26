@@ -6,7 +6,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
 
-export default function SplashScreen({ navigation }) {
+// autoNavigate=false when used as a loading overlay — skips the Auth redirect timer
+export default function SplashScreen({ navigation, autoNavigate = true }) {
   const { colors: C } = useTheme();
   const omScale = useRef(new Animated.Value(0.3)).current;
   const omOpacity = useRef(new Animated.Value(0)).current;
@@ -19,17 +20,21 @@ export default function SplashScreen({ navigation }) {
   const bottomOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.loop(
+    // Store refs so we can stop them on unmount (issue 7: prevent memory leak)
+    const rotateLoop = Animated.loop(
       Animated.timing(ringRotate, { toValue: 1, duration: 12000, useNativeDriver: true })
-    ).start();
-    Animated.loop(
+    );
+    rotateLoop.start();
+
+    const glowLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(glowPulse, { toValue: 0.4, duration: 1500, useNativeDriver: true }),
         Animated.timing(glowPulse, { toValue: 0.15, duration: 1500, useNativeDriver: true }),
       ])
-    ).start();
+    );
+    glowLoop.start();
 
-    Animated.sequence([
+    const seqAnim = Animated.sequence([
       Animated.delay(300),
       Animated.timing(ringOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.parallel([
@@ -43,10 +48,21 @@ export default function SplashScreen({ navigation }) {
       ]),
       Animated.timing(subtitleOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
       Animated.timing(bottomOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-    ]).start();
+    ]);
+    seqAnim.start();
 
-    const timer = setTimeout(() => navigation.replace('Auth'), 3200);
-    return () => clearTimeout(timer);
+    // issue 5: only navigate when rendered as a real screen, not as loading overlay
+    let timer;
+    if (autoNavigate && navigation) {
+      timer = setTimeout(() => navigation.replace('Auth'), 3200);
+    }
+
+    return () => {
+      rotateLoop.stop();
+      glowLoop.stop();
+      seqAnim.stop();
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   const spin = ringRotate.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });

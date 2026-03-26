@@ -8,6 +8,7 @@ import { useProfile } from '../theme/ProfileContext';
 import { FontSizes } from '../theme/colors';
 import AppLogo from '../components/AppLogo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { notifyNavStateChanged } from '../utils/navEvents';
 
 const { width, height } = Dimensions.get('window');
 
@@ -95,6 +96,7 @@ export default function OnboardingScreen({ navigation }) {
   const finishOnboarding = async () => {
     await updateProfile({ language: selectedLang, onboarded: true });
     await AsyncStorage.setItem('@gitasaar_onboarded', 'true');
+    notifyNavStateChanged(); // issue 6: update AppNavigator state reactively
     Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
       navigation.replace('ProfileSetup');
     });
