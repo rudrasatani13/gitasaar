@@ -68,7 +68,7 @@ export default function BookmarksScreen({ navigation }) {
       {/* Add folder input */}
       {showAddFolder && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingVertical: 12, backgroundColor: C.glassBg, borderBottomWidth: 1, borderBottomColor: C.glassBorder }}>
-          <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, backgroundColor: C.glassInputBg, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: C.glassBorder, outlineStyle: 'none' }}
+          <TextInput style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, backgroundColor: C.glassInputBg, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: C.glassBorder }}
             placeholder="Folder name..." placeholderTextColor={C.textMuted}
             value={newFolderName} onChangeText={setNewFolderName} autoFocus />
           <TouchableOpacity onPress={handleAddFolder} style={{ backgroundColor: C.primary, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 }}>

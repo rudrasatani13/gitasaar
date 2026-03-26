@@ -25,7 +25,7 @@ export default function ProfileEditScreen({ navigation }) {
   const pickFromGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Needed', 'Gallery access chahiye.');
+      Alert.alert('Permission Needed', 'Gallery access is required to pick a photo.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -42,7 +42,7 @@ export default function ProfileEditScreen({ navigation }) {
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Needed', 'Camera access chahiye.');
+      Alert.alert('Permission Needed', 'Camera access is required to take a photo.');
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -57,14 +57,14 @@ export default function ProfileEditScreen({ navigation }) {
 
   const showPhotoOptions = () => {
     const opts = [
-      { text: 'Gallery se choose karo', onPress: pickFromGallery },
-      { text: 'Camera se photo lo', onPress: takePhoto },
+      { text: 'Choose from Gallery', onPress: pickFromGallery },
+      { text: 'Take a Photo', onPress: takePhoto },
     ];
     if (isRealPhoto) {
-      opts.push({ text: 'Photo hatao', style: 'destructive', onPress: () => setTempPhoto('__remove__') });
+      opts.push({ text: 'Remove Photo', style: 'destructive', onPress: () => setTempPhoto('__remove__') });
     }
     opts.push({ text: 'Cancel', style: 'cancel' });
-    Alert.alert('Profile Photo', 'Kya karna hai?', opts);
+    Alert.alert('Profile Photo', 'What would you like to do?', opts);
   };
 
   const handleSave = async () => {
@@ -163,8 +163,8 @@ export default function ProfileEditScreen({ navigation }) {
           <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1, marginBottom: 8 }}>DISPLAY NAME</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, borderWidth: 1.5, borderColor: C.border }}>
             <MaterialCommunityIcons name="account-outline" size={20} color={C.textMuted} />
-            <TextInput style={{ flex: 1, fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 16, paddingHorizontal: 12, fontWeight: '500', outlineStyle: 'none', outlineWidth: 0 }}
-              placeholder="Apna naam daalein..." placeholderTextColor={C.textMuted}
+            <TextInput style={{ flex: 1, fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 16, paddingHorizontal: 12, fontWeight: '500' }}
+              placeholder="Enter your name..." placeholderTextColor={C.textMuted}
               value={name} onChangeText={setName} autoCapitalize="words" />
             {name.length > 0 && (
               <TouchableOpacity onPress={() => setName('')}><MaterialCommunityIcons name="close-circle" size={18} color={C.textMuted} /></TouchableOpacity>

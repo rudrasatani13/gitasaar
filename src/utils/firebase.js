@@ -68,12 +68,12 @@ export async function loginWithGoogle() {
       const result = await signInWithPopup(auth, provider);
       return { success: true, user: result.user };
     } else {
-      return { success: false, error: 'Google login phone pe APK build ke baad available hoga' };
+      return { success: false, error: 'Google login will be available after the APK build on devices.' };
     }
   } catch (e) {
     let msg = e.message;
-    if (msg.includes('popup-closed')) msg = 'Login popup band kar diya. Try again.';
-    if (msg.includes('cancelled')) msg = 'Login cancel kar diya.';
+    if (msg.includes('popup-closed')) msg = 'Login popup was closed. Please try again.';
+    if (msg.includes('cancelled')) msg = 'Login was cancelled.';
     return { success: false, error: msg };
   }
 }
@@ -92,7 +92,7 @@ export async function loginWithApple() {
     }
   } catch (e) {
     let msg = e.message;
-    if (msg.includes('popup-closed')) msg = 'Login popup band kar diya. Try again.';
+    if (msg.includes('popup-closed')) msg = 'Login popup was closed. Please try again.';
     return { success: false, error: msg };
   }
 }
@@ -118,12 +118,12 @@ export async function sendPhoneOTP(phoneNumber) {
       confirmationResult = await signInWithPhoneNumber(auth, formatted, window.recaptchaVerifier);
       return { success: true, message: 'OTP sent to ' + formatted };
     } else {
-      return { success: false, error: 'Phone login browser mein kaam karta hai. APK build mein native support aayega.' };
+      return { success: false, error: 'Phone login works in browser. Native support will come in APK build.' };
     }
   } catch (e) {
     let msg = e.message;
-    if (msg.includes('invalid-phone-number')) msg = 'Phone number galat hai. +91XXXXXXXXXX format use karo.';
-    if (msg.includes('too-many-requests')) msg = 'Bahut zyada attempts. Thodi der baad try karo.';
+    if (msg.includes('invalid-phone-number')) msg = 'Invalid phone number. Please use +91XXXXXXXXXX format.';
+    if (msg.includes('too-many-requests')) msg = 'Too many attempts. Please try again later.';
     if (window.recaptchaVerifier) {
       try { window.recaptchaVerifier.clear(); } catch(err) {}
       window.recaptchaVerifier = null;
@@ -142,8 +142,8 @@ export async function verifyPhoneOTP(otp) {
     return { success: true, user: result.user };
   } catch (e) {
     let msg = e.message;
-    if (msg.includes('invalid-verification-code')) msg = 'Galat OTP. Sahi code daalo.';
-    if (msg.includes('code-expired')) msg = 'OTP expire ho gaya. Naya OTP bhejo.';
+    if (msg.includes('invalid-verification-code')) msg = 'Invalid OTP. Please enter the correct code.';
+    if (msg.includes('code-expired')) msg = 'OTP expired. Please request a new OTP.';
     return { success: false, error: msg };
   }
 }

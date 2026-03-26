@@ -196,7 +196,6 @@ export default function JournalScreen() {
                 style={{ fontSize: FontSizes.md, color: C.textPrimary, lineHeight: 24,
                   backgroundColor: C.glassInputBg, borderRadius: 16, padding: 16,
                   borderWidth: 1, borderColor: C.glassBorder, minHeight: 160, textAlignVertical: 'top',
-                  outlineStyle: 'none', outlineWidth: 0,
                 }}
                 placeholder="Apne thoughts, feelings, gratitude likh do..."
                 placeholderTextColor={C.textMuted}
@@ -227,7 +226,7 @@ export default function JournalScreen() {
               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.glassInputBg, borderRadius: 14, paddingHorizontal: 14, marginBottom: 10, borderWidth: 1, borderColor: C.glassBorder }}>
                 <MaterialCommunityIcons name="magnify" size={18} color={C.textMuted} />
                 <TextInput
-                  style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, paddingVertical: 12, paddingHorizontal: 10, outlineStyle: 'none', outlineWidth: 0 }}
+                  style={{ flex: 1, fontSize: FontSizes.md, color: C.textPrimary, paddingVertical: 12, paddingHorizontal: 10 }}
                   placeholder="Search entries..." placeholderTextColor={C.textMuted}
                   value={searchQuery} onChangeText={setSearchQuery}
                 />

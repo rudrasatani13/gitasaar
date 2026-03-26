@@ -102,12 +102,12 @@ export default function ProfileSetupScreen({ navigation }) {
                   <MaterialCommunityIcons name="account-heart-outline" size={30} color={C.primary} />
                 </View>
                 <Text style={{ fontSize: FontSizes.xxl, fontWeight: '700', color: C.textPrimary, textAlign: 'center', marginBottom: 6 }}>Welcome to GitaSaar!</Text>
-                <Text style={{ fontSize: FontSizes.md, color: C.textMuted, textAlign: 'center', marginBottom: 32 }}>{'हम आपको क्या बुलाएँ?'}</Text>
+                <Text style={{ fontSize: FontSizes.md, color: C.textMuted, textAlign: 'center', marginBottom: 32 }}>What should we call you?</Text>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, borderWidth: 1.5, borderColor: C.border, width: '100%', marginBottom: 20 }}>
                   <MaterialCommunityIcons name="account-outline" size={20} color={C.textMuted} />
-                  <TextInput style={{ flex: 1, fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 18, paddingHorizontal: 12, textAlign: 'center', outlineStyle: 'none', outlineWidth: 0 }}
-                    placeholder="Apna naam daalein..." placeholderTextColor={C.textMuted}
+                  <TextInput style={{ flex: 1, fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 18, paddingHorizontal: 12, textAlign: 'center' }}
+                    placeholder="Enter your name..." placeholderTextColor={C.textMuted}
                     value={name} onChangeText={setName} autoFocus autoCapitalize="words" />
                 </View>
 
@@ -128,23 +128,23 @@ export default function ProfileSetupScreen({ navigation }) {
                   <MaterialCommunityIcons name="cake-variant-outline" size={30} color={C.primary} />
                 </View>
                 <Text style={{ fontSize: FontSizes.xxl, fontWeight: '700', color: C.textPrimary, textAlign: 'center', marginBottom: 6 }}>Your Birthday</Text>
-                <Text style={{ fontSize: FontSizes.md, color: C.textMuted, textAlign: 'center', marginBottom: 32 }}>{'आपकी जन्मतिथि (optional)'}</Text>
+                <Text style={{ fontSize: FontSizes.md, color: C.textMuted, textAlign: 'center', marginBottom: 32 }}>Your birthdate (optional)</Text>
 
                 <View style={{ flexDirection: 'row', gap: 10, width: '100%', marginBottom: 20 }}>
                   <View style={{ flex: 1, backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 12, borderWidth: 1.5, borderColor: C.border }}>
-                    <TextInput style={{ fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 18, textAlign: 'center', outlineStyle: 'none', outlineWidth: 0 }}
+                    <TextInput style={{ fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 18, textAlign: 'center' }}
                       placeholder="DD" placeholderTextColor={C.textMuted}
                       value={birthDay} onChangeText={(t) => { if (t.length <= 2) setBirthDay(t.replace(/[^0-9]/g, '')); }}
                       keyboardType="number-pad" maxLength={2} />
                   </View>
                   <View style={{ flex: 1, backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 12, borderWidth: 1.5, borderColor: C.border }}>
-                    <TextInput style={{ fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 18, textAlign: 'center', outlineStyle: 'none', outlineWidth: 0 }}
+                    <TextInput style={{ fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 18, textAlign: 'center' }}
                       placeholder="MM" placeholderTextColor={C.textMuted}
                       value={birthMonth} onChangeText={(t) => { if (t.length <= 2) setBirthMonth(t.replace(/[^0-9]/g, '')); }}
                       keyboardType="number-pad" maxLength={2} />
                   </View>
                   <View style={{ flex: 1.5, backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 12, borderWidth: 1.5, borderColor: C.border }}>
-                    <TextInput style={{ fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 18, textAlign: 'center', outlineStyle: 'none', outlineWidth: 0 }}
+                    <TextInput style={{ fontSize: FontSizes.lg, color: C.textPrimary, paddingVertical: 18, textAlign: 'center' }}
                       placeholder="YYYY" placeholderTextColor={C.textMuted}
                       value={birthYear} onChangeText={(t) => { if (t.length <= 4) setBirthYear(t.replace(/[^0-9]/g, '')); }}
                       keyboardType="number-pad" maxLength={4} />
@@ -169,7 +169,7 @@ export default function ProfileSetupScreen({ navigation }) {
                   <MaterialCommunityIcons name="account-search-outline" size={30} color={C.primary} />
                 </View>
                 <Text style={{ fontSize: FontSizes.xxl, fontWeight: '700', color: C.textPrimary, textAlign: 'center', marginBottom: 6 }}>How did you find us?</Text>
-                <Text style={{ fontSize: FontSizes.md, color: C.textMuted, textAlign: 'center', marginBottom: 28 }}>{'आपने हमारे बारे में कहाँ सुना?'}</Text>
+                <Text style={{ fontSize: FontSizes.md, color: C.textMuted, textAlign: 'center', marginBottom: 28 }}>Where did you hear about us?</Text>
 
                 <View style={{ gap: 10, width: '100%', marginBottom: 20 }}>
                   {REFERRAL_OPTIONS.map((opt) => {

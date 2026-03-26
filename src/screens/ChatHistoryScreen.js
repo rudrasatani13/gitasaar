@@ -26,14 +26,14 @@ export default function ChatHistoryScreen({ navigation }) {
   const { conversations, deleteConversation, clearAll } = useChatHistory();
 
   const handleDelete = (id) => {
-    Alert.alert('Delete', 'Ye conversation delete karna hai?', [
+    Alert.alert('Delete Chat', 'Are you sure you want to delete this conversation?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => deleteConversation(id) },
     ]);
   };
 
   const handleClearAll = () => {
-    Alert.alert('Clear All', 'Saari chat history delete karna hai?', [
+    Alert.alert('Clear All', 'Delete all chat history? This cannot be undone.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete All', style: 'destructive', onPress: clearAll },
     ]);
@@ -67,7 +67,7 @@ export default function ChatHistoryScreen({ navigation }) {
               <MaterialCommunityIcons name="chat-outline" size={32} color={C.primary} />
             </View>
             <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: C.textPrimary, marginBottom: 6 }}>No conversations yet</Text>
-            <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, textAlign: 'center' }}>Chat tab mein Krishna se baat karo, conversations yahan save hongi</Text>
+            <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, textAlign: 'center' }}>Start a conversation with Krishna in the Chat tab — it will be saved here.</Text>
           </View>
         ) : (
           conversations.map((convo) => (

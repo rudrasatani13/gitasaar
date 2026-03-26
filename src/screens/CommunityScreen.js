@@ -128,14 +128,14 @@ export default function CommunityScreen({ navigation }) {
       {showCompose && (
         <View style={{ backgroundColor: C.bgCard, padding: 18, borderBottomWidth: 1, borderBottomColor: C.border }}>
           <TextInput
-            style={{ backgroundColor: C.bgInput, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, fontSize: FontSizes.sm, color: C.textPrimary, borderWidth: 1, borderColor: C.border, minHeight: 80, textAlignVertical: 'top', outlineStyle: 'none', marginBottom: 10 }}
+            style={{ backgroundColor: C.bgInput, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, fontSize: FontSizes.sm, color: C.textPrimary, borderWidth: 1, borderColor: C.border, minHeight: 80, textAlignVertical: 'top', marginBottom: 10 }}
             placeholder="Share your reflection on a verse..."
             placeholderTextColor={C.textMuted}
             value={newPost} onChangeText={setNewPost}
             multiline numberOfLines={4}
           />
           <TextInput
-            style={{ backgroundColor: C.bgInput, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: FontSizes.xs, color: C.textPrimary, borderWidth: 1, borderColor: C.border, marginBottom: 10, outlineStyle: 'none' }}
+            style={{ backgroundColor: C.bgInput, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: FontSizes.xs, color: C.textPrimary, borderWidth: 1, borderColor: C.border, marginBottom: 10 }}
             placeholder="Verse reference (e.g. 2.47) — optional"
             placeholderTextColor={C.textMuted}
             value={verseRef} onChangeText={setVerseRef}

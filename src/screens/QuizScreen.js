@@ -62,7 +62,7 @@ export default function QuizScreen({ navigation }) {
       setIsAnswered(false);
       setSelectedAnswer(null);
     } else {
-      Alert.alert("Network Error", "Aapke liye naye questions nahi aa paaye. Kripya apna internet check karein.");
+      Alert.alert("Network Error", "Could not generate new questions. Please check your internet connection and try again.");
     }
   };
 

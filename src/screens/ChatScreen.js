@@ -151,7 +151,7 @@ export default function ChatScreen() {
   const currentLang = profile.language || 'hinglish';
 
   const handleNewChat = () => {
-    Alert.alert('New Chat', 'Naya chat start karna hai? Purana chat clear ho jayega.', [
+    Alert.alert('New Chat', 'Start a new conversation? The current chat will be cleared.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'New Chat', onPress: () => { resetChat(); setMessages([WELCOME]); setShowSuggestions(true); setShowPaywall(false); } },
     ]);
@@ -305,8 +305,6 @@ export default function ChatScreen() {
                 paddingVertical: 8,
                 maxHeight: 100,
                 minHeight: 38,
-                outlineStyle: 'none',
-                outlineWidth: 0,
                 lineHeight: 20,
               }}
               placeholder={tr('askAnything')}

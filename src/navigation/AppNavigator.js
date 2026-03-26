@@ -156,8 +156,13 @@ export default function AppNavigator() {
       if (!isMounted) return;
       setLoading(true);
       if (u) {
-        // Pura cloud data pehle download/restore hone do
-        await restoreFromCloud(u.uid);
+        // Restore cloud data with a timeout so login never hangs forever
+        try {
+          await Promise.race([
+            restoreFromCloud(u.uid),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+          ]);
+        } catch (e) { console.log('restoreFromCloud skipped:', e.message); }
         
         const localDone = await AsyncStorage.getItem('@gitasaar_setup_done');
         const localOnboarded = await AsyncStorage.getItem('@gitasaar_onboarded');

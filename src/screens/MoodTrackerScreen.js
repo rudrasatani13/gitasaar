@@ -113,7 +113,7 @@ export default function MoodTrackerScreen({ navigation }) {
             {/* Note */}
             {!todayLogged && selectedMood && (
               <TextInput
-                style={{ width: '100%', backgroundColor: C.bgInput, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, fontSize: FontSizes.sm, color: C.textPrimary, borderWidth: 1, borderColor: C.border, marginBottom: 14, textAlignVertical: 'top', minHeight: 60, outlineStyle: 'none' }}
+                style={{ width: '100%', backgroundColor: C.bgInput, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, fontSize: FontSizes.sm, color: C.textPrimary, borderWidth: 1, borderColor: C.border, marginBottom: 14, textAlignVertical: 'top', minHeight: 60 }}
                 placeholder="What's on your mind? (optional)"
                 placeholderTextColor={C.textMuted}
                 value={note} onChangeText={setNote}

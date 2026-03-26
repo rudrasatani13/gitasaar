@@ -1,7 +1,7 @@
 import AppLogo from "../components/AppLogo";
 // src/screens/AuthScreen.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Animated, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Animated, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { isValidEmail, sanitizeInput } from '../utils/security';
@@ -50,18 +50,24 @@ export default function AuthScreen({ navigation }) {
 
   // Email login/signup
   const handleEmailAuth = async () => {
-    if (!email.trim() || !password.trim()) return Alert.alert('Error', 'Email aur password daalein');
-    if (password.length < 6) return Alert.alert('Error', 'Password kam se kam 6 characters');
+    if (!email.trim() || !password.trim()) return Alert.alert('Error', 'Please enter your email and password.');
+    if (password.length < 6) return Alert.alert('Error', 'Password must be at least 6 characters.');
     setLoading(true);
-    const result = isLogin ? await login(email.trim(), password) : await signup(email.trim(), password);
-    setLoading(false);
-    if (!result.success) {
-      let msg = result.error;
-      if (msg.includes('user-not-found')) msg = 'Account nahi mila. Signup karo pehle.';
-      if (msg.includes('wrong-password') || msg.includes('invalid-credential')) msg = 'Galat password.';
-      if (msg.includes('email-already-in-use')) msg = 'Email already registered hai. Login karo.';
-      if (msg.includes('invalid-email')) msg = 'Email format galat hai.';
-      Alert.alert('Error', msg);
+    try {
+      const result = isLogin ? await login(email.trim(), password) : await signup(email.trim(), password);
+      setLoading(false);
+      if (!result.success) {
+        let msg = result.error;
+        if (msg.includes('user-not-found')) msg = 'Account not found. Please sign up first.';
+        else if (msg.includes('wrong-password') || msg.includes('invalid-credential')) msg = 'Incorrect password.';
+        else if (msg.includes('email-already-in-use')) msg = 'Email is already registered. Please login.';
+        else if (msg.includes('invalid-email')) msg = 'Invalid email format.';
+        else if (msg.includes('too-many-requests')) msg = 'Too many attempts. Please reset password or try again later.';
+        Alert.alert('Error', msg);
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', error.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -83,24 +89,34 @@ export default function AuthScreen({ navigation }) {
 
   // Phone - Send OTP
   const handleSendOTP = async () => {
-    if (!phone.trim() || phone.trim().length < 10) return Alert.alert('Error', '10 digit phone number daalo');
+    if (!phone.trim() || phone.trim().length < 10) return Alert.alert('Error', 'Please enter a valid 10-digit phone number.');
     setLoading(true);
-    const result = await sendPhoneOTP(phone.trim());
-    setLoading(false);
-    if (result.success) {
-      animateSwitch(() => setMode('otp'));
-    } else {
-      Alert.alert('Error', result.error);
+    try {
+      const result = await sendPhoneOTP(phone.trim());
+      setLoading(false);
+      if (result.success) {
+        animateSwitch(() => setMode('otp'));
+      } else {
+        Alert.alert('Error', result.error);
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', error.message || 'Something went wrong');
     }
   };
 
   // Phone - Verify OTP
   const handleVerifyOTP = async () => {
-    if (!otp.trim() || otp.trim().length < 6) return Alert.alert('Error', '6 digit OTP daalo');
+    if (!otp.trim() || otp.trim().length < 6) return Alert.alert('Error', 'Please enter a valid 6-digit OTP.');
     setLoading(true);
-    const result = await verifyPhoneOTP(otp.trim());
-    setLoading(false);
-    if (!result.success) Alert.alert('Error', result.error);
+    try {
+      const result = await verifyPhoneOTP(otp.trim());
+      setLoading(false);
+      if (!result.success) Alert.alert('Error', result.error);
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', error.message || 'Something went wrong');
+    }
   };
 
   const isLogin = mode === 'login';
@@ -125,7 +141,7 @@ export default function AuthScreen({ navigation }) {
             <Text style={{ fontSize: FontSizes.xxxl, fontWeight: '700', color: C.textPrimary }}>GitaSaar</Text>
             <Text style={{ fontSize: FontSizes.lg, color: C.primary, marginTop: 2 }}>{'गीता सार'}</Text>
             <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, marginTop: 8 }}>
-              {isOtp ? 'OTP verify karo' : isPhone ? 'Phone se login karo' : isLogin ? 'Welcome back' : 'Begin your spiritual journey'}
+              {isOtp ? 'Verify OTP' : isPhone ? 'Login with Phone' : isLogin ? 'Welcome back' : 'Begin your spiritual journey'}
             </Text>
           </Animated.View>
 
@@ -182,9 +198,10 @@ export default function AuthScreen({ navigation }) {
 
                 {/* Submit */}
                 <TouchableOpacity onPress={handleEmailAuth} disabled={loading} activeOpacity={0.85}>
-                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1 }}>
+                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1, flexDirection: 'row', justifyContent: 'center' }}>
+                    {loading && <ActivityIndicator color={C.textOnPrimary} style={{ marginRight: 8 }} />}
                     <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textOnPrimary }}>
-                      {loading ? 'Please wait...' : isLogin ? 'Login' : 'Create Account'}
+                      {loading ? (isLogin ? 'Logging in...' : 'Creating Account...') : isLogin ? 'Login' : 'Create Account'}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -207,7 +224,8 @@ export default function AuthScreen({ navigation }) {
                 />
 
                 <TouchableOpacity onPress={handleSendOTP} disabled={loading} activeOpacity={0.85}>
-                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1 }}>
+                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1, flexDirection: 'row', justifyContent: 'center' }}>
+                    {loading && <ActivityIndicator color={C.textOnPrimary} style={{ marginRight: 8 }} />}
                     <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textOnPrimary }}>
                       {loading ? 'Sending OTP...' : 'Send OTP'}
                     </Text>
@@ -215,7 +233,7 @@ export default function AuthScreen({ navigation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => animateSwitch(() => setMode('login'))} style={{ alignItems: 'center', marginTop: 16 }}>
-                  <Text style={{ fontSize: FontSizes.sm, color: C.primary, fontWeight: '600' }}>Email se login karo</Text>
+                  <Text style={{ fontSize: FontSizes.sm, color: C.primary, fontWeight: '600' }}>Login with Email</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -226,7 +244,7 @@ export default function AuthScreen({ navigation }) {
                 <GlassCard style={{ marginBottom: 14 }} noPadding intensity={35}>
                   <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', padding: 14 }}>
                     <MaterialCommunityIcons name="message-text-outline" size={18} color={C.peacockBlue} />
-                    <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, flex: 1 }}>OTP bhej diya gaya hai +91{phone} par</Text>
+                    <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, flex: 1 }}>OTP has been sent to +91{phone}</Text>
                   </View>
                 </GlassCard>
 
@@ -240,7 +258,8 @@ export default function AuthScreen({ navigation }) {
                 />
 
                 <TouchableOpacity onPress={handleVerifyOTP} disabled={loading} activeOpacity={0.85}>
-                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1 }}>
+                  <LinearGradient colors={C.gradientGold} style={{ borderRadius: 16, paddingVertical: 15, alignItems: 'center', opacity: loading ? 0.7 : 1, flexDirection: 'row', justifyContent: 'center' }}>
+                    {loading && <ActivityIndicator color={C.textOnPrimary} style={{ marginRight: 8 }} />}
                     <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textOnPrimary }}>
                       {loading ? 'Verifying...' : 'Verify OTP'}
                     </Text>

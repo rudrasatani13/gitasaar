@@ -129,7 +129,7 @@ export default function VerseLibraryScreen({ navigation }) {
         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.glassInputBg, borderRadius: 16, paddingHorizontal: 16, height: 50, borderWidth: 1, borderColor: C.glassBorder }}>
           <MaterialCommunityIcons name="magnify" size={22} color={C.textMuted} />
           <TextInput
-            style={{ flex: 1, marginLeft: 10, fontSize: FontSizes.md, color: C.textPrimary, height: '100%', outlineStyle: 'none' }}
+            style={{ flex: 1, marginLeft: 10, fontSize: FontSizes.md, color: C.textPrimary, height: '100%' }}
             placeholder="Search chapters or themes..."
             placeholderTextColor={C.textMuted}
             value={searchQuery}
