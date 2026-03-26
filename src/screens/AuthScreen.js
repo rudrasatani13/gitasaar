@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { isValidEmail, sanitizeInput } from '../utils/security';
 import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
-import { login, signup, loginWithGoogle, loginWithApple, sendPhoneOTP, verifyPhoneOTP } from '../utils/firebase';
+import { login, signup, loginWithGoogle, loginWithApple, sendPhoneOTP, verifyPhoneOTP, resetPassword } from '../utils/firebase';
 import GlassCard from '../components/GlassCard';
 import GlassInput from '../components/GlassInput';
 
@@ -48,10 +48,26 @@ export default function AuthScreen({ navigation }) {
     });
   };
 
+  // Forgot Password
+  const handleForgotPassword = async () => {
+    if (!email.trim()) return Alert.alert('Error', 'Enter your email address first, then tap Forgot Password.');
+    if (!isValidEmail(email.trim())) return Alert.alert('Error', 'Please enter a valid email address.');
+    setLoading(true);
+    const result = await resetPassword(email.trim());
+    setLoading(false);
+    if (result.success) {
+      Alert.alert('Password Reset', 'A reset link has been sent to your email.');
+    } else {
+      Alert.alert('Error', result.error);
+    }
+  };
+
   // Email login/signup
   const handleEmailAuth = async () => {
     if (!email.trim() || !password.trim()) return Alert.alert('Error', 'Please enter your email and password.');
+    if (!isValidEmail(email.trim())) return Alert.alert('Error', 'Please enter a valid email address.');
     if (password.length < 6) return Alert.alert('Error', 'Password must be at least 6 characters.');
+    if (!isLogin && password !== confirmPassword) return Alert.alert('Error', 'Passwords do not match.');
     setLoading(true);
     try {
       const result = isLogin ? await login(email.trim(), password) : await signup(email.trim(), password);
@@ -186,6 +202,11 @@ export default function AuthScreen({ navigation }) {
                   secureTextEntry={!showPassword} autoCapitalize="none"
                   style={{ marginBottom: 4 }}
                 />
+                {isLogin && (
+                  <TouchableOpacity onPress={handleForgotPassword} style={{ alignSelf: 'flex-end', marginBottom: 4, paddingVertical: 2 }}>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.primary, fontWeight: '600' }}>Forgot Password?</Text>
+                  </TouchableOpacity>
+                )}
                 {!isLogin && (
                   <GlassInput
                     leftIcon={<MaterialCommunityIcons name="lock-check-outline" size={18} color={C.textMuted} />}
