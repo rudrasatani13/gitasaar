@@ -140,9 +140,10 @@ export async function autoSync(uid) {
 
 // ============ ON LOGOUT FLOW ============
 export async function onUserLogout() {
-  if (currentUid) {
-    await backupToCloud(currentUid); // Logout se pehle last data save karo
-  }
-  await clearLocalData();
+  const uidToBackup = currentUid;
   currentUid = null;
+  await clearLocalData(); // Clear immediately — don't block logout on cloud backup
+  if (uidToBackup) {
+    backupToCloud(uidToBackup).catch(() => {}); // Backup in background (issue 4)
+  }
 }

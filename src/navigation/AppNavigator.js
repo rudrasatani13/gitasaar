@@ -11,6 +11,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useTranslation } from '../theme/useTranslation';
 import { onAuthChange } from '../utils/firebase';
 import { restoreFromCloud, onUserLogout } from '../utils/userDataSync';
+import { registerNavRefresh, unregisterNavRefresh } from '../utils/navEvents';
 import { BlurView } from 'expo-blur';
 
 import SplashScreen from '../screens/SplashScreen';
@@ -152,6 +153,18 @@ export default function AppNavigator() {
 
   useEffect(() => {
     let isMounted = true;
+
+    // issue 6: register a handler so screens can push state changes back immediately
+    registerNavRefresh(async () => {
+      if (!isMounted) return;
+      const localDone = await AsyncStorage.getItem('@gitasaar_setup_done');
+      const localOnboarded = await AsyncStorage.getItem('@gitasaar_onboarded');
+      if (isMounted) {
+        setSetupDone(localDone === 'true');
+        setOnboarded(localOnboarded === 'true');
+      }
+    });
+
     const unsub = onAuthChange(async (u) => {
       if (!isMounted) return;
       if (u) {
@@ -161,7 +174,8 @@ export default function AppNavigator() {
         if (isMounted) {
           setSetupDone(localDone === 'true');
           setOnboarded(localOnboarded === 'true');
-          setUser(u);
+          // issue 8: preserve same object reference on token refresh to prevent nav re-mount
+          setUser(prev => (prev?.uid === u.uid ? prev : u));
           setLoading(false);
         }
         // Restore cloud in background — non-blocking
@@ -177,13 +191,16 @@ export default function AppNavigator() {
         }
       }
     });
+
     return () => {
       isMounted = false;
+      unregisterNavRefresh();
       unsub();
     };
   }, []);
 
-  if (loading) return <LoadingScreen />;
+  // issue 5: show branded splash (not a bare spinner) to all users during initial auth check
+  if (loading) return <SplashScreen autoNavigate={false} />;
 
   const extras = (
     <>
