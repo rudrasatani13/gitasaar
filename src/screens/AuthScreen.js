@@ -22,6 +22,7 @@ export default function AuthScreen({ navigation }) {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState('');
+  const [authError, setAuthError] = useState('');
 
   const headerOpacity = useRef(new Animated.Value(0)).current;
   const headerY = useRef(new Animated.Value(-20)).current;
@@ -42,6 +43,7 @@ export default function AuthScreen({ navigation }) {
   }, []);
 
   const animateSwitch = (callback) => {
+    setAuthError('');
     Animated.timing(formOpacity, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
       callback();
       Animated.timing(formOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
@@ -50,24 +52,26 @@ export default function AuthScreen({ navigation }) {
 
   // Forgot Password
   const handleForgotPassword = async () => {
-    if (!email.trim()) return Alert.alert('Error', 'Enter your email address first, then tap Forgot Password.');
-    if (!isValidEmail(email.trim())) return Alert.alert('Error', 'Please enter a valid email address.');
+    setAuthError('');
+    if (!email.trim()) return setAuthError('Enter your email address first, then tap Forgot Password.');
+    if (!isValidEmail(email.trim())) return setAuthError('Please enter a valid email address.');
     setLoading(true);
     const result = await resetPassword(email.trim());
     setLoading(false);
     if (result.success) {
-      Alert.alert('Password Reset', 'A reset link has been sent to your email.');
+      setAuthError('Password reset link sent! Check your email.');
     } else {
-      Alert.alert('Error', result.error);
+      setAuthError(result.error || 'Failed to send reset email. Try again.');
     }
   };
 
   // Email login/signup
   const handleEmailAuth = async () => {
-    if (!email.trim() || !password.trim()) return Alert.alert('Error', 'Please enter your email and password.');
-    if (!isValidEmail(email.trim())) return Alert.alert('Error', 'Please enter a valid email address.');
-    if (password.length < 6) return Alert.alert('Error', 'Password must be at least 6 characters.');
-    if (!isLogin && password !== confirmPassword) return Alert.alert('Error', 'Passwords do not match.');
+    setAuthError('');
+    if (!email.trim() || !password.trim()) return setAuthError('Please enter your email and password.');
+    if (!isValidEmail(email.trim())) return setAuthError('Please enter a valid email address.');
+    if (password.length < 6) return setAuthError('Password must be at least 6 characters.');
+    if (!isLogin && password !== confirmPassword) return setAuthError('Passwords do not match.');
     setLoading(true);
     try {
       const result = isLogin ? await login(email.trim(), password) : await signup(email.trim(), password);
@@ -82,11 +86,11 @@ export default function AuthScreen({ navigation }) {
         else if (code.includes('invalid-email')) msg = 'Invalid email format.';
         else if (code.includes('too-many-requests')) msg = 'Too many attempts. Please reset your password or try again later.';
         else msg = 'Something went wrong. Please try again.';
-        Alert.alert('Error', msg);
+        setAuthError(msg);
       }
     } catch (error) {
       setLoading(false);
-      Alert.alert('Error', error.message || 'Something went wrong. Please try again.');
+      setAuthError(error.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -218,6 +222,11 @@ export default function AuthScreen({ navigation }) {
                     secureTextEntry autoCapitalize="none"
                     style={{ marginBottom: 4 }}
                   />
+                )}
+
+                {/* Inline error */}
+                {!!authError && (
+                  <Text style={{ fontSize: FontSizes.xs, color: '#e53935', textAlign: 'center', marginBottom: 10, paddingHorizontal: 4 }}>{authError}</Text>
                 )}
 
                 {/* Submit */}
