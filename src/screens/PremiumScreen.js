@@ -60,7 +60,7 @@ export default function PremiumScreen({ navigation }) {
     setError('');
     startPayment(
       selectedPlan, email, displayName,
-      async (result) => { await activatePremium(selectedPlan); setProcessing(false); },
+      async (result) => { await activatePremium(selectedPlan, result.paymentId); setProcessing(false); },
       (errMsg) => { setError(errMsg); setProcessing(false); }
     );
   };

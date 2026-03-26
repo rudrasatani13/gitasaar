@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../utils/firebase';
 import { onSyncComplete, autoSync } from '../utils/userDataSync';
+import { validatePremiumToken } from '../utils/security';
 
 const PremiumContext = createContext();
 const PREMIUM_KEY = '@gitasaar_premium';
@@ -57,10 +58,10 @@ export function PremiumProvider({ children }) {
         AsyncStorage.getItem(USAGE_KEY),
       ]);
 
-      // 1. Check Premium Status
+      // 1. Check Premium Status — validate token before granting access
       if (premData) {
         const p = JSON.parse(premData);
-        if (p.expiryDate && new Date(p.expiryDate) > new Date()) {
+        if (validatePremiumToken(p)) {
           setIsPremium(true);
           setPlanType(p.planType);
           setExpiryDate(p.expiryDate);
@@ -77,12 +78,12 @@ export function PremiumProvider({ children }) {
       if (usageData) {
         const u = JSON.parse(usageData);
         if (u.date === today) {
-          // Same day - keep usage (Purana data rakhlo)
-          // Ensure audioRecitations exists for older users upgrading to this version
+          // Same day - keep usage, but clamp values to valid range (prevent tampered negative values)
+          const clamp = (v, max) => Math.min(Math.max(Number.isInteger(v) ? v : 0, 0), max);
           setUsage({
-            chatMessages: u.chatMessages || 0,
-            audioRecitations: u.audioRecitations || 0,
-            quizPlays: u.quizPlays || 0,
+            chatMessages: clamp(u.chatMessages, FREE_LIMITS.chatMessages),
+            audioRecitations: clamp(u.audioRecitations, FREE_LIMITS.audioRecitations),
+            quizPlays: clamp(u.quizPlays, FREE_LIMITS.quizPlays),
             date: u.date
           });
         } else {
@@ -171,16 +172,22 @@ export function PremiumProvider({ children }) {
   // --- SUBSCRIPTION MANAGEMENT ---
   // ==========================================
 
-  const activatePremium = async (plan) => {
+  const activatePremium = async (plan, paymentId) => {
+    // Require a paymentId — prevents direct calls without a real payment
+    if (!paymentId || typeof paymentId !== 'string' || paymentId.trim() === '') {
+      console.warn('activatePremium: paymentId required');
+      return;
+    }
+
     const expiry = new Date();
     if (plan === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
     else if (plan === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
 
-    const premData = { isPremium: true, planType: plan, expiryDate: expiry.toISOString() };
+    const premData = { isPremium: true, planType: plan, expiryDate: expiry.toISOString(), paymentId: paymentId.trim() };
     setIsPremium(true);
     setPlanType(plan);
     setExpiryDate(expiry.toISOString());
-    
+
     await AsyncStorage.setItem(PREMIUM_KEY, JSON.stringify(premData));
     if (auth.currentUser) autoSync(auth.currentUser.uid); // Turant cloud sync
   };

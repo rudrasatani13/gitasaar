@@ -19,14 +19,14 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from 'react-native';
 
-// Yahan bhi ab EXPO_PUBLIC variable use kar rahe hain
+// All config values from env — set these in .env file
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: "gitasaar2004.firebaseapp.com",
-  projectId: "gitasaar2004",
-  storageBucket: "gitasaar2004.firebasestorage.app",
-  messagingSenderId: "886569809716",
-  appId: "1:886569809716:web:ebe280002920f5e5a89761",
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "gitasaar2004.firebaseapp.com",
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "gitasaar2004",
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "gitasaar2004.firebasestorage.app",
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "886569809716",
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:886569809716:web:ebe280002920f5e5a89761",
 };
 
 const app = initializeApp(firebaseConfig);

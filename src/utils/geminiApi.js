@@ -1,5 +1,6 @@
 // src/utils/geminiApi.js
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { checkRateLimit } from './security';
 
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_KEY;
 
@@ -124,6 +125,9 @@ function getChat(language) {
 }
 
 export async function sendMessageToGemini(userMessage, language) {
+  if (!checkRateLimit('gemini_chat', 15)) {
+    return { success: false, error: 'Too many requests. Please wait a moment.' };
+  }
   try {
     const chat = getChat(language);
     const result = await chat.sendMessage(userMessage);
@@ -137,6 +141,9 @@ export async function sendMessageToGemini(userMessage, language) {
 
 // AI Quiz Generator Logic (Safe)
 export async function generateDailyQuiz(language) {
+  if (!checkRateLimit('gemini_quiz', 5)) {
+    return { success: false, error: 'Too many quiz requests. Please wait a moment.' };
+  }
   try {
     if (!genAI) genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     

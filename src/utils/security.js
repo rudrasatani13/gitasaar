@@ -145,14 +145,14 @@ export function isValidEmail(email) {
 }
 
 // ============ 6. PREMIUM VALIDATION ============
-// Extra check to prevent premium bypass
+// Extra check to prevent premium bypass — requires BOTH paymentId AND valid expiryDate
 export function validatePremiumToken(premiumData) {
   if (!premiumData) return false;
-  // Check expiry
+  // Must have a non-empty paymentId (no bypassing with just isPremium flag)
+  if (!premiumData.paymentId || typeof premiumData.paymentId !== 'string' || premiumData.paymentId.trim() === '') return false;
+  // Must have a valid future expiry date
   if (!premiumData.expiryDate) return false;
   if (new Date(premiumData.expiryDate) <= new Date()) return false;
-  // Check has payment ID
-  if (!premiumData.paymentId && !premiumData.isPremium) return false;
   return true;
 }
 
