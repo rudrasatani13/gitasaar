@@ -14,6 +14,7 @@ import {
   signInWithCredential,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from 'react-native';
@@ -145,6 +146,16 @@ export async function verifyPhoneOTP(otp) {
     if (msg.includes('invalid-verification-code')) msg = 'Invalid OTP. Please enter the correct code.';
     if (msg.includes('code-expired')) msg = 'OTP expired. Please request a new OTP.';
     return { success: false, error: msg };
+  }
+}
+
+// ========== FORGOT PASSWORD ==========
+export async function resetPassword(email) {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
   }
 }
 
