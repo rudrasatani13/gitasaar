@@ -95,7 +95,9 @@ export default function OnboardingScreen({ navigation }) {
   const finishOnboarding = async () => {
     await updateProfile({ language: selectedLang, onboarded: true });
     await AsyncStorage.setItem('@gitasaar_onboarded', 'true');
-    Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true }).start();
+    Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+      navigation.replace('ProfileSetup');
+    });
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
