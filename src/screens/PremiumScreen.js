@@ -209,7 +209,7 @@ export default function PremiumScreen({ navigation }) {
             <LinearGradient colors={processing ? [C.textMuted, C.textMuted] : C.gradientGold} style={{ borderRadius: 16, paddingVertical: 18, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, ...C.shadowGold }}>
               <MaterialCommunityIcons name={processing ? 'loading' : 'crown'} size={20} color={processing ? '#FFF' : C.textOnPrimary} />
               <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: processing ? '#FFF' : C.textOnPrimary }}>
-                {processing ? 'Processing...' : selectedPlan === 'yearly' ? `Get Premium — ${yearly.label}` : `Get Premium — ${monthly.label}`}
+                {processing ? 'Processing...' : selectedPlan === 'yearly' ? `Get Premium — ${yearly?.label ?? ''}` : `Get Premium — ${monthly?.label ?? ''}`}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -227,7 +227,7 @@ export default function PremiumScreen({ navigation }) {
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <MaterialCommunityIcons name={region === 'india' ? 'currency-inr' : 'currency-usd'} size={12} color={C.textMuted} />
-            <Text style={{ fontSize: 10, color: C.textMuted }}>{region === 'india' ? 'Razorpay' : 'Stripe'}</Text>
+            <Text style={{ fontSize: 10, color: C.textMuted }}>{!region ? '...' : region === 'india' ? 'Razorpay' : 'Stripe'}</Text>
           </View>
         </View>
 
