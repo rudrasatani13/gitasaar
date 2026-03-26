@@ -1,5 +1,5 @@
 // src/theme/TrackerContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../utils/firebase';
 import { autoSync, onSyncComplete } from '../utils/userDataSync';
@@ -107,38 +107,39 @@ export function TrackerProvider({ children }) {
     return { read: count, total: totalVerses, percent: totalVerses > 0 ? Math.round((count / totalVerses) * 100) : 0 };
   };
 
-  // Generate progress object for VerseLibraryScreen
-  const progress = {};
-  Object.keys(readVerses).forEach((key) => {
-    const [chapter, verse] = key.split('_');
-    if (!progress[chapter]) progress[chapter] = [];
-    progress[chapter].push(parseInt(verse));
-  });
+  // Generate progress object for VerseLibraryScreen — memoized to avoid recomputing on every render
+  const progress = useMemo(() => {
+    const p = {};
+    Object.keys(readVerses).forEach((key) => {
+      const [chapter, verse] = key.split('_');
+      if (!p[chapter]) p[chapter] = [];
+      p[chapter].push(parseInt(verse));
+    });
+    return p;
+  }, [readVerses]);
 
-  const totalRead = Object.keys(readVerses).length;
-  const totalPercent = Math.round((totalRead / 700) * 100);
+  const totalRead = useMemo(() => Object.keys(readVerses).length, [readVerses]);
+  const totalPercent = useMemo(() => Math.round((totalRead / 700) * 100), [totalRead]);
 
-  const getStreakWeek = () => {
+  const streakWeek = useMemo(() => {
     const days = [];
     const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const today = new Date();
     const dayOfWeek = today.getDay();
     const sunday = new Date(today);
     sunday.setDate(today.getDate() - dayOfWeek);
+    const todayStr = today.toISOString().split('T')[0];
     for (let i = 0; i < 7; i++) {
       const d = new Date(sunday);
       d.setDate(sunday.getDate() + i);
       const dateStr = d.toISOString().split('T')[0];
       const isActive = readDates.includes(dateStr) || dateStr === streak.lastDate;
-      days.push({
-        label: dayNames[i],
-        date: dateStr,
-        active: isActive,
-        isToday: dateStr === today.toISOString().split('T')[0],
-      });
+      days.push({ label: dayNames[i], date: dateStr, active: isActive, isToday: dateStr === todayStr });
     }
     return days;
-  };
+  }, [readDates, streak.lastDate]);
+
+  const getStreakWeek = () => streakWeek;
 
   return (
     <TrackerContext.Provider value={{

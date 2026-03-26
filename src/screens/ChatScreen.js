@@ -139,7 +139,7 @@ export default function ChatScreen() {
   const { tr } = useTranslation();
   
   // --- NAYA PAYWALL LOGIC ---
-  const { useChatMessage, chatRemaining, isPremium } = usePremium();
+  const { useChatMessage, refundChatMessage, chatRemaining, isPremium } = usePremium();
   const [showPaywall, setShowPaywall] = useState(false);
   // --------------------------
 
@@ -176,19 +176,33 @@ export default function ChatScreen() {
     setMessages((p) => [...p, { id: Date.now().toString(), type: 'user', text: msg, time: now }]);
     setInputText('');
     setIsTyping(true);
-    
+
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
 
-    const result = await sendMessageToGemini(msg, currentLang);
-    const aiTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    
-    if (result.success) {
-      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime }]);
-    } else {
-      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.error || 'Kuch gadbad ho gayi.', verse: null, advice: null, time: aiTime }]);
+    try {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 20000)
+      );
+      const result = await Promise.race([sendMessageToGemini(msg, currentLang), timeoutPromise]);
+      const aiTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+      if (result.success) {
+        setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime }]);
+      } else {
+        refundChatMessage();
+        setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.error || 'Kuch gadbad ho gayi. Please try again.', verse: null, advice: null, time: aiTime }]);
+      }
+    } catch (e) {
+      refundChatMessage();
+      const aiTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      const errText = e.message === 'timeout'
+        ? 'Response timed out. Please check your connection and try again.'
+        : 'Kuch gadbad ho gayi. Please try again.';
+      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: errText, verse: null, advice: null, time: aiTime }]);
+    } finally {
+      setIsTyping(false);
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     }
-    setIsTyping(false);
-    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
   return (

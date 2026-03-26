@@ -45,24 +45,34 @@ export default function QuizScreen({ navigation }) {
     tapLight();
     setShowPaywall(false);
     setIsLoading(true); // Loading spinner on
-    
-    const response = await generateDailyQuiz(profile?.language || 'english');
-    
-    setIsLoading(false); // Loading spinner off
 
-    if (response.success && response.data && response.data.length > 0) {
-      // 3. Agar questions aa gaye, tabhi limit me se 1 cut karo (useQuizPlay run karo)
-      useQuizPlay(); 
-      
-      setGeneratedQuestions(response.data);
-      setQuizStarted(true);
-      setCurrentQuestionIndex(0);
-      setScore(0);
-      setShowResult(false);
-      setIsAnswered(false);
-      setSelectedAnswer(null);
-    } else {
-      Alert.alert("Network Error", "Could not generate new questions. Please check your internet connection and try again.");
+    try {
+      const response = await generateDailyQuiz(profile?.language || 'english');
+
+      if (response.success && response.data && response.data.length > 0) {
+        // 3. Agar questions aa gaye, tabhi limit me se 1 cut karo (useQuizPlay run karo)
+        useQuizPlay();
+
+        setGeneratedQuestions(response.data);
+        setQuizStarted(true);
+        setCurrentQuestionIndex(0);
+        setScore(0);
+        setShowResult(false);
+        setIsAnswered(false);
+        setSelectedAnswer(null);
+      } else {
+        // Reset to clean welcome state on failure
+        setGeneratedQuestions([]);
+        setQuizStarted(false);
+        Alert.alert("Network Error", "Could not generate new questions. Please check your internet connection and try again.");
+      }
+    } catch (e) {
+      console.warn('QuizScreen startQuiz error:', e);
+      setGeneratedQuestions([]);
+      setQuizStarted(false);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false); // Always reset loading
     }
   };
 

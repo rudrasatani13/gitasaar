@@ -182,7 +182,7 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
 
   const playAll = async () => {
     if (isPlaying || isLoading) { stop(); return; }
-    
+
     const canPlay = useAudioPlay();
     if (!canPlay) { handlePaywall(); return; }
 
@@ -195,20 +195,23 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
     if (hindi) parts.push({ text: hindi, label: 'Meaning' });
     if (english) parts.push({ text: english, label: 'English' });
 
-    if (parts.length === 0) return;
+    if (parts.length === 0) { setIsLoading(false); return; }
 
-    setIsLoading(true);
     setIsPlaying(true);
     setIsLoading(false);
 
-    for (const part of parts) {
-      if (stoppedRef.current) break;
-      await playPart(part.text, part.label);
-    }
-
-    if (!stoppedRef.current) {
-      setIsPlaying(false);
-      setCurrentPart('');
+    try {
+      for (const part of parts) {
+        if (stoppedRef.current) break;
+        await playPart(part.text, part.label);
+      }
+    } catch (e) {
+      console.warn('AudioPlayer playAll error:', e);
+    } finally {
+      if (!stoppedRef.current) {
+        setIsPlaying(false);
+        setCurrentPart('');
+      }
     }
   };
 
@@ -223,16 +226,23 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
     setIsPlaying(true);
     setCurrentPart(label);
 
-    const cleanedText = cleanText(text);
-    const source = await generateSpeech(cleanedText, label);
-    if (source && !stoppedRef.current) {
-      if (Platform.OS === 'web') await playBlobWeb(source.blob);
-      else await playNative(source);
-    }
-
-    if (!stoppedRef.current) {
-      setIsPlaying(false);
-      setCurrentPart('');
+    try {
+      const cleanedText = cleanText(text);
+      const source = await generateSpeech(cleanedText, label);
+      if (source && !stoppedRef.current) {
+        if (Platform.OS === 'web') {
+          if (source.blob) await playBlobWeb(source.blob);
+        } else {
+          await playNative(source);
+        }
+      }
+    } catch (e) {
+      console.warn('AudioPlayer playSingle error:', e);
+    } finally {
+      if (!stoppedRef.current) {
+        setIsPlaying(false);
+        setCurrentPart('');
+      }
     }
   };
 

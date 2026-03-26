@@ -1,6 +1,6 @@
 // src/screens/PremiumScreen.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Animated, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
@@ -26,8 +26,9 @@ export default function PremiumScreen({ navigation }) {
   const [selectedPlan, setSelectedPlan] = useState('yearly');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
-  const [region, setRegion] = useState('india');
+  const [region, setRegion] = useState(null);
   const [plans, setPlans] = useState(null);
+  const [plansLoading, setPlansLoading] = useState(true);
 
   const crownScale = useRef(new Animated.Value(0.5)).current;
   const crownY = useRef(new Animated.Value(0)).current;
@@ -46,14 +47,20 @@ export default function PremiumScreen({ navigation }) {
     ).start();
 
     // Detect region for pricing
-    detectRegion().then((r) => {
-      setRegion(r);
-      setPlans(getPlans(r));
-    });
+    detectRegion()
+      .then((r) => {
+        setRegion(r);
+        setPlans(getPlans(r));
+      })
+      .catch(() => {
+        setRegion('india');
+        setPlans(getPlans('india'));
+      })
+      .finally(() => setPlansLoading(false));
   }, []);
 
-  const monthly = plans?.monthly || { display: '₹149', label: '₹149/month' };
-  const yearly = plans?.yearly || { display: '₹999', label: '₹999/year', save: '44%', perMonth: '₹83' };
+  const monthly = plans?.monthly;
+  const yearly = plans?.yearly;
 
   const handlePurchase = () => {
     setProcessing(true);
@@ -126,52 +133,61 @@ export default function PremiumScreen({ navigation }) {
           {/* Region badge */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10, backgroundColor: C.bgSecondary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 }}>
             <MaterialCommunityIcons name="earth" size={12} color={C.textMuted} />
-            <Text style={{ fontSize: 10, color: C.textMuted }}>{region === 'india' ? 'Pricing in INR' : 'Pricing in USD'}</Text>
+            <Text style={{ fontSize: 10, color: C.textMuted }}>{plansLoading ? 'Detecting region...' : region === 'india' ? 'Pricing in INR' : 'Pricing in USD'}</Text>
           </View>
         </Animated.View>
 
         {/* Plan Cards */}
         <View style={{ flexDirection: 'row', gap: 12, paddingHorizontal: 20, marginBottom: 20 }}>
-          {/* Monthly */}
-          <TouchableOpacity onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} style={{ flex: 1 }}>
-            <View style={{
-              borderRadius: 20, padding: 20, alignItems: 'center',
-              backgroundColor: selectedPlan === 'monthly' ? C.bgCardElevated : C.bgCard,
-              borderWidth: 2, borderColor: selectedPlan === 'monthly' ? C.primary : C.border,
-              ...C.shadowLight,
-            }}>
-              {selectedPlan === 'monthly' && (
-                <View style={{ position: 'absolute', top: 10, right: 10 }}>
-                  <MaterialCommunityIcons name="check-circle" size={20} color={C.primary} />
-                </View>
-              )}
-              <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, letterSpacing: 1, marginBottom: 10 }}>MONTHLY</Text>
-              <Text style={{ fontSize: 36, fontWeight: '800', color: C.textPrimary }}>{monthly.display}</Text>
-              <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, marginTop: 2 }}>per month</Text>
+          {plansLoading ? (
+            <View style={{ flex: 1, alignItems: 'center', paddingVertical: 40 }}>
+              <ActivityIndicator color={C.primary} size="large" />
+              <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 10 }}>Loading pricing...</Text>
             </View>
-          </TouchableOpacity>
+          ) : (
+            <>
+              {/* Monthly */}
+              <TouchableOpacity onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} style={{ flex: 1 }}>
+                <View style={{
+                  borderRadius: 20, padding: 20, alignItems: 'center',
+                  backgroundColor: selectedPlan === 'monthly' ? C.bgCardElevated : C.bgCard,
+                  borderWidth: 2, borderColor: selectedPlan === 'monthly' ? C.primary : C.border,
+                  ...C.shadowLight,
+                }}>
+                  {selectedPlan === 'monthly' && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <MaterialCommunityIcons name="check-circle" size={20} color={C.primary} />
+                    </View>
+                  )}
+                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, letterSpacing: 1, marginBottom: 10 }}>MONTHLY</Text>
+                  <Text style={{ fontSize: 36, fontWeight: '800', color: C.textPrimary }}>{monthly?.display}</Text>
+                  <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, marginTop: 2 }}>per month</Text>
+                </View>
+              </TouchableOpacity>
 
-          {/* Yearly */}
-          <TouchableOpacity onPress={() => setSelectedPlan('yearly')} activeOpacity={0.8} style={{ flex: 1 }}>
-            <View style={{
-              borderRadius: 20, padding: 20, alignItems: 'center', overflow: 'hidden',
-              backgroundColor: selectedPlan === 'yearly' ? C.bgCardElevated : C.bgCard,
-              borderWidth: 2, borderColor: selectedPlan === 'yearly' ? C.primary : C.border,
-              ...C.shadowLight,
-            }}>
-              <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: C.success, paddingVertical: 4, alignItems: 'center' }}>
-                <Text style={{ fontSize: 9, fontWeight: '800', color: '#FFF', letterSpacing: 1 }}>BEST VALUE — SAVE {yearly.save}</Text>
-              </View>
-              {selectedPlan === 'yearly' && (
-                <View style={{ position: 'absolute', top: 28, right: 10 }}>
-                  <MaterialCommunityIcons name="check-circle" size={20} color={C.primary} />
+              {/* Yearly */}
+              <TouchableOpacity onPress={() => setSelectedPlan('yearly')} activeOpacity={0.8} style={{ flex: 1 }}>
+                <View style={{
+                  borderRadius: 20, padding: 20, alignItems: 'center', overflow: 'hidden',
+                  backgroundColor: selectedPlan === 'yearly' ? C.bgCardElevated : C.bgCard,
+                  borderWidth: 2, borderColor: selectedPlan === 'yearly' ? C.primary : C.border,
+                  ...C.shadowLight,
+                }}>
+                  <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: C.success, paddingVertical: 4, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 9, fontWeight: '800', color: '#FFF', letterSpacing: 1 }}>BEST VALUE — SAVE {yearly?.save}</Text>
+                  </View>
+                  {selectedPlan === 'yearly' && (
+                    <View style={{ position: 'absolute', top: 28, right: 10 }}>
+                      <MaterialCommunityIcons name="check-circle" size={20} color={C.primary} />
+                    </View>
+                  )}
+                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, letterSpacing: 1, marginTop: 14, marginBottom: 10 }}>YEARLY</Text>
+                  <Text style={{ fontSize: 36, fontWeight: '800', color: C.textPrimary }}>{yearly?.display}</Text>
+                  <Text style={{ fontSize: FontSizes.sm, color: C.success, fontWeight: '600', marginTop: 2 }}>Just {yearly?.perMonth}/month</Text>
                 </View>
-              )}
-              <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, letterSpacing: 1, marginTop: 14, marginBottom: 10 }}>YEARLY</Text>
-              <Text style={{ fontSize: 36, fontWeight: '800', color: C.textPrimary }}>{yearly.display}</Text>
-              <Text style={{ fontSize: FontSizes.sm, color: C.success, fontWeight: '600', marginTop: 2 }}>Just {yearly.perMonth}/month</Text>
-            </View>
-          </TouchableOpacity>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         {/* Error */}
@@ -189,7 +205,7 @@ export default function PremiumScreen({ navigation }) {
 
         {/* Subscribe Button */}
         <View style={{ paddingHorizontal: 20, marginBottom: 8 }}>
-          <TouchableOpacity onPress={handlePurchase} disabled={processing} activeOpacity={0.85}>
+          <TouchableOpacity onPress={handlePurchase} disabled={processing || plansLoading} activeOpacity={0.85}>
             <LinearGradient colors={processing ? [C.textMuted, C.textMuted] : C.gradientGold} style={{ borderRadius: 16, paddingVertical: 18, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, ...C.shadowGold }}>
               <MaterialCommunityIcons name={processing ? 'loading' : 'crown'} size={20} color={processing ? '#FFF' : C.textOnPrimary} />
               <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: processing ? '#FFF' : C.textOnPrimary }}>

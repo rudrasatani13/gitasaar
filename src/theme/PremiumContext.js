@@ -103,10 +103,9 @@ export function PremiumProvider({ children }) {
   };
 
   const saveUsage = async (updated) => {
-    try { 
-      await AsyncStorage.setItem(USAGE_KEY, JSON.stringify(updated)); 
-      // Auto-Sync to Firebase (5 sec debounce ke sath taaki crash na ho)
-      if (auth.currentUser) autoSync(auth.currentUser.uid); 
+    try {
+      await AsyncStorage.setItem(USAGE_KEY, JSON.stringify(updated));
+      // Only sync premium status changes — not every usage tick
     } catch (e) {}
   };
 
@@ -145,6 +144,14 @@ export function PremiumProvider({ children }) {
     setUsage(updated);
     saveUsage(updated);
     return true;
+  };
+
+  // Refund a chat message deduction (call on API failure)
+  const refundChatMessage = () => {
+    if (isPremium) return;
+    const updated = { ...usage, chatMessages: Math.max(0, usage.chatMessages - 1) };
+    setUsage(updated);
+    AsyncStorage.setItem(USAGE_KEY, JSON.stringify(updated)).catch(() => {});
   };
 
   // 4. Share Templates
@@ -204,7 +211,7 @@ export function PremiumProvider({ children }) {
     <PremiumContext.Provider value={{
       isPremium, planType, expiryDate, usage, loaded,
       FREE_LIMITS, FREE_TEMPLATES,
-      useChatMessage, useAudioPlay, useQuizPlay, isTemplateAvailable, canAddFolder,
+      useChatMessage, useAudioPlay, useQuizPlay, refundChatMessage, isTemplateAvailable, canAddFolder,
       canExportJournal, isAdFree,
       chatRemaining, audioRemaining, quizRemaining,
       activatePremium, cancelPremium,

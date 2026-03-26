@@ -97,13 +97,14 @@ export default function JournalScreen() {
   };
 
   const handleDelete = (id) => {
-    if (typeof window !== 'undefined' && window.confirm) {
-      if (window.confirm('Kya aap ye entry delete karna chahte hain?')) {
-        deleteEntry(id);
-      }
-    } else {
-      deleteEntry(id);
-    }
+    Alert.alert(
+      'Delete Entry',
+      'Kya aap ye entry delete karna chahte hain?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteEntry(id) },
+      ]
+    );
   };
 
   return (
@@ -119,8 +120,8 @@ export default function JournalScreen() {
           {!isWriting && (
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <TouchableOpacity onPress={() => {
-                if (!isPremium) { if (typeof window !== 'undefined') window.alert('Export as PDF is a Premium feature. Upgrade to unlock!'); return; }
-                if (typeof window !== 'undefined') window.alert('PDF export coming soon!');
+                if (!isPremium) { Alert.alert('Premium Feature', 'Export as PDF is a Premium feature. Upgrade to unlock!'); return; }
+                Alert.alert('Coming Soon', 'PDF export coming soon!');
               }}
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: C.glassBg, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 999, borderWidth: 1, borderColor: C.glassBorder }}>
                 <MaterialCommunityIcons name="file-export-outline" size={14} color={C.primary} />

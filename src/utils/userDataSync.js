@@ -123,7 +123,10 @@ export async function clearLocalData() {
     if (userKeys.length > 0) await AsyncStorage.multiRemove(userKeys);
     notifySync(); // Clear hone ke baad screens update karo
     return true;
-  } catch (e) { return false; }
+  } catch (e) {
+    console.error('clearLocalData error:', e);
+    return false;
+  }
 }
 
 // ============ AUTO SYNC ============

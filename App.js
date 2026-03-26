@@ -1,7 +1,31 @@
 // App.js
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, info) {
+    console.error('App crashed:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, backgroundColor: '#FDF8EF', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 8 }}>Something went wrong</Text>
+          <Text style={{ fontSize: 14, color: '#888', textAlign: 'center' }}>Please restart the app. We apologize for the inconvenience.</Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
 import { useFonts, NotoSans_400Regular, NotoSans_500Medium, NotoSans_700Bold } from '@expo-google-fonts/noto-sans';
 import { NotoSerifDevanagari_400Regular, NotoSerifDevanagari_700Bold } from '@expo-google-fonts/noto-serif-devanagari';
 import * as Notifications from 'expo-notifications';
@@ -44,6 +68,7 @@ export default function App() {
   if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#FDF8EF' }} />;
 
   return (
+    <ErrorBoundary>
     <ThemeProvider>
     <OfflineProvider>
       <ProfileProvider>
@@ -63,5 +88,6 @@ export default function App() {
       </ProfileProvider>
     </OfflineProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }

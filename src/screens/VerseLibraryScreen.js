@@ -1,6 +1,6 @@
 // src/screens/VerseLibraryScreen.js
-import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, RefreshControl } from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { View, Text, FlatList, ScrollView, TouchableOpacity, TextInput, Modal, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
@@ -9,9 +9,6 @@ import { FontSizes } from '../theme/colors';
 import { KrishnaVersesBackground } from "../components/SpiritualBackground";
 import ShlokaCard from '../components/ShlokaCard';
 import GlassCard from '../components/GlassCard';
-
-let gitaData = null;
-try { gitaData = require('../data/gitaDatabase.json'); } catch (e) {}
 
 const CHAPTERS = [
   { number: 1, name: 'Arjuna Vishada Yoga', nameHindi: 'अर्जुन विषाद योग', verses: 47, theme: "Arjuna's Dilemma" },
@@ -51,6 +48,20 @@ export default function VerseLibraryScreen({ navigation }) {
   const [selectedVerse, setSelectedVerse] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [gitaData, setGitaData] = useState(null);
+
+  useEffect(() => {
+    // Lazy-load the large JSON off the main render pass
+    const timer = setTimeout(() => {
+      try {
+        const data = require('../data/gitaDatabase.json');
+        setGitaData(data);
+      } catch (e) {
+        console.warn('Failed to load gitaDatabase:', e);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -78,7 +89,7 @@ export default function VerseLibraryScreen({ navigation }) {
     return { completed: completedVerses, total: totalVerses, percentage: Math.round((completedVerses / totalVerses) * 100) };
   }, [progress]);
 
-  const handleVerseClick = (chNum, vNum) => {
+  const handleVerseClick = useCallback((chNum, vNum) => {
     if (gitaData && gitaData[chNum] && gitaData[chNum][vNum]) {
       const verseData = gitaData[chNum][vNum];
       setSelectedVerse({
@@ -88,7 +99,81 @@ export default function VerseLibraryScreen({ navigation }) {
         ...verseData
       });
     }
-  };
+  }, [gitaData]);
+
+  const renderChapter = useCallback(({ item: ch }) => {
+    const isExpanded = expandedChapter === ch.number;
+    const completedCount = progress?.[ch.number]?.length || 0;
+    const progressPct = (completedCount / ch.verses) * 100;
+    return (
+      <View style={{ marginBottom: 12 }}>
+        <GlassCard noPadding style={{ borderRadius: 20, overflow: 'hidden' }} intensity={40}>
+          <TouchableOpacity
+            onPress={() => setExpandedChapter(isExpanded ? null : ch.number)}
+            style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}
+            activeOpacity={0.7}
+          >
+            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: isExpanded ? C.primary : C.glassBg, justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1, borderColor: isExpanded ? C.primary : C.glassBorder }}>
+              <Text style={{ fontSize: FontSizes.lg, fontWeight: 'bold', color: isExpanded ? C.textOnPrimary : C.textPrimary }}>{ch.number}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary, marginBottom: 2 }}>{ch.name}</Text>
+              <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontStyle: 'italic', marginBottom: 6 }}>{ch.theme}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ flex: 1, height: 4, backgroundColor: C.glassBg, borderRadius: 2, overflow: 'hidden' }}>
+                  <View style={{ width: `${progressPct}%`, height: '100%', backgroundColor: C.success }} />
+                </View>
+                <Text style={{ fontSize: 10, color: C.textMuted, fontWeight: '600' }}>{completedCount}/{ch.verses}</Text>
+              </View>
+            </View>
+            <MaterialCommunityIcons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={24} color={C.textMuted} />
+          </TouchableOpacity>
+
+          {isExpanded && (
+            <View style={{ backgroundColor: C.glassBg, borderTopWidth: 1, borderTopColor: C.glassBorder, padding: 8 }}>
+              {gitaData && gitaData[ch.number] ? (
+                Array.from({ length: ch.verses }, (_, i) => i + 1).map((num) => {
+                  const vNum = num.toString();
+                  const verseData = gitaData[ch.number][vNum];
+                  if (!verseData) return null;
+                  const isRead = progress?.[ch.number]?.includes(num);
+                  return (
+                    <TouchableOpacity
+                      key={vNum}
+                      onPress={() => handleVerseClick(ch.number, vNum)}
+                      style={{ marginBottom: 8, backgroundColor: isRead ? C.success + '08' : C.glassBg, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: isRead ? C.success + '30' : C.glassBorder, flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={{ minWidth: 42, height: 42, borderRadius: 12, backgroundColor: isRead ? C.success + '15' : C.glassBg, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: isRead ? C.success : C.glassBorderGold }}>
+                        <Text style={{ fontSize: FontSizes.md, fontWeight: '800', color: isRead ? C.success : C.primary }}>{vNum}</Text>
+                      </View>
+                      <View style={{ flex: 1, gap: 6 }}>
+                        <Text style={{ fontSize: FontSizes.md, color: C.textSanskrit, lineHeight: 22, fontWeight: '500' }} numberOfLines={2}>{verseData.sanskrit.replace(/\n/g, ' ')}</Text>
+                        <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, lineHeight: 20, fontStyle: 'italic' }} numberOfLines={2}>{verseData.hindi || verseData.english}</Text>
+                      </View>
+                      <View style={{ alignSelf: 'center' }}>
+                        {isRead ? (
+                          <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.success + '20', justifyContent: 'center', alignItems: 'center' }}>
+                            <MaterialCommunityIcons name="check" size={16} color={C.success} />
+                          </View>
+                        ) : (
+                          <MaterialCommunityIcons name="chevron-right" size={20} color={C.textMuted} />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })
+              ) : (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <Text style={{ color: C.textMuted }}>Shlokas loading error. Run fetchVerses.js</Text>
+                </View>
+              )}
+            </View>
+          )}
+        </GlassCard>
+      </View>
+    );
+  }, [expandedChapter, progress, gitaData, C, handleVerseClick]);
 
   return (
     <LinearGradient colors={C.gradientWarm} style={{ flex: 1 }}>
@@ -167,87 +252,16 @@ export default function VerseLibraryScreen({ navigation }) {
       </View>
 
       {/* Chapters List */}
-      <ScrollView
+      <FlatList
+        data={filteredChapters}
+        keyExtractor={(ch) => ch.number.toString()}
+        renderItem={renderChapter}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />}
-      >
-        {filteredChapters.map((ch) => {
-          const isExpanded = expandedChapter === ch.number;
-          const completedCount = progress?.[ch.number]?.length || 0;
-          const progressPct = (completedCount / ch.verses) * 100;
-          
-          return (
-            <View key={ch.number} style={{ marginBottom: 12 }}>
-              <GlassCard noPadding style={{ borderRadius: 20, overflow: 'hidden' }} intensity={40}>
-                <TouchableOpacity
-                  onPress={() => setExpandedChapter(isExpanded ? null : ch.number)}
-                  style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}
-                  activeOpacity={0.7}
-                >
-                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: isExpanded ? C.primary : C.glassBg, justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1, borderColor: isExpanded ? C.primary : C.glassBorder }}>
-                    <Text style={{ fontSize: FontSizes.lg, fontWeight: 'bold', color: isExpanded ? C.textOnPrimary : C.textPrimary }}>{ch.number}</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary, marginBottom: 2 }}>{ch.name}</Text>
-                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontStyle: 'italic', marginBottom: 6 }}>{ch.theme}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <View style={{ flex: 1, height: 4, backgroundColor: C.glassBg, borderRadius: 2, overflow: 'hidden' }}>
-                        <View style={{ width: `${progressPct}%`, height: '100%', backgroundColor: C.success }} />
-                      </View>
-                      <Text style={{ fontSize: 10, color: C.textMuted, fontWeight: '600' }}>{completedCount}/{ch.verses}</Text>
-                    </View>
-                  </View>
-                  <MaterialCommunityIcons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={24} color={C.textMuted} />
-                </TouchableOpacity>
-
-                {isExpanded && (
-                  <View style={{ backgroundColor: C.glassBg, borderTopWidth: 1, borderTopColor: C.glassBorder, padding: 8 }}>
-                    {gitaData && gitaData[ch.number] ? (
-                      Array.from({ length: ch.verses }, (_, i) => i + 1).map((num) => {
-                        const vNum = num.toString();
-                        const verseData = gitaData[ch.number][vNum];
-                        if (!verseData) return null;
-                        const isRead = progress?.[ch.number]?.includes(num);
-                        return (
-                          <TouchableOpacity
-                            key={vNum}
-                            onPress={() => handleVerseClick(ch.number, vNum)}
-                            style={{ marginBottom: 8, backgroundColor: isRead ? C.success + '08' : C.glassBg, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: isRead ? C.success + '30' : C.glassBorder, flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}
-                            activeOpacity={0.7}
-                          >
-                            <View style={{ minWidth: 42, height: 42, borderRadius: 12, backgroundColor: isRead ? C.success + '15' : C.glassBg, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: isRead ? C.success : C.glassBorderGold }}>
-                              <Text style={{ fontSize: FontSizes.md, fontWeight: '800', color: isRead ? C.success : C.primary }}>{vNum}</Text>
-                            </View>
-                            <View style={{ flex: 1, gap: 6 }}>
-                              <Text style={{ fontSize: FontSizes.md, color: C.textSanskrit, lineHeight: 22, fontWeight: '500' }} numberOfLines={2}>{verseData.sanskrit.replace(/\n/g, ' ')}</Text>
-                              <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, lineHeight: 20, fontStyle: 'italic' }} numberOfLines={2}>{verseData.hindi || verseData.english}</Text>
-                            </View>
-                            <View style={{ alignSelf: 'center' }}>
-                              {isRead ? (
-                                <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: C.success + '20', justifyContent: 'center', alignItems: 'center' }}>
-                                  <MaterialCommunityIcons name="check" size={16} color={C.success} />
-                                </View>
-                              ) : (
-                                <MaterialCommunityIcons name="chevron-right" size={20} color={C.textMuted} />
-                              )}
-                            </View>
-                          </TouchableOpacity>
-                        );
-                      })
-                    ) : (
-                      <View style={{ padding: 20, alignItems: 'center' }}>
-                        <Text style={{ color: C.textMuted }}>Shlokas loading error. Run fetchVerses.js</Text>
-                      </View>
-                    )}
-                  </View>
-                )}
-              </GlassCard>
-            </View>
-          );
-        })}
-        <View style={{ height: 40 }} />
-      </ScrollView>
+        removeClippedSubviews
+        ListFooterComponent={<View style={{ height: 40 }} />}
+      />
 
       {/* Full Verse & Audio Modal */}
       <Modal visible={selectedVerse !== null} animationType="slide" transparent onRequestClose={() => setSelectedVerse(null)}>
