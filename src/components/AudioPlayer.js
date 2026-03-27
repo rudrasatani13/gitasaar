@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../utils/firebase';
 import { usePremium } from '../theme/PremiumContext';
 import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
@@ -10,9 +12,7 @@ import { tapLight } from '../utils/haptics';
 import { useNavigation } from '@react-navigation/native';
 import GlassCard from './GlassCard';
 
-const ELEVEN_API_KEY = process.env.EXPO_PUBLIC_ELEVEN_KEY;
-const VOICE_ID = 'PnaKthDVqB7PvUN6iU48PnaKthDVqB7PvUN6iU48';
-const MODEL_ID = 'eleven_multilingual_v2'; 
+const generateSpeechAudio = httpsCallable(functions, 'generateSpeechAudio');
 
 const hashString = (str) => {
   let hash = 0;
@@ -37,15 +37,12 @@ const cleanText = (text) => {
 let Speech = null;
 try { Speech = require('expo-speech'); } catch (e) {}
 
-const API_TIMEOUT_MS = 15000; // 15 second timeout for ElevenLabs API
-
 async function generateSpeech(text, label) {
   try {
-    if (!ELEVEN_API_KEY) return { fallback: true, text };
-
     const isNative = Platform.OS !== 'web';
     let fileUri = null;
 
+    // Check local cache first (native only)
     if (isNative) {
       const fileName = `audio_${label}_${hashString(text)}.mp3`;
       fileUri = FileSystem.cacheDirectory + fileName;
@@ -53,34 +50,26 @@ async function generateSpeech(text, label) {
       if (fileInfo.exists) return { uri: fileUri, isLocal: true };
     }
 
-    // Add timeout to prevent hanging on slow/failed API
-    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timeoutId = controller ? setTimeout(() => controller.abort(), API_TIMEOUT_MS) : null;
+    // Call Cloud Function instead of ElevenLabs directly
+    const result = await generateSpeechAudio({ text });
+    const { audioBase64 } = result.data;
 
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
-      method: 'POST',
-      headers: { 'xi-api-key': ELEVEN_API_KEY, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
-      body: JSON.stringify({ text: text, model_id: MODEL_ID, voice_settings: { stability: 0.6, similarity_boost: 0.75, style: 0.3 } }),
-      ...(controller ? { signal: controller.signal } : {}),
-    });
-
-    if (timeoutId) clearTimeout(timeoutId);
-
-    if (!response.ok) return { fallback: true, text };
-    const blob = await response.blob();
+    if (!audioBase64) return { fallback: true, text };
 
     if (isNative && fileUri) {
-      const reader = new FileReader();
-      const base64 = await new Promise((resolve) => {
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(blob);
-      });
-      await FileSystem.writeAsStringAsync(fileUri, base64, { encoding: FileSystem.EncodingType.Base64 });
+      // Cache the audio file locally
+      await FileSystem.writeAsStringAsync(fileUri, audioBase64, { encoding: FileSystem.EncodingType.Base64 });
       return { uri: fileUri, isLocal: true };
     }
+
+    // Web: convert base64 to blob
+    const byteChars = atob(audioBase64);
+    const byteArray = new Uint8Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+    const blob = new Blob([byteArray], { type: 'audio/mpeg' });
     return { blob, isLocal: false };
   } catch (e) {
-    // On timeout or network error, return fallback marker
+    // On error, return fallback marker for device TTS
     return { fallback: true, text };
   }
 }

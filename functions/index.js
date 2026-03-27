@@ -7,11 +7,14 @@
  * 2. verifyRazorpayPayment  — HMAC signature check + Firestore premium write
  * 3. generateGeminiResponse — Gemini API proxy (chat)
  * 4. generateQuizQuestions  — Gemini API proxy (quiz)
+ * 5. generateSpeechAudio    — ElevenLabs TTS proxy
+ * 6. checkUserPremium       — server-side premium status check
  *
  * Secrets (set via: firebase functions:secrets:set SECRET_NAME)
  *   RAZORPAY_KEY_ID
  *   RAZORPAY_SECRET
  *   GEMINI_API_KEY
+ *   ELEVENLABS_API_KEY
  */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
@@ -320,4 +323,105 @@ RESPOND WITH A VALID JSON ARRAY ONLY. No markdown, no backticks, no extra text.
   if (!valid.length) throw new HttpsError("internal", "No valid questions generated.");
 
   return { success: true, data: valid };
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TASK 5 — ELEVENLABS TTS PROXY
+// Keeps ElevenLabs API key off the client. Returns audio as base64.
+// ─────────────────────────────────────────────────────────────────────────────
+const ELEVENLABS_VOICE_ID = "PnaKthDVqB7PvUN6iU48";
+const ELEVENLABS_MODEL_ID = "eleven_multilingual_v2";
+const MAX_TTS_TEXT_LENGTH = 2000;
+
+exports.generateSpeechAudio = onCall(
+    { timeoutSeconds: 30 },
+    async (request) => {
+      const uid = request.auth?.uid;
+      if (!uid) throw new HttpsError("unauthenticated", "Login required.");
+      if (isRateLimited(uid, 10)) {
+        throw new HttpsError("resource-exhausted", "Too many audio requests. Please wait.");
+      }
+
+      const { text, voiceId } = request.data;
+      if (!text || typeof text !== "string" || !text.trim()) {
+        throw new HttpsError("invalid-argument", "Text is required.");
+      }
+      if (text.length > MAX_TTS_TEXT_LENGTH) {
+        throw new HttpsError("invalid-argument", `Text too long. Max ${MAX_TTS_TEXT_LENGTH} characters.`);
+      }
+
+      const API_KEY = process.env.ELEVENLABS_API_KEY;
+      if (!API_KEY) throw new HttpsError("internal", "Audio service not configured.");
+
+      const voice = typeof voiceId === "string" && voiceId.length > 0
+        ? voiceId
+        : ELEVENLABS_VOICE_ID;
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+
+      try {
+        const resp = await fetch(
+            `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}`,
+            {
+              method: "POST",
+              headers: {
+                "xi-api-key": API_KEY,
+                "Content-Type": "application/json",
+                "Accept": "audio/mpeg",
+              },
+              body: JSON.stringify({
+                text: text.trim(),
+                model_id: ELEVENLABS_MODEL_ID,
+                voice_settings: { stability: 0.6, similarity_boost: 0.75, style: 0.3 },
+              }),
+              signal: controller.signal,
+            },
+        );
+
+        clearTimeout(timeout);
+
+        if (!resp.ok) {
+          const errText = await resp.text().catch(() => "");
+          throw new HttpsError(
+              "internal",
+              `ElevenLabs API error (${resp.status}): ${errText.slice(0, 200)}`,
+          );
+        }
+
+        const arrayBuf = await resp.arrayBuffer();
+        const base64 = Buffer.from(arrayBuf).toString("base64");
+
+        return { success: true, audioBase64: base64, contentType: "audio/mpeg" };
+      } catch (err) {
+        clearTimeout(timeout);
+        if (err.name === "AbortError") {
+          throw new HttpsError("deadline-exceeded", "Audio generation timed out.");
+        }
+        if (err instanceof HttpsError) throw err;
+        throw new HttpsError("internal", "Audio generation failed.");
+      }
+    },
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TASK 6 — CHECK USER PREMIUM STATUS (server-authoritative)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.checkUserPremium = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Login required.");
+
+  const snap = await db.collection("users").doc(uid).get();
+  if (!snap.exists) return { isPremium: false };
+
+  const data = snap.data();
+  const isActive = data.isPremium === true &&
+                   data.expiryDate &&
+                   new Date(data.expiryDate) > new Date();
+
+  return {
+    isPremium: isActive,
+    planType:  isActive ? data.planType  : null,
+    expiryDate: isActive ? data.expiryDate : null,
+  };
 });

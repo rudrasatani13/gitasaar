@@ -174,9 +174,6 @@ export function PremiumProvider({ children }) {
   const audioRemaining = isPremium ? 'Unlimited' : Math.max(0, FREE_LIMITS.audioRecitations - usage.audioRecitations);
   const quizRemaining  = isPremium ? 'Unlimited' : Math.max(0, FREE_LIMITS.quizPlays        - usage.quizPlays);
 
-  // Cloud Function already writes to Firestore; onSnapshot handles state update automatically.
-  const activatePremium = () => {};
-
   const cancelPremium = () => {
     setIsPremium(false);
     setPlanType(null);
@@ -191,7 +188,7 @@ export function PremiumProvider({ children }) {
       isTemplateAvailable, canAddFolder,
       canExportJournal, isAdFree,
       chatRemaining, audioRemaining, quizRemaining,
-      activatePremium, cancelPremium,
+      cancelPremium,
     }}>
       {children}
     </PremiumContext.Provider>
