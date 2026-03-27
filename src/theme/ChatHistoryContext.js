@@ -15,12 +15,14 @@ export function ChatHistoryProvider({ children }) {
     try {
       const data = await AsyncStorage.getItem(HISTORY_KEY);
       if (data) setConversations(JSON.parse(data));
-    } catch (e) {}
+    } catch (e) {
+      console.error('ChatHistory load error:', e);
+    }
     setLoaded(true);
   };
 
   const save = async (updated) => {
-    try { await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updated)); } catch (e) {}
+    try { await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updated)); } catch (e) { console.error('ChatHistory save error:', e); }
   };
 
   // Save a conversation (array of messages)

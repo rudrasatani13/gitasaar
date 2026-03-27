@@ -29,15 +29,17 @@ export default function BookmarksScreen({ navigation }) {
   };
 
   const handleDeleteFolder = (id) => {
-    if (typeof window !== 'undefined' && window.confirm) {
-      if (window.confirm('Delete this folder? Bookmarks will move to Favorites.')) {
-        deleteFolder(id);
-        if (activeFolder === id) setActiveFolder('all');
-      }
-    } else {
-      deleteFolder(id);
-      if (activeFolder === id) setActiveFolder('all');
-    }
+    Alert.alert(
+      'Delete Folder',
+      'Delete this folder? Bookmarks will move to Favorites.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => {
+          deleteFolder(id);
+          if (activeFolder === id) setActiveFolder('all');
+        }},
+      ]
+    );
   };
 
   const handleMove = (verseId, folderId) => {

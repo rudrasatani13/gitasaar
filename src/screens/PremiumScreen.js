@@ -5,17 +5,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useProfile } from '../theme/ProfileContext';
-import { usePremium } from '../theme/PremiumContext';
+import { usePremium, generatePaymentCallerToken } from '../theme/PremiumContext';
 import { FontSizes } from '../theme/colors';
 import { startPayment, detectRegion, getPlans } from '../utils/payment';
 
+// Free limits must match PremiumContext: chat 5/day, audio 3/day, quiz 1/day, folders 4, templates 2
 const FEATURES = [
-  { icon: 'chat-processing-outline', title: 'Unlimited AI Chat', free: '10/day', color: '#C28840' },
+  { icon: 'chat-processing-outline', title: 'Unlimited AI Chat', free: '5/day', color: '#C28840' },
   { icon: 'card-multiple-outline', title: 'All Share Templates', free: '2 only', color: '#14918E' },
-  { icon: 'headphones', title: 'Audio Recitation', free: 'Locked', color: '#E8793A' },
+  { icon: 'headphones', title: 'Audio Recitation', free: '3/day', color: '#E8793A' },
   { icon: 'head-question-outline', title: 'Unlimited Quiz', free: '1/day', color: '#7B1830' },
-  { icon: 'folder-multiple-outline', title: 'Bookmark Folders', free: '1 folder', color: '#C95A6A' },
-  { icon: 'file-export-outline', title: 'Export Journal', free: 'Locked', color: '#0E6B6B' },
+  { icon: 'folder-multiple-outline', title: 'Bookmark Folders', free: '4 folders', color: '#C95A6A' },
+  { icon: 'file-export-outline', title: 'Export Journal', free: 'Free', color: '#0E6B6B' },
   { icon: 'close-circle-outline', title: 'Ad-Free', free: 'With ads', color: '#D63B2F' },
 ];
 
@@ -65,9 +66,11 @@ export default function PremiumScreen({ navigation }) {
   const handlePurchase = () => {
     setProcessing(true);
     setError('');
+    // Generate one-time token before initiating payment
+    const callerToken = generatePaymentCallerToken();
     startPayment(
       selectedPlan, email, displayName,
-      async (result) => { await activatePremium(selectedPlan, result.paymentId); setProcessing(false); },
+      async (result) => { await activatePremium(selectedPlan, result.paymentId, callerToken); setProcessing(false); },
       (errMsg) => { setError(errMsg); setProcessing(false); }
     );
   };

@@ -145,15 +145,46 @@ export function isValidEmail(email) {
 }
 
 // ============ 6. PREMIUM VALIDATION ============
-// Extra check to prevent premium bypass — requires BOTH paymentId AND valid expiryDate
+// Extra check to prevent premium bypass — requires BOTH paymentId AND valid expiryDate + signature
+const PREMIUM_SIGN_SECRET = 'gs_prem_2026';
+
+export async function generatePremiumSignature(premiumData) {
+  const payload = `${premiumData.paymentId}|${premiumData.expiryDate}|${premiumData.planType}|${PREMIUM_SIGN_SECRET}`;
+  if (Crypto) {
+    try {
+      return await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        payload
+      );
+    } catch (e) {}
+  }
+  // Web fallback
+  return btoa(payload).substring(0, 32);
+}
+
 export function validatePremiumToken(premiumData) {
   if (!premiumData) return false;
   // Must have a non-empty paymentId (no bypassing with just isPremium flag)
   if (!premiumData.paymentId || typeof premiumData.paymentId !== 'string' || premiumData.paymentId.trim() === '') return false;
+  // Must have a valid plan type
+  if (!premiumData.planType || !['monthly', 'yearly'].includes(premiumData.planType)) return false;
   // Must have a valid future expiry date
   if (!premiumData.expiryDate) return false;
-  if (new Date(premiumData.expiryDate) <= new Date()) return false;
+  const expiry = new Date(premiumData.expiryDate);
+  if (isNaN(expiry.getTime()) || expiry <= new Date()) return false;
+  // Expiry must not be unreasonably far in the future (max 13 months)
+  const maxExpiry = new Date();
+  maxExpiry.setMonth(maxExpiry.getMonth() + 13);
+  if (expiry > maxExpiry) return false;
+  // Must have a signature (prevents raw AsyncStorage tampering)
+  if (!premiumData.signature || typeof premiumData.signature !== 'string') return false;
   return true;
+}
+
+export async function verifyPremiumSignature(premiumData) {
+  if (!validatePremiumToken(premiumData)) return false;
+  const expected = await generatePremiumSignature(premiumData);
+  return premiumData.signature === expected;
 }
 
 // ============ 7. ANTI-TAMPERING ============

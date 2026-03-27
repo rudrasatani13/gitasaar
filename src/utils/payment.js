@@ -30,7 +30,17 @@ async function detectRegion() {
     const data = await res.json();
     detectedRegion = data.country_code === 'IN' ? 'india' : 'international';
   } catch (e) {
-    detectedRegion = 'india';
+    // Fallback: use timezone-based heuristic instead of blindly defaulting to india
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const offset = new Date().getTimezoneOffset();
+      // IST is UTC+5:30 = -330 minutes offset
+      detectedRegion = (offset === -330 || tz.includes('Asia/Kolkata') || tz.includes('Asia/Calcutta'))
+        ? 'india'
+        : 'international';
+    } catch {
+      detectedRegion = 'international';
+    }
   }
   return detectedRegion;
 }

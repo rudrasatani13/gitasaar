@@ -125,53 +125,109 @@ function getChat(language) {
 }
 
 export async function sendMessageToGemini(userMessage, language) {
+  // Validate API key exists
+  if (!GEMINI_API_KEY) {
+    return { success: false, error: 'AI service is not configured. Please try again later.' };
+  }
+  // Validate input
+  if (!userMessage || typeof userMessage !== 'string' || userMessage.trim().length === 0) {
+    return { success: false, error: 'Please enter a message.' };
+  }
+  // Cap input length to prevent abuse
+  const sanitizedMessage = userMessage.trim().slice(0, 1000);
+
   if (!checkRateLimit('gemini_chat', 15)) {
     return { success: false, error: 'Too many requests. Please wait a moment.' };
   }
   try {
     const chat = getChat(language);
-    const result = await chat.sendMessage(userMessage);
-    const parsed = parseResponse(result.response.text());
+    const result = await chat.sendMessage(sanitizedMessage);
+    const responseText = result?.response?.text?.();
+    if (!responseText || typeof responseText !== 'string') {
+      return { success: false, error: 'Received an empty response. Please try again.' };
+    }
+    const parsed = parseResponse(responseText);
     return { success: true, data: { text: parsed.text || 'Namaste!', verse: parsed.verse, advice: parsed.advice } };
-  } catch (e) { 
+  } catch (e) {
     console.error("Gemini AI Error:", e);
-    return { success: false, error: e.message || 'Something went wrong' }; 
+    // Reset chat session on persistent errors so next attempt starts fresh
+    if (e.message?.includes('blocked') || e.message?.includes('SAFETY')) {
+      chatSession = null;
+    }
+    return { success: false, error: 'Could not connect to AI. Please check your internet and try again.' };
   }
 }
 
 // AI Quiz Generator Logic (Safe)
 export async function generateDailyQuiz(language) {
+  if (!GEMINI_API_KEY) {
+    return { success: false, error: 'AI service is not configured.' };
+  }
   if (!checkRateLimit('gemini_quiz', 5)) {
     return { success: false, error: 'Too many quiz requests. Please wait a moment.' };
   }
   try {
     if (!genAI) genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    
+
     const langInstruction = LANG_INSTRUCTIONS[language] || "English";
-    
+
     const prompt = `Generate a 3-question multiple choice quiz about the teachings, stories, and philosophy of the Bhagavad Gita.
     The questions and options MUST be in this language: ${langInstruction}
     Make the questions thoughtful, not just basic trivia. Make them different every time.
-    
+
     RESPOND STRICTLY WITH A VALID JSON ARRAY ONLY. NO MARKDOWN, NO BACKTICKS, NO EXTRA TEXT.
     Format required:
     [
       {
         "question": "Question text here?",
         "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-        "correctAnswer": 0, 
+        "correctAnswer": 0,
         "explanation": "Short explanation of why this is correct."
       }
     ]`;
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: { temperature: 1.0 } });
     const result = await model.generateContent(prompt);
-    let text = result.response.text();
-    text = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
+    const responseText = result?.response?.text?.();
+    if (!responseText || typeof responseText !== 'string') {
+      return { success: false, error: 'Empty response from AI. Please try again.' };
+    }
 
-    const quizData = JSON.parse(text);
-    return { success: true, data: quizData };
+    // Safe JSON extraction — strip markdown fences and any leading/trailing non-JSON
+    let text = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+    // Extract JSON array from response (in case of extra text)
+    const jsonStart = text.indexOf('[');
+    const jsonEnd = text.lastIndexOf(']');
+    if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+      return { success: false, error: 'Invalid quiz format received. Please try again.' };
+    }
+    text = text.substring(jsonStart, jsonEnd + 1);
+
+    let quizData;
+    try {
+      quizData = JSON.parse(text);
+    } catch (parseErr) {
+      console.error('Quiz JSON parse error:', parseErr.message);
+      return { success: false, error: 'Could not parse quiz data. Please try again.' };
+    }
+
+    // Validate structure: must be array of valid question objects
+    if (!Array.isArray(quizData) || quizData.length === 0) {
+      return { success: false, error: 'Invalid quiz data received. Please try again.' };
+    }
+    const validQuestions = quizData.filter(q =>
+      q && typeof q.question === 'string' &&
+      Array.isArray(q.options) && q.options.length >= 2 &&
+      typeof q.correctAnswer === 'number' &&
+      q.correctAnswer >= 0 && q.correctAnswer < q.options.length
+    );
+    if (validQuestions.length === 0) {
+      return { success: false, error: 'Quiz questions were malformed. Please try again.' };
+    }
+
+    return { success: true, data: validQuestions };
   } catch (e) {
-    return { success: false, error: e.message };
+    console.error('Quiz generation error:', e.message);
+    return { success: false, error: 'Could not generate quiz. Please check your connection and try again.' };
   }
 }

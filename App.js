@@ -6,20 +6,25 @@ import { StatusBar } from 'expo-status-bar';
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
   componentDidCatch(error, info) {
-    console.error('App crashed:', error, info);
+    console.error('App crashed:', error, info?.componentStack);
   }
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+  };
   render() {
     if (this.state.hasError) {
       return (
         <View style={{ flex: 1, backgroundColor: '#FDF8EF', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <Text style={{ fontSize: 32, marginBottom: 16 }}>{'\u0950'}</Text>
           <Text style={{ fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 8 }}>Something went wrong</Text>
-          <Text style={{ fontSize: 14, color: '#888', textAlign: 'center' }}>Please restart the app. We apologize for the inconvenience.</Text>
+          <Text style={{ fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 20 }}>We apologize for the inconvenience.</Text>
+          <Text onPress={this.handleRetry} style={{ fontSize: 16, fontWeight: '700', color: '#C28840', paddingVertical: 12, paddingHorizontal: 28, borderWidth: 1.5, borderColor: '#C28840', borderRadius: 12, overflow: 'hidden' }}>Try Again</Text>
         </View>
       );
     }

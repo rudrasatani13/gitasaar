@@ -200,10 +200,11 @@ export default function JournalScreen() {
                 }}
                 placeholder="Apne thoughts, feelings, gratitude likh do..."
                 placeholderTextColor={C.textMuted}
-                value={text} onChangeText={setText} multiline autoFocus
+                value={text} onChangeText={(t) => setText(t.slice(0, 5000))} multiline autoFocus
+                maxLength={5000}
               />
 
-              <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 6, textAlign: 'right' }}>{getWordCount(text)} words</Text>
+              <Text style={{ fontSize: FontSizes.xs, color: text.length >= 4800 ? '#D63B2F' : C.textMuted, marginTop: 6, textAlign: 'right' }}>{getWordCount(text)} words · {text.length}/5000 chars</Text>
 
               <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
                 <TouchableOpacity onPress={handleCancel}

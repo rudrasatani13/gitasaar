@@ -73,6 +73,44 @@ export async function backupToCloud(uid) {
 }
 
 // ============ RESTORE FROM FIRESTORE ============
+// Helper: only overwrite local data if cloud version is newer
+async function mergeIfNewer(key, cloudValue, cloudTimestamp) {
+  if (cloudValue === undefined || cloudValue === null) return;
+  try {
+    const localRaw = await AsyncStorage.getItem(key);
+    if (!localRaw) {
+      // No local data — accept cloud
+      await AsyncStorage.setItem(key, cloudValue);
+      return;
+    }
+    // Try to compare timestamps embedded in JSON data
+    try {
+      const localData = JSON.parse(localRaw);
+      const cloudData = JSON.parse(cloudValue);
+      const localTime = localData._lastModified || localData.updatedAt || 0;
+      const cloudTime = cloudData._lastModified || cloudData.updatedAt || cloudTimestamp || 0;
+      if (new Date(cloudTime) > new Date(localTime)) {
+        await AsyncStorage.setItem(key, cloudValue);
+      }
+      // else: local is newer or same, keep local
+    } catch {
+      // Not JSON or no timestamps — use cloud timestamp vs local sync marker
+      if (cloudTimestamp) {
+        const localSyncMarker = await AsyncStorage.getItem(key + '_syncTs');
+        if (!localSyncMarker || new Date(cloudTimestamp) > new Date(localSyncMarker)) {
+          await AsyncStorage.setItem(key, cloudValue);
+        }
+      } else {
+        // No timestamp info — fallback to cloud (first-time sync)
+        await AsyncStorage.setItem(key, cloudValue);
+      }
+    }
+  } catch {
+    // On any error, accept cloud data as fallback
+    await AsyncStorage.setItem(key, cloudValue);
+  }
+}
+
 export async function restoreFromCloud(uid) {
   currentUid = uid;
   if (!firestore || !uid) { notifySync(); return false; }
@@ -80,13 +118,12 @@ export async function restoreFromCloud(uid) {
     // A. Core Data Restore karo
     const coreRef = firestore.doc(firestore.db, 'userData', uid);
     const coreSnap = await firestore.getDoc(coreRef);
-    
+
     if (coreSnap.exists()) {
       const data = coreSnap.data();
+      const cloudSyncTime = data._lastSync || null;
       for (const key of CORE_KEYS) {
-        if (data[key] !== undefined && data[key] !== null) {
-          await AsyncStorage.setItem(key, data[key]);
-        }
+        await mergeIfNewer(key, data[key], cloudSyncTime);
       }
     }
 
@@ -97,7 +134,7 @@ export async function restoreFromCloud(uid) {
       if (heavySnap.exists()) {
         const heavyData = heavySnap.data();
         if (heavyData.data) {
-          await AsyncStorage.setItem(key, heavyData.data);
+          await mergeIfNewer(key, heavyData.data, heavyData.updatedAt);
         }
       }
     }
@@ -105,7 +142,7 @@ export async function restoreFromCloud(uid) {
     notifySync(); // Data restore hone ke baad app ko update karo
     return true;
   } catch (e) {
-    console.log('Restore error:', e.message);
+    console.error('Restore error:', e.message);
     notifySync();
     return false;
   }

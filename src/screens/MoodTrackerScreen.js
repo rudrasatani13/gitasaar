@@ -147,7 +147,7 @@ export default function MoodTrackerScreen({ navigation }) {
             <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 12 }}>LAST 7 DAYS</Text>
             <View style={{ backgroundColor: C.bgCard, borderRadius: 20, padding: 16, borderWidth: 1, borderColor: C.border }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 14 }}>
-                {last7.reverse().map((entry, i) => {
+                {[...last7].reverse().map((entry, i) => {
                   const mood = MOODS.find(m => m.id === entry.mood);
                   const dayLabel = new Date(entry.dateISO).toLocaleDateString('en', { weekday: 'short' });
                   return (

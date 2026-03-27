@@ -173,7 +173,7 @@ export default function ChatScreen() {
     setShowPaywall(false);
     setShowSuggestions(false);
     const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    setMessages((p) => [...p, { id: Date.now().toString(), type: 'user', text: msg, time: now }]);
+    setMessages((p) => [...p, { id: Date.now().toString(), type: 'user', text: msg, time: now }].slice(-100));
     setInputText('');
     setIsTyping(true);
 
@@ -187,7 +187,7 @@ export default function ChatScreen() {
       const aiTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
       if (result.success) {
-        setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime }]);
+        setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime }].slice(-100));
       } else {
         refundChatMessage();
         setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.error || 'Kuch gadbad ho gayi. Please try again.', verse: null, advice: null, time: aiTime }]);

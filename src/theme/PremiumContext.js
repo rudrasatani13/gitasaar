@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../utils/firebase';
 import { onSyncComplete, autoSync } from '../utils/userDataSync';
-import { validatePremiumToken } from '../utils/security';
+import { validatePremiumToken, verifyPremiumSignature, generatePremiumSignature } from '../utils/security';
 
 const PremiumContext = createContext();
 const PREMIUM_KEY = '@gitasaar_premium';
@@ -20,6 +20,13 @@ const FREE_LIMITS = {
 };
 
 const FREE_TEMPLATES = ['saffron', 'minimal'];
+
+// One-time-use token to ensure activatePremium is only called from payment callback
+let _paymentCallerToken = null;
+export function generatePaymentCallerToken() {
+  _paymentCallerToken = Date.now().toString(36) + Math.random().toString(36).slice(2);
+  return _paymentCallerToken;
+}
 
 export function PremiumProvider({ children }) {
   const [isPremium, setIsPremium] = useState(false);
@@ -49,7 +56,7 @@ export function PremiumProvider({ children }) {
     return () => { unsubSync(); unsubAuth(); };
   }, []);
 
-  const getTodayDate = () => new Date().toDateString(); // Gives "Mon Mar 24 2026"
+  const getTodayDate = () => new Date().toISOString().slice(0, 10); // "2026-03-27" UTC date
 
   const load = async () => {
     try {
@@ -58,14 +65,25 @@ export function PremiumProvider({ children }) {
         AsyncStorage.getItem(USAGE_KEY),
       ]);
 
-      // 1. Check Premium Status — validate token before granting access
+      // 1. Check Premium Status — validate token + signature before granting access
       if (premData) {
-        const p = JSON.parse(premData);
-        if (validatePremiumToken(p)) {
-          setIsPremium(true);
-          setPlanType(p.planType);
-          setExpiryDate(p.expiryDate);
-        } else {
+        try {
+          const p = JSON.parse(premData);
+          if (validatePremiumToken(p)) {
+            const sigValid = await verifyPremiumSignature(p);
+            if (sigValid) {
+              setIsPremium(true);
+              setPlanType(p.planType);
+              setExpiryDate(p.expiryDate);
+            } else {
+              setIsPremium(false);
+              await AsyncStorage.removeItem(PREMIUM_KEY);
+            }
+          } else {
+            setIsPremium(false);
+            await AsyncStorage.removeItem(PREMIUM_KEY);
+          }
+        } catch (parseErr) {
           setIsPremium(false);
           await AsyncStorage.removeItem(PREMIUM_KEY);
         }
@@ -98,15 +116,18 @@ export function PremiumProvider({ children }) {
         setUsage(fresh);
         await AsyncStorage.setItem(USAGE_KEY, JSON.stringify(fresh));
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('PremiumContext load error:', e);
+    }
     setLoaded(true);
   };
 
   const saveUsage = async (updated) => {
     try {
       await AsyncStorage.setItem(USAGE_KEY, JSON.stringify(updated));
-      // Only sync premium status changes — not every usage tick
-    } catch (e) {}
+    } catch (e) {
+      console.error('PremiumContext saveUsage error:', e);
+    }
   };
 
   // ==========================================
@@ -179,24 +200,40 @@ export function PremiumProvider({ children }) {
   // --- SUBSCRIPTION MANAGEMENT ---
   // ==========================================
 
-  const activatePremium = async (plan, paymentId) => {
-    // Require a paymentId — prevents direct calls without a real payment
+  // _callerToken is an internal token set by startPayment to prevent direct calls
+  const activatePremium = async (plan, paymentId, _callerToken) => {
+    // Require a valid paymentId
     if (!paymentId || typeof paymentId !== 'string' || paymentId.trim() === '') {
       console.warn('activatePremium: paymentId required');
       return;
     }
+    // Require a valid plan type
+    if (!plan || !['monthly', 'yearly'].includes(plan)) {
+      console.warn('activatePremium: invalid plan');
+      return;
+    }
+    // Require caller token from payment gateway callback
+    if (!_callerToken || _callerToken !== _paymentCallerToken) {
+      console.warn('activatePremium: unauthorized caller');
+      return;
+    }
+    // Invalidate token after single use
+    _paymentCallerToken = null;
 
     const expiry = new Date();
     if (plan === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
     else if (plan === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
 
     const premData = { isPremium: true, planType: plan, expiryDate: expiry.toISOString(), paymentId: paymentId.trim() };
+    // Generate signature to prevent AsyncStorage tampering
+    premData.signature = await generatePremiumSignature(premData);
+
     setIsPremium(true);
     setPlanType(plan);
     setExpiryDate(expiry.toISOString());
 
     await AsyncStorage.setItem(PREMIUM_KEY, JSON.stringify(premData));
-    if (auth.currentUser) autoSync(auth.currentUser.uid); // Turant cloud sync
+    if (auth.currentUser) autoSync(auth.currentUser.uid);
   };
 
   const cancelPremium = async () => {

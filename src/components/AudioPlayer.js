@@ -34,9 +34,14 @@ const cleanText = (text) => {
     .trim();
 };
 
+let Speech = null;
+try { Speech = require('expo-speech'); } catch (e) {}
+
+const API_TIMEOUT_MS = 15000; // 15 second timeout for ElevenLabs API
+
 async function generateSpeech(text, label) {
   try {
-    if (!ELEVEN_API_KEY) throw new Error("ElevenLabs API Key is missing");
+    if (!ELEVEN_API_KEY) return { fallback: true, text };
 
     const isNative = Platform.OS !== 'web';
     let fileUri = null;
@@ -48,13 +53,20 @@ async function generateSpeech(text, label) {
       if (fileInfo.exists) return { uri: fileUri, isLocal: true };
     }
 
+    // Add timeout to prevent hanging on slow/failed API
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), API_TIMEOUT_MS) : null;
+
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
       method: 'POST',
       headers: { 'xi-api-key': ELEVEN_API_KEY, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
       body: JSON.stringify({ text: text, model_id: MODEL_ID, voice_settings: { stability: 0.6, similarity_boost: 0.75, style: 0.3 } }),
+      ...(controller ? { signal: controller.signal } : {}),
     });
 
-    if (!response.ok) return null;
+    if (timeoutId) clearTimeout(timeoutId);
+
+    if (!response.ok) return { fallback: true, text };
     const blob = await response.blob();
 
     if (isNative && fileUri) {
@@ -68,8 +80,31 @@ async function generateSpeech(text, label) {
     }
     return { blob, isLocal: false };
   } catch (e) {
-    return null;
+    // On timeout or network error, return fallback marker
+    return { fallback: true, text };
   }
+}
+
+// Fallback: use device TTS when ElevenLabs fails
+function playFallbackTTS(text) {
+  return new Promise((resolve) => {
+    if (Speech && Platform.OS !== 'web') {
+      Speech.speak(text, {
+        language: 'hi-IN',
+        onDone: resolve,
+        onError: resolve,
+        onStopped: resolve,
+      });
+    } else if (Platform.OS === 'web' && typeof speechSynthesis !== 'undefined') {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'hi-IN';
+      utterance.onend = resolve;
+      utterance.onerror = resolve;
+      speechSynthesis.speak(utterance);
+    } else {
+      resolve();
+    }
+  });
 }
 
 function playBlobWeb(blob) {
@@ -174,8 +209,14 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
     const source = await generateSpeech(cleanedText, label);
     if (!source || stoppedRef.current) return;
 
-    if (Platform.OS === 'web') await playBlobWeb(source.blob);
-    else await playNative(source);
+    if (source.fallback) {
+      // ElevenLabs failed — use device TTS as fallback
+      await playFallbackTTS(source.text);
+    } else if (Platform.OS === 'web') {
+      await playBlobWeb(source.blob);
+    } else {
+      await playNative(source);
+    }
 
     if (!stoppedRef.current) await new Promise(r => setTimeout(r, 400));
   };
@@ -230,7 +271,9 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
       const cleanedText = cleanText(text);
       const source = await generateSpeech(cleanedText, label);
       if (source && !stoppedRef.current) {
-        if (Platform.OS === 'web') {
+        if (source.fallback) {
+          await playFallbackTTS(source.text);
+        } else if (Platform.OS === 'web') {
           if (source.blob) await playBlobWeb(source.blob);
         } else {
           await playNative(source);
