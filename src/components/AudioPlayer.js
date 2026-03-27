@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import GlassCard from './GlassCard';
 
 const ELEVEN_API_KEY = process.env.EXPO_PUBLIC_ELEVEN_KEY;
-const VOICE_ID = 'S5P5Y6sMPfFCbxqUJ3F4'; 
+const VOICE_ID = 'PnaKthDVqB7PvUN6iU48PnaKthDVqB7PvUN6iU48';
 const MODEL_ID = 'eleven_multilingual_v2'; 
 
 const hashString = (str) => {
