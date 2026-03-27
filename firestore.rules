@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Users ────────────────────────────────────────────────────────────────
+    // Each user can only read/write their own document.
+    // Premium fields (isPremium, planType, expiryDate, paymentId) live here
+    // and are written exclusively by Cloud Functions — clients can only read.
+    match /users/{uid} {
+      allow read:  if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid
+                   // Block clients from directly setting premium fields;
+                   // those must come through Cloud Functions only.
+                   && !('isPremium'   in request.resource.data)
+                   && !('planType'    in request.resource.data)
+                   && !('paymentId'   in request.resource.data)
+                   && !('orderId'     in request.resource.data)
+                   && !('expiryDate'  in request.resource.data)
+                   && !('activatedAt' in request.resource.data);
+    }
+
+    // ── Community ────────────────────────────────────────────────────────────
+    // Anyone can read. Only authenticated users can write.
+    match /community/{document=**} {
+      allow read:  if true;
+      allow write: if request.auth != null;
+    }
+
+    // ── Default: deny everything else ────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
