@@ -1,18 +1,22 @@
 // src/utils/payment.js
-// Razorpay for India + International
-import { Platform } from 'react-native';
+// Production-level Razorpay integration — order creation + server-side verification
+// via Firebase Cloud Functions. API key and secret never touch the client.
 
-// Ab API key sirf .env se aayegi
-const RAZORPAY_KEY = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
+import { Platform } from 'react-native';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from './firebase';
+
+// Razorpay KEY_ID is safe to expose on client (it's a public identifier, not the secret)
+const RAZORPAY_KEY_ID = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
 
 const PLANS = {
   india: {
-    monthly: { amount: 14900, currency: 'INR', display: '₹149', label: '₹149/month' },
-    yearly:  { amount: 99900, currency: 'INR', display: '₹999', label: '₹999/year', save: '44%', perMonth: '₹83' },
+    monthly: { display: '₹149',   label: '₹149/month' },
+    yearly:  { display: '₹999',   label: '₹999/year', save: '44%', perMonth: '₹83' },
   },
   international: {
-    monthly: { amount: 599, currency: 'USD', display: '$5.99', label: '$5.99/month' },
-    yearly:  { amount: 4999, currency: 'USD', display: '$49.99', label: '$49.99/year', save: '30%', perMonth: '$4.17' },
+    monthly: { display: '$5.99',  label: '$5.99/month' },
+    yearly:  { display: '$49.99', label: '$49.99/year', save: '30%', perMonth: '$4.17' },
   },
 };
 
@@ -29,15 +33,10 @@ async function detectRegion() {
     const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
     const data = await res.json();
     detectedRegion = data.country_code === 'IN' ? 'india' : 'international';
-  } catch (e) {
-    // Fallback: use timezone-based heuristic instead of blindly defaulting to india
+  } catch {
     try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
       const offset = new Date().getTimezoneOffset();
-      // IST is UTC+5:30 = -330 minutes offset
-      detectedRegion = (offset === -330 || tz.includes('Asia/Kolkata') || tz.includes('Asia/Calcutta'))
-        ? 'india'
-        : 'international';
+      detectedRegion = offset === -330 ? 'india' : 'international';
     } catch {
       detectedRegion = 'international';
     }
@@ -45,7 +44,7 @@ async function detectRegion() {
   return detectedRegion;
 }
 
-function getPlans(region) {
+export function getPlans(region) {
   return PLANS[region] || PLANS.international;
 }
 
@@ -63,39 +62,64 @@ function loadRazorpay() {
   });
 }
 
-async function startPayment(planType, userEmail, userName, onSuccess, onFailure) {
+// Cloud Function callables
+const createRazorpayOrder   = httpsCallable(functions, 'createRazorpayOrder');
+const verifyRazorpayPayment = httpsCallable(functions, 'verifyRazorpayPayment');
+
+export async function startPayment(planType, userEmail, userName, onSuccess, onFailure) {
   if (Platform.OS !== 'web') {
     onFailure('In-app purchase coming soon');
     return;
   }
 
+  if (!RAZORPAY_KEY_ID) {
+    onFailure('Payment config error. Check API keys.');
+    return;
+  }
+
   const region = await detectRegion();
-  const plans = getPlans(region);
-  const plan = plans[planType];
-  if (!plan) { onFailure('Invalid plan'); return; }
+
+  // Step 1 — Create order server-side (amount + currency decided by server, not client)
+  let orderId, amount, currency;
+  try {
+    const result = await createRazorpayOrder({ planType, region });
+    ({ orderId, amount, currency } = result.data);
+  } catch (e) {
+    onFailure(e.message || 'Could not create payment order. Please try again.');
+    return;
+  }
 
   await loadRazorpay();
   if (!window.Razorpay) { onFailure('Payment service not available'); return; }
 
-  if (!RAZORPAY_KEY) {
-    onFailure('Payment Config Error. Check API Keys.');
-    return;
-  }
-
   const options = {
-    key: RAZORPAY_KEY,
-    amount: plan.amount,
-    currency: plan.currency,
-    name: 'GitaSaar',
-    description: 'GitaSaar Premium - ' + (planType === 'yearly' ? 'Yearly' : 'Monthly'),
-    prefill: { email: userEmail || '', name: userName || '' },
-    theme: { color: '#C28840' },
-    handler: (response) => {
-      onSuccess({ paymentId: response.razorpay_payment_id, plan: planType, gateway: 'razorpay' });
+    key:         RAZORPAY_KEY_ID,
+    amount,
+    currency,
+    order_id:    orderId,           // required for HMAC signature verification
+    name:        'GitaSaar',
+    description: `GitaSaar Premium — ${planType === 'yearly' ? 'Yearly' : 'Monthly'}`,
+    prefill:     { email: userEmail || '', name: userName || '' },
+    theme:       { color: '#C28840' },
+
+    // Step 2 — Verify signature server-side before granting premium
+    handler: async (response) => {
+      try {
+        await verifyRazorpayPayment({
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_order_id:   response.razorpay_order_id,
+          razorpay_signature:  response.razorpay_signature,
+          planType,
+        });
+        // Premium is now written to Firestore by the Cloud Function.
+        // PremiumContext's onSnapshot listener picks it up automatically.
+        onSuccess({ paymentId: response.razorpay_payment_id, plan: planType, gateway: 'razorpay' });
+      } catch (e) {
+        onFailure(e.message || 'Payment verification failed. Please contact support.');
+      }
     },
-    modal: {
-      ondismiss: () => onFailure('Payment cancelled'),
-    },
+
+    modal: { ondismiss: () => onFailure('Payment cancelled') },
   };
 
   try {
@@ -107,4 +131,4 @@ async function startPayment(planType, userEmail, userName, onSuccess, onFailure)
   }
 }
 
-export { startPayment, detectRegion, getPlans, PLANS };
+export { detectRegion, PLANS };

@@ -16,6 +16,8 @@ import {
   signInWithPhoneNumber,
   sendPasswordResetEmail,
 } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getFunctions }  from 'firebase/functions';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from 'react-native';
 
@@ -39,6 +41,12 @@ if (Platform.OS === "web") {
   });
 }
 export { auth };
+
+// Firestore database instance
+export const db = getFirestore(app);
+
+// Cloud Functions instance — must match the region set in functions/index.js
+export const functions = getFunctions(app, 'asia-south1');
 
 // ========== EMAIL AUTH ==========
 export async function signup(email, password) {
