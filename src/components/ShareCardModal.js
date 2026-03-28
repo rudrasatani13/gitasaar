@@ -83,28 +83,28 @@ function TemplateRoyal({ verse }) {
 
 function TemplateCosmos({ verse }) {
   return (
-    <LinearGradient colors={['#000005', '#0C0A3E', '#1E1B4B']} style={{ width: CW, height: CH, borderRadius: 20, padding: 28 }}>
-      {/* Star dots */}
+    <LinearGradient colors={['#000D1A', '#0C4A6E', '#164E63']} style={{ width: CW, height: CH, borderRadius: 20, padding: 28 }}>
+      {/* Ocean star dots */}
       {[[10,20],[50,8],[80,15],[20,45],[70,35],[90,50],[15,70],[55,65],[85,80],[30,90]].map(([l,t], i) => (
-        <View key={i} style={{ position: 'absolute', left: `${l}%`, top: `${t}%`, width: i%3===0?3:2, height: i%3===0?3:2, borderRadius: 2, backgroundColor: '#FFFFFF', opacity: 0.4 + (i*0.04) }} />
+        <View key={i} style={{ position: 'absolute', left: `${l}%`, top: `${t}%`, width: i%3===0?3:2, height: i%3===0?3:2, borderRadius: 2, backgroundColor: i%4===0 ? '#A5F3FC' : '#FFFFFF', opacity: 0.4 + (i*0.04) }} />
       ))}
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(224,168,80,0.20)' }} />
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(34,211,238,0.25)' }} />
       <View style={{ alignItems: 'center', marginBottom: 16 }}>
         <Text style={{ fontSize: 28, color: '#E0A850' }}>{'\u0950'}</Text>
-        <View style={{ backgroundColor: 'rgba(224,168,80,0.12)', paddingHorizontal: 14, paddingVertical: 5, borderRadius: 999, marginTop: 8 }}>
-          <Text style={{ fontSize: 11, fontWeight: '800', color: '#E0A850', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
+        <View style={{ backgroundColor: 'rgba(34,211,238,0.12)', paddingHorizontal: 14, paddingVertical: 5, borderRadius: 999, marginTop: 8 }}>
+          <Text style={{ fontSize: 11, fontWeight: '800', color: '#22D3EE', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
         </View>
       </View>
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <Text style={{ fontSize: 18, color: '#FCD34D', lineHeight: 30, textAlign: 'center', marginBottom: 16 }}>{verse.sanskrit}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16, paddingHorizontal: 20 }}>
-          <View style={{ flex: 1, height: 1, backgroundColor: '#8B5CF6', opacity: 0.35 }} />
-          <View style={{ width: 6, height: 6, backgroundColor: '#8B5CF6', opacity: 0.6, borderRadius: 3 }} />
-          <View style={{ flex: 1, height: 1, backgroundColor: '#8B5CF6', opacity: 0.35 }} />
+          <View style={{ flex: 1, height: 1, backgroundColor: '#22D3EE', opacity: 0.35 }} />
+          <View style={{ width: 6, height: 6, backgroundColor: '#22D3EE', opacity: 0.6, borderRadius: 3 }} />
+          <View style={{ flex: 1, height: 1, backgroundColor: '#22D3EE', opacity: 0.35 }} />
         </View>
-        <Text style={{ fontSize: 14, color: 'rgba(240,240,255,0.80)', lineHeight: 22, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 8 }}>"{verse.english}"</Text>
+        <Text style={{ fontSize: 14, color: 'rgba(224,247,252,0.82)', lineHeight: 22, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 8 }}>"{verse.english}"</Text>
       </View>
-      <View style={{ alignItems: 'center', marginTop: 12 }}><Text style={{ fontSize: 11, fontWeight: '700', color: '#8B5CF6', letterSpacing: 2 }}>GITASAAR</Text></View>
+      <View style={{ alignItems: 'center', marginTop: 12 }}><Text style={{ fontSize: 11, fontWeight: '700', color: '#22D3EE', letterSpacing: 2 }}>GITASAAR</Text></View>
     </LinearGradient>
   );
 }
@@ -180,7 +180,7 @@ function TemplateLotus({ verse }) {
 }
 
 const TEMPLATES = [
-  { id: 'cosmos', label: 'Cosmos', icon: 'star-four-points', color: '#8B5CF6', Component: TemplateCosmos },
+  { id: 'cosmos', label: 'Ocean', icon: 'waves', color: '#22D3EE', Component: TemplateCosmos },
   { id: 'royal', label: 'Royal', icon: 'crown-outline', color: '#DBA04E', Component: TemplateRoyal },
   { id: 'saffron', label: 'Saffron', icon: 'white-balance-sunny', color: '#C28840', Component: TemplateSaffron },
   { id: 'peacock', label: 'Peacock', icon: 'feather', color: '#14918E', Component: TemplatePeacock },

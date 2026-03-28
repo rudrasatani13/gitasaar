@@ -1,11 +1,10 @@
 // src/components/SpiritualBackground.js
-// SPACE THEME — animated twinkling starfield + nebula blobs
-import React, { useRef, useEffect, useMemo } from 'react';
+// SERENE OCEAN THEME — twinkling starfield + ocean glow blobs
+import React, { useRef, useEffect } from 'react';
 import { View, Animated, Dimensions } from 'react-native';
 
 const { width: W, height: H } = Dimensions.get('window');
 
-// Pre-generate star data at module level (stable across renders)
 function makeStars(count) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -13,24 +12,26 @@ function makeStars(count) {
     y: Math.random() * H,
     size: Math.random() * 2.2 + 0.4,
     baseOpacity: Math.random() * 0.55 + 0.25,
+    // tint: ~20% of stars get a subtle cyan tint
+    color: i % 5 === 0 ? '#A5F3FC' : i % 7 === 0 ? '#BAE6FD' : '#FFFFFF',
     group: i % 5,
   }));
 }
 const ALL_STARS = makeStars(90);
 
-// Nebula blob config
-const NEBULA_BLOBS = [
-  { top: -70, right: -90, size: 300, color: '#8B5CF6', opacity: 0.055 },
-  { bottom: -100, left: -70, size: 260, color: '#3B82F6', opacity: 0.050 },
-  { top: '30%', right: -60, size: 200, color: '#00D4FF', opacity: 0.035 },
-  { top: '60%', left: -50, size: 180, color: '#7C3AED', opacity: 0.040 },
-  { top: '10%', left: '30%', size: 140, color: '#F59E0B', opacity: 0.018 },
+// Ocean glow blobs — deep blues, teals, cyan
+const OCEAN_BLOBS = [
+  { top: -70,   right: -90, size: 320, color: '#0EA5E9', opacity: 0.065 }, // sky blue
+  { bottom: -100, left: -70, size: 280, color: '#0D9488', opacity: 0.060 }, // teal
+  { top: '30%', right: -60, size: 210, color: '#22D3EE', opacity: 0.045 }, // bright cyan
+  { top: '62%', left: -50,  size: 190, color: '#1D4ED8', opacity: 0.040 }, // deep ocean blue
+  { top: '12%', left: '32%', size: 150, color: '#E0A850', opacity: 0.020 }, // gold shimmer
 ];
 
-function NebulaBlobs() {
+function OceanBlobs() {
   return (
     <>
-      {NEBULA_BLOBS.map((b, i) => (
+      {OCEAN_BLOBS.map((b, i) => (
         <View
           key={i}
           style={{
@@ -64,7 +65,7 @@ function StarGroup({ stars, anim }) {
             width: s.size,
             height: s.size,
             borderRadius: s.size / 2,
-            backgroundColor: '#FFFFFF',
+            backgroundColor: s.color,
             opacity: Animated.multiply(anim, s.baseOpacity),
           }}
         />
@@ -111,7 +112,7 @@ export function StarfieldBackground() {
       pointerEvents="none"
       style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}
     >
-      <NebulaBlobs />
+      <OceanBlobs />
       {anims.map((anim, i) => (
         <StarGroup
           key={i}
@@ -123,11 +124,10 @@ export function StarfieldBackground() {
   );
 }
 
-// All per-screen exports now delegate to StarfieldBackground
-export function ChatBackground()        { return <StarfieldBackground />; }
-export function LotusHomeBackground()   { return <StarfieldBackground />; }
-export function KrishnaVersesBackground() { return <StarfieldBackground />; }
-export function ShivaJournalBackground()  { return <StarfieldBackground />; }
+export function ChatBackground()           { return <StarfieldBackground />; }
+export function LotusHomeBackground()      { return <StarfieldBackground />; }
+export function KrishnaVersesBackground()  { return <StarfieldBackground />; }
+export function ShivaJournalBackground()   { return <StarfieldBackground />; }
 export function GaneshSettingsBackground() { return <StarfieldBackground />; }
 export function HanumanQuizBackground()    { return <StarfieldBackground />; }
 export function ResponseImage()            { return null; }

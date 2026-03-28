@@ -36,8 +36,15 @@ All 700 verses, Sanskrit/Hindi/English translations, AI chat (Ask Krishna), spir
 
 ## What's Been Implemented
 
-### Space Theme Redesign (2026)
-Complete visual overhaul to Space/Black/Stars theme:
+### Ocean Theme Redesign (2026 — v2)
+Replaced purple/space palette with Serene Ocean palette:
+- `colors.js` → `SpaceColors` fully updated: deep midnight navy backgrounds (`#000D1A → #002550`), sky-ocean blue (`#0EA5E9`), teal (`#14B8A6`), bright cyan (`#22D3EE`), turquoise (`#2DD4BF`), seafoam text (`#E8F7FC`). Spiritual gold (`#E0A850`) preserved as primary accent.
+- `SpiritualBackground.js` → Ocean glow blobs (sky blue, teal, deep ocean blue, gold). Stars now have subtle cyan/white tint for variety.
+- `AppNavigator.js` → Tab bar with `rgba(34,211,238,0.28)` cyan border, inactive icons `rgba(34,211,238,0.45)`.
+- `SplashScreen.js` → Ocean glow pulses (sky-blue + gold), ring dots use cyan/teal/gold.
+- `ShareCardModal.js` → "Cosmos" template renamed "Ocean" with deep-ocean teal gradient + cyan accents.
+- `SettingsScreen.js` → "Ocean Theme: Active" badge with teal styling.
+- `OnboardingScreen.js` → Slides updated: gold, ocean-cyan, teal, amber, sky-blue.
 - `colors.js` — New `SpaceColors` palette: deep space black backgrounds (#000005), nebula purple (#8B5CF6), cosmic blue (#3B82F6), starlight cyan (#00D4FF), spiritual gold (#E0A850) as primary accent. All glassmorphism tokens updated to cosmic purple-tinted glass.
 - `ThemeContext.js` — Space theme always active (isDark=true, no toggle)
 - `SpiritualBackground.js` — 90 animated twinkling stars in 5 groups with independent pulse animations + 5 nebula blob overlays (purple, blue, cyan, violet, gold). Replaces all god-image backgrounds.

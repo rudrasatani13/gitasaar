@@ -67,9 +67,9 @@ function TabButton({ route, focused, onPress, C, isDark }) {
       <TouchableOpacity onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut} activeOpacity={1}
         style={{ alignItems: 'center', paddingVertical: 10, gap: 3 }}>
         <Animated.View style={{ transform: [{ scale: iconScale }] }}>
-          <AnimatedTabIcon name={route.name} focused={focused} color={focused ? C.primary : 'rgba(139,92,246,0.50)'} size={22} />
+          <AnimatedTabIcon name={route.name} focused={focused} color={focused ? C.primary : 'rgba(34,211,238,0.45)'} size={22} />
         </Animated.View>
-        <Text style={{ fontSize: 10, fontWeight: focused ? '700' : '500', color: focused ? C.primary : 'rgba(139,92,246,0.50)', letterSpacing: 0.2 }}>{label}</Text>
+        <Text style={{ fontSize: 10, fontWeight: focused ? '700' : '500', color: focused ? C.primary : 'rgba(34,211,238,0.45)', letterSpacing: 0.2 }}>{label}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -80,12 +80,12 @@ function CustomTabBar({ state, descriptors, navigation }) {
   return (
     // Floating pill wrapper — sits above the screen
     <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 28 : 16, left: 20, right: 20, zIndex: 100 }}>
-      {/* Glass pill — cosmic dark background with purple border */}
+      {/* Glass pill — ocean dark with teal/cyan border */}
       <View style={{
         borderRadius: 36,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(139,92,246,0.30)',
+        borderColor: 'rgba(34,211,238,0.28)',
         backgroundColor: C.bgCardElevated,
       }}>
         {Platform.OS !== 'web' && (
@@ -98,7 +98,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
         <View style={{
           flexDirection: 'row',
           backgroundColor: Platform.OS === 'web'
-            ? 'rgba(8,8,30,0.92)'
+            ? 'rgba(0,16,36,0.94)'
             : 'transparent',
           paddingHorizontal: 4,
           paddingVertical: 2,

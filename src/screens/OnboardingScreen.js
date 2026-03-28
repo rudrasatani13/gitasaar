@@ -19,23 +19,20 @@ const SLIDES = [
     title: 'All 700 Sacred Verses',
     subtitle: 'Complete Bhagavad Gita with Sanskrit, Hindi meaning, and English translation',
     color: '#E0A850',
-    gradient: ['#0C0A20', '#1A1530'],
   },
   {
     id: '2',
     icon: 'chat-processing-outline',
     title: 'Ask Krishna Anything',
     subtitle: 'AI-powered spiritual guide that understands your problems and shares Gita wisdom',
-    color: '#00D4FF',
-    gradient: ['#050520', '#0A0A30'],
+    color: '#22D3EE',
   },
   {
     id: '3',
     icon: 'notebook-edit-outline',
     title: 'Your Spiritual Journal',
     subtitle: 'Write daily reflections, track your mood, and grow on your spiritual path',
-    color: '#8B5CF6',
-    gradient: ['#0A0520', '#100A28'],
+    color: '#14B8A6',
   },
   {
     id: '4',
@@ -43,15 +40,13 @@ const SLIDES = [
     title: 'Build Daily Streak',
     subtitle: 'Read verses daily, earn badges, and track your journey through the Gita',
     color: '#F59E0B',
-    gradient: ['#0C0820', '#160C10'],
   },
   {
     id: '5',
     icon: 'account-group-outline',
     title: 'Join the Community',
     subtitle: 'Share reflections, inspire others, and walk the path of dharma together',
-    color: '#10B981',
-    gradient: ['#050C20', '#081520'],
+    color: '#38BDF8',
   },
 ];
 

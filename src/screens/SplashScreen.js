@@ -71,24 +71,24 @@ export default function SplashScreen({ navigation, autoNavigate = true }) {
   return (
     <LinearGradient colors={C.gradientWarm} style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
       <StarfieldBackground />
-      {/* Nebula background glows */}
-      <View style={{ position: 'absolute', top: -80, right: -80, width: 260, height: 260, borderRadius: 130, backgroundColor: C.nebulaPurple, opacity: 0.06 }} />
-      <View style={{ position: 'absolute', bottom: -100, left: -100, width: 300, height: 300, borderRadius: 150, backgroundColor: C.cosmicBlue, opacity: 0.05 }} />
-      <View style={{ position: 'absolute', top: '40%', right: -60, width: 160, height: 160, borderRadius: 80, backgroundColor: C.peacockBlue, opacity: 0.04 }} />
+      {/* Ocean glow blobs */}
+      <View style={{ position: 'absolute', top: -80, right: -80, width: 260, height: 260, borderRadius: 130, backgroundColor: '#0EA5E9', opacity: 0.07 }} />
+      <View style={{ position: 'absolute', bottom: -100, left: -100, width: 300, height: 300, borderRadius: 150, backgroundColor: '#0D9488', opacity: 0.06 }} />
+      <View style={{ position: 'absolute', top: '40%', right: -60, width: 160, height: 160, borderRadius: 80, backgroundColor: '#22D3EE', opacity: 0.05 }} />
 
       {/* Main column - everything stacked vertically */}
       <View style={{ alignItems: 'center' }}>
         {/* Om + Ring box */}
         <View style={{ width: 160, height: 160, justifyContent: 'center', alignItems: 'center', marginBottom: 44 }}>
-          {/* Nebula glow pulse */}
-          <Animated.View style={{ position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: C.nebulaPurple, opacity: Animated.multiply(glowPulse, new Animated.Value(0.7)) }} />
+          {/* Ocean glow pulse */}
+          <Animated.View style={{ position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: '#0EA5E9', opacity: Animated.multiply(glowPulse, new Animated.Value(0.7)) }} />
           {/* Gold inner glow */}
           <Animated.View style={{ position: 'absolute', width: 100, height: 100, borderRadius: 50, backgroundColor: C.primary, opacity: Animated.multiply(glowPulse, new Animated.Value(0.5)) }} />
           <Animated.View style={{ position: 'absolute', width: 160, height: 160, opacity: ringOpacity, transform: [{ rotate: spin }] }}>
             <View style={{ width: 160, height: 160, borderRadius: 80, borderWidth: 1.5, borderColor: C.borderGoldStrong, borderStyle: 'dashed' }} />
             <View style={{ position: 'absolute', top: -4, left: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary }} />
-            <View style={{ position: 'absolute', bottom: -4, left: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.nebulaPurple }} />
-            <View style={{ position: 'absolute', left: -4, top: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.peacockBlue }} />
+            <View style={{ position: 'absolute', bottom: -4, left: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: '#22D3EE' }} />
+            <View style={{ position: 'absolute', left: -4, top: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: '#14B8A6' }} />
             <View style={{ position: 'absolute', right: -4, top: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary }} />
           </Animated.View>
           <Animated.View style={{ opacity: omOpacity, transform: [{ scale: omScale }] }}><AppLogo size={100} /></Animated.View>
