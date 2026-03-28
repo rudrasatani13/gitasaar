@@ -12,6 +12,7 @@ import { useProfile } from '../theme/ProfileContext';
 import { useTranslation } from '../theme/useTranslation';
 import { FontSizes } from '../theme/colors';
 import { sendMessageToGemini, resetChat } from '../utils/geminiApi';
+import { loadMemory, updateMemory, formatMemoryForPrompt, getPersonalizedGreeting } from '../utils/conversationMemory';
 import VoiceInput from '../components/VoiceInput';
 import TypeWriter from '../components/TypeWriter';
 import { StarfieldBackground } from '../components/SpiritualBackground';
@@ -81,7 +82,7 @@ function TypingIndicator() {
 }
 
 // ─── Welcome Hero (shown when chat is fresh) ─────────────────────────────────
-function WelcomeHero({ onTopicPress }) {
+function WelcomeHero({ onTopicPress, greeting }) {
   const { colors: C, isDark } = useTheme();
   const glow = useRef(new Animated.Value(0.20)).current;
 
@@ -93,6 +94,8 @@ function WelcomeHero({ onTopicPress }) {
       ])
     ).start();
   }, []);
+
+  const { title, subtitle, isReturning, visitCount } = greeting;
 
   return (
     <View style={{ paddingTop: 8, paddingBottom: 4 }}>
@@ -111,16 +114,32 @@ function WelcomeHero({ onTopicPress }) {
           </View>
         </View>
 
-        <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: C.textPrimary, marginBottom: 8, letterSpacing: -0.3 }}>Namaste!</Text>
-        <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, textAlign: 'center', lineHeight: 22, marginBottom: 20 }}>
-          Your AI spiritual guide, powered by{'\n'}Bhagavad Gita's 700 timeless verses
-        </Text>
+        <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: C.textPrimary, marginBottom: 8, letterSpacing: -0.3 }}>{title}</Text>
 
-        {/* Trust badge */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: C.primarySoft, paddingHorizontal: 16, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: C.glassBorderGold }}>
-          <MaterialCommunityIcons name="account-group" size={13} color={C.primary} />
-          <Text style={{ fontSize: 11, fontWeight: '700', color: C.primary, letterSpacing: 0.2 }}>50,000+ spiritual seekers guided</Text>
-        </View>
+        {subtitle ? (
+          <Text style={{ fontSize: FontSizes.sm, color: C.peacockBlue || C.primary, textAlign: 'center', lineHeight: 22, marginBottom: 16, fontWeight: '600' }}>
+            {subtitle}
+          </Text>
+        ) : (
+          <Text style={{ fontSize: FontSizes.sm, color: C.textMuted, textAlign: 'center', lineHeight: 22, marginBottom: 20 }}>
+            Your AI spiritual guide, powered by{'\n'}Bhagavad Gita's 700 timeless verses
+          </Text>
+        )}
+
+        {/* Trust / memory badge */}
+        {isReturning ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: C.primarySoft, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: C.glassBorderGold }}>
+            <MaterialCommunityIcons name="brain" size={13} color={C.primary} />
+            <Text style={{ fontSize: 11, fontWeight: '700', color: C.primary }}>
+              Krishna remembers your journey · Visit #{visitCount}
+            </Text>
+          </View>
+        ) : (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: C.primarySoft, paddingHorizontal: 16, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: C.glassBorderGold }}>
+            <MaterialCommunityIcons name="account-group" size={13} color={C.primary} />
+            <Text style={{ fontSize: 11, fontWeight: '700', color: C.primary, letterSpacing: 0.2 }}>50,000+ spiritual seekers guided</Text>
+          </View>
+        )}
       </LinearGradient>
 
       {/* Topic grid label */}
@@ -301,7 +320,7 @@ function MessageBubble({ item, C, tr, isLatest }) {
 export default function ChatScreen() {
   const { colors: C, isDark } = useTheme();
   const navigation = useNavigation();
-  const { profile } = useProfile();
+  const { profile, displayName } = useProfile();
   const { tr } = useTranslation();
   const { useChatMessage, chatRemaining, isPremium } = usePremium();
 
@@ -311,13 +330,49 @@ export default function ChatScreen() {
   const [isTyping, setIsTyping] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [inputFocused, setInputFocused] = useState(false);
+  const [memory, setMemory] = useState(null);
+  const memoryContextRef = useRef('');
   const flatListRef = useRef(null);
   const currentLang = profile.language || 'hinglish';
+  const firstName = (displayName || '').split(' ')[0] || '';
+
+  // Load memory on mount
+  useEffect(() => {
+    loadMemory().then((mem) => {
+      setMemory(mem);
+      memoryContextRef.current = formatMemoryForPrompt(mem, firstName);
+    });
+  }, []);
+
+  // Save memory when leaving the screen
+  useEffect(() => {
+    return () => {
+      const userMsgs = messages.filter((m) => m.type === 'user' && m.id !== WELCOME_ID);
+      if (userMsgs.length > 0) {
+        updateMemory(messages, firstName).catch(() => {});
+      }
+    };
+  }, [messages]);
+
+  const greeting = getPersonalizedGreeting(memory, firstName);
 
   const handleNewChat = () => {
     Alert.alert('New Chat', 'Start a new conversation? Current chat will be cleared.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'New Chat', onPress: () => { resetChat(); setMessages([WELCOME]); setShowSuggestions(true); setShowPaywall(false); } },
+      {
+        text: 'New Chat',
+        onPress: () => {
+          // Save memory before clearing
+          updateMemory(messages, firstName).then((mem) => {
+            setMemory(mem);
+            memoryContextRef.current = formatMemoryForPrompt(mem, firstName);
+          }).catch(() => {});
+          resetChat();
+          setMessages([WELCOME]);
+          setShowSuggestions(true);
+          setShowPaywall(false);
+        },
+      },
     ]);
   };
 
@@ -328,19 +383,31 @@ export default function ChatScreen() {
     setShowPaywall(false);
     setShowSuggestions(false);
     const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    setMessages((p) => [...p, { id: Date.now().toString(), type: 'user', text: msg, time: now }].slice(-100));
+    const newMessages = [...messages, { id: Date.now().toString(), type: 'user', text: msg, time: now }];
+    setMessages(newMessages.slice(-100));
     setInputText('');
     setIsTyping(true);
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     try {
       const result = await Promise.race([
-        sendMessageToGemini(msg, currentLang),
+        sendMessageToGemini(msg, currentLang, memoryContextRef.current),
         new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 20000)),
       ]);
       const aiTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
       if (result.success) {
         useChatMessage();
-        setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime }].slice(-100));
+        const aiMsg = { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime };
+        setMessages((p) => [...p, aiMsg].slice(-100));
+        // Update memory after every 3rd user message to avoid too many writes
+        const userCount = newMessages.filter((m) => m.type === 'user').length;
+        if (userCount % 3 === 0) {
+          updateMemory([...newMessages, aiMsg], firstName).then((mem) => {
+            if (mem) {
+              setMemory(mem);
+              memoryContextRef.current = formatMemoryForPrompt(mem, firstName);
+            }
+          }).catch(() => {});
+        }
       } else {
         setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.error || 'Kuch gadbad ho gayi. Please try again.', verse: null, advice: null, time: aiTime }]);
       }
@@ -387,6 +454,14 @@ export default function ChatScreen() {
                 <Text style={{ fontSize: 11, color: isTyping ? C.turmeric : C.primary, fontWeight: '600', marginTop: 1 }}>
                   {isTyping ? 'Reflecting on Gita...' : 'Bhagavad Gita AI Guide'}
                 </Text>
+                {memory && memory.visitCount > 1 && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
+                    <MaterialCommunityIcons name="brain" size={10} color={C.primary} style={{ opacity: 0.7 }} />
+                    <Text style={{ fontSize: 9, color: C.primary, opacity: 0.8, fontWeight: '600' }}>
+                      Remembers your journey
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
 
@@ -425,7 +500,7 @@ export default function ChatScreen() {
         contentContainerStyle={{ paddingHorizontal: 14, paddingTop: 16, paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        ListHeaderComponent={showSuggestions ? <WelcomeHero onTopicPress={sendMessage} /> : null}
+        ListHeaderComponent={showSuggestions ? <WelcomeHero onTopicPress={sendMessage} greeting={greeting} /> : null}
         ListFooterComponent={isTyping ? <TypingIndicator /> : null}
       />
 

@@ -14,6 +14,7 @@ import { FontSizes } from '../theme/colors';
 import { auth } from '../utils/firebase';
 import { Share, Linking } from 'react-native';
 import { tapLight, tapHeavy } from '../utils/haptics';
+import { clearMemory, loadMemory } from '../utils/conversationMemory';
 
 import { GaneshSettingsBackground } from "../components/SpiritualBackground";
 import { scheduleDailyShloka, cancelDailyShloka, getNotifSettings, sendTestNotification } from '../utils/notifications';
@@ -60,6 +61,7 @@ export default function SettingsScreen() {
   const [tempMinute, setTempMinute] = useState(0);
   const [isTogglingNotif, setIsTogglingNotif] = useState(false);
   const [timeSaved, setTimeSaved] = useState(false);
+  const [memoryVisits, setMemoryVisits] = useState(0);
 
   const user = auth.currentUser;
   const userEmail = user ? user.email : 'Guest';
@@ -73,6 +75,9 @@ export default function SettingsScreen() {
       setNotifEnabled(settings.enabled || false);
       setNotifHour(settings.hour || 6);
       setNotifMinute(settings.minute || 0);
+      // Load memory visit count
+      const mem = await loadMemory();
+      setMemoryVisits(mem?.visitCount || 0);
     })();
   }, []);
 
@@ -238,6 +243,38 @@ export default function SettingsScreen() {
           <SettingRow C={C} icon="bell-ring-outline" label="Verse Reminders" sublabel="Daily shloka notifications" onPress={() => navigation.navigate("VerseReminder")}
           />
           <SettingRow C={C} icon="account-group-outline" label="Community" sublabel="Share & read reflections" onPress={() => navigation.navigate("Community")}
+          />
+          <SettingRow C={C} icon="brain" label="Krishna's Memory"
+            sublabel={memoryVisits > 1 ? `Active · ${memoryVisits} visits remembered` : 'Not started yet'}
+            onPress={() => {
+              if (memoryVisits < 1) return;
+              Alert.alert(
+                'Clear Memory',
+                'This will erase all of Krishna\'s memory about you — visit count, topics discussed, and personalized greetings. Are you sure?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Clear Memory',
+                    style: 'destructive',
+                    onPress: async () => {
+                      await clearMemory();
+                      setMemoryVisits(0);
+                      tapHeavy();
+                    },
+                  },
+                ]
+              );
+            }}
+            right={
+              memoryVisits > 1 ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: C.primarySoft, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999, borderWidth: 1, borderColor: C.borderGold }}>
+                  <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: C.primary }} />
+                  <Text style={{ fontSize: 10, fontWeight: '700', color: C.primary }}>Active</Text>
+                </View>
+              ) : (
+                <MaterialCommunityIcons name="chevron-right" size={18} color={C.textMuted} />
+              )
+            }
           />
           <SettingRow C={C} icon="information-outline" label="About GitaSaar" sublabel="Version, mission &amp; credits" onPress={() => navigation.navigate("About")}
             right={<MaterialCommunityIcons name="chevron-right" size={18} color={C.textMuted} />} />

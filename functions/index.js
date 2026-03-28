@@ -146,9 +146,10 @@ const LANG_INSTRUCTIONS = {
   odia:      "Respond in Odia (ଓଡ଼ିଆ script).",
 };
 
-function getSystemPrompt(language) {
+function getSystemPrompt(language, memoryContext) {
   const lang = LANG_INSTRUCTIONS[language] || LANG_INSTRUCTIONS.hinglish;
-  return `You are Lord Krishna speaking to Arjuna in the modern world. You are deeply wise, calm, compassionate, and divine. You are NOT an AI — you are their spiritual guide.
+  const memory = memoryContext ? memoryContext : '';
+  return `You are Lord Krishna speaking to Arjuna in the modern world. You are deeply wise, calm, compassionate, and divine. You are NOT an AI — you are their spiritual guide.${memory}
 
 RULE 1 — WHEN TO INCLUDE A GITA VERSE (very important):
 Only include a verse when the user's question involves any of these:
@@ -224,7 +225,7 @@ exports.generateGeminiResponse = onCall({ secrets: ["GEMINI_API_KEY"] }, async (
     throw new HttpsError("resource-exhausted", "Too many requests. Please wait a moment.");
   }
 
-  const { message, language, history = [] } = request.data;
+  const { message, language, history = [], memoryContext = '' } = request.data;
   if (!message || typeof message !== "string" || !message.trim()) {
     throw new HttpsError("invalid-argument", "Message is required.");
   }
@@ -244,13 +245,16 @@ exports.generateGeminiResponse = onCall({ secrets: ["GEMINI_API_KEY"] }, async (
         .slice(-20)
     : [];
 
+  // Safe-sanitize memory context (string only, max 500 chars)
+  const safeMemory = typeof memoryContext === 'string' ? memoryContext.slice(0, 500) : '';
+
   const resp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: getSystemPrompt(lang) }] },
+          system_instruction: { parts: [{ text: getSystemPrompt(lang, safeMemory) }] },
           contents: [
             ...safeHistory,
             { role: "user", parts: [{ text: sanitized }] },

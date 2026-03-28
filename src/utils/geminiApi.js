@@ -72,7 +72,7 @@ function parseResponse(text) {
 }
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
-export async function sendMessageToGemini(userMessage, language) {
+export async function sendMessageToGemini(userMessage, language, memoryContext = '') {
   if (!userMessage || typeof userMessage !== 'string' || !userMessage.trim())
     return { success: false, error: 'Please enter a message.' };
 
@@ -93,7 +93,7 @@ export async function sendMessageToGemini(userMessage, language) {
     const safeHistory = Array.isArray(history)
       ? history.filter(h => h && h.role && Array.isArray(h.parts) && h.parts.length > 0)
       : [];
-    const result      = await geminiCallable({ message: sanitized, language: lang, history: safeHistory });
+    const result      = await geminiCallable({ message: sanitized, language: lang, history: safeHistory, memoryContext });
     const responseText = result.data?.text;
 
     if (!responseText || typeof responseText !== 'string')
