@@ -52,8 +52,10 @@ export const functions = getFunctions(app, 'asia-south1');
 export async function signup(email, password) {
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
+    console.log('[AUTH DEBUG] signup success:', result.user?.uid, result.user?.email);
     return { success: true, user: result.user };
   } catch (e) {
+    console.log('[AUTH DEBUG] signup error — code:', e.code, '| message:', e.message, '| full:', JSON.stringify(e));
     return { success: false, error: e.code || e.message };
   }
 }
@@ -61,8 +63,10 @@ export async function signup(email, password) {
 export async function login(email, password) {
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
+    console.log('[AUTH DEBUG] login success:', result.user?.uid, result.user?.email);
     return { success: true, user: result.user };
   } catch (e) {
+    console.log('[AUTH DEBUG] login error — code:', e.code, '| message:', e.message, '| full:', JSON.stringify(e));
     return { success: false, error: e.code || e.message };
   }
 }
@@ -178,5 +182,8 @@ export async function logout() {
 }
 
 export function onAuthChange(callback) {
-  return onAuthStateChanged(auth, callback);
+  return onAuthStateChanged(auth, (user) => {
+    console.log('[AUTH DEBUG] onAuthStateChanged triggered — uid:', user?.uid ?? 'null', '| email:', user?.email ?? 'null');
+    callback(user);
+  });
 }

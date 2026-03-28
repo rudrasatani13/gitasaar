@@ -27,6 +27,7 @@ export function ProfileProvider({ children }) {
     });
 
     const unsubAuth = auth.onAuthStateChanged((user) => {
+      console.log('[AUTH DEBUG] ProfileContext onAuthStateChanged — uid:', user?.uid ?? 'null');
       if (!user) {
         setProfile({ name: '', photo: null, language: 'english' });
         setLocalPhotoUri(null);
