@@ -38,41 +38,57 @@ let Speech = null;
 try { Speech = require('expo-speech'); } catch (e) {}
 
 async function generateSpeech(text, label) {
-  try {
-    const isNative = Platform.OS !== 'web';
-    let fileUri = null;
+  const isNative = Platform.OS !== 'web';
+  let fileUri = null;
 
-    // Check local cache first (native only)
-    if (isNative) {
+  // Step 1: Check local cache (native only) — isolated so a cache miss never triggers fallback
+  if (isNative) {
+    try {
       const fileName = `audio_${label}_${hashString(text)}.mp3`;
       fileUri = FileSystem.cacheDirectory + fileName;
       const fileInfo = await FileSystem.getInfoAsync(fileUri);
       if (fileInfo.exists) return { uri: fileUri, isLocal: true };
+    } catch (e) {
+      console.warn('[AUDIO] Cache check failed:', e?.message);
+      fileUri = null; // skip caching this round
     }
+  }
 
-    // Call Cloud Function instead of ElevenLabs directly
+  // Step 2: Call Cloud Function — isolated so we see the exact error if it fails
+  let audioBase64;
+  try {
     const result = await generateSpeechAudio({ text });
-    const { audioBase64 } = result.data;
-
-    if (!audioBase64) return { fallback: true, text };
-
-    if (isNative && fileUri) {
-      // Cache the audio file locally
-      await FileSystem.writeAsStringAsync(fileUri, audioBase64, { encoding: FileSystem.EncodingType.Base64 });
-      return { uri: fileUri, isLocal: true };
-    }
-
-    // Web: convert base64 to blob
-    const byteChars = atob(audioBase64);
-    const byteArray = new Uint8Array(byteChars.length);
-    for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
-    const blob = new Blob([byteArray], { type: 'audio/mpeg' });
-    return { blob, isLocal: false };
+    audioBase64 = result.data?.audioBase64;
   } catch (e) {
-    // Log real error so it's visible in console/EAS logs — do NOT silently swallow
-    console.warn('[AUDIO] ElevenLabs cloud function failed — code:', e?.code, '| message:', e?.message, '| details:', e?.details);
+    console.warn('[AUDIO] Cloud function error — code:', e?.code, '| message:', e?.message, '| details:', e?.details);
     return { fallback: true, text };
   }
+
+  if (!audioBase64) {
+    console.warn('[AUDIO] Cloud function returned empty audioBase64');
+    return { fallback: true, text };
+  }
+
+  // Step 3a: Native — write to cache and return file URI
+  if (isNative) {
+    if (fileUri) {
+      try {
+        await FileSystem.writeAsStringAsync(fileUri, audioBase64, { encoding: FileSystem.EncodingType.Base64 });
+        return { uri: fileUri, isLocal: true };
+      } catch (e) {
+        console.warn('[AUDIO] FileSystem write failed:', e?.message, '— playing from base64 directly');
+      }
+    }
+    // FileSystem write failed or no fileUri — return base64 directly so audio still plays
+    return { base64: audioBase64, isLocal: false };
+  }
+
+  // Step 3b: Web — convert base64 to blob
+  const byteChars = atob(audioBase64);
+  const byteArray = new Uint8Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+  const blob = new Blob([byteArray], { type: 'audio/mpeg' });
+  return { blob, isLocal: false };
 }
 
 // Fallback: use device TTS when ElevenLabs fails
@@ -118,9 +134,26 @@ function stopWebAudio() {
 async function playNative(source) {
   try {
     const { Audio } = require('expo-av');
-    if (!source.uri) return;
 
-    const { sound } = await Audio.Sound.createAsync({ uri: source.uri }, { shouldPlay: true });
+    // Required on Android — without this, audio plays silently through earpiece or not at all
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    });
+
+    // Support both file URI and raw base64 (FileSystem write fallback)
+    let audioSource;
+    if (source.uri) {
+      audioSource = { uri: source.uri };
+    } else if (source.base64) {
+      audioSource = { uri: `data:audio/mpeg;base64,${source.base64}` };
+    } else {
+      return;
+    }
+
+    const { sound } = await Audio.Sound.createAsync(audioSource, { shouldPlay: true });
     return new Promise((resolve) => {
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.didJustFinish) {
@@ -130,7 +163,9 @@ async function playNative(source) {
       });
       playNative._current = sound;
     });
-  } catch (e) { }
+  } catch (e) {
+    console.warn('[AUDIO] playNative error:', e?.message);
+  }
 }
 
 function stopNativeAudio() {
