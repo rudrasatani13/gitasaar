@@ -1,84 +1,133 @@
 // src/components/SpiritualBackground.js
-import React, { useRef, useEffect } from 'react';
-import { View, Image, Animated, Dimensions, Platform } from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
+// SPACE THEME — animated twinkling starfield + nebula blobs
+import React, { useRef, useEffect, useMemo } from 'react';
+import { View, Animated, Dimensions } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const { width: W, height: H } = Dimensions.get('window');
 
-// Load all images
-const GODS = {};
-try { GODS.krishna = require('../../assets/images/gods/krishna-bg.png'); } catch(e) {}
-try { GODS.shiva = require('../../assets/images/gods/shiva-bg.png'); } catch(e) {}
-try { GODS.hanuman = require('../../assets/images/gods/hanuman-bg.png'); } catch(e) {}
-try { GODS.ganesh = require('../../assets/images/gods/ganesh-bg.png'); } catch(e) {}
-try { GODS.om = require('../../assets/images/gods/om-bg.png'); } catch(e) {}
-try { GODS.lotus = require('../../assets/images/gods/lotus-bg.png'); } catch(e) {}
+// Pre-generate star data at module level (stable across renders)
+function makeStars(count) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: Math.random() * W,
+    y: Math.random() * H,
+    size: Math.random() * 2.2 + 0.4,
+    baseOpacity: Math.random() * 0.55 + 0.25,
+    group: i % 5,
+  }));
+}
+const ALL_STARS = makeStars(90);
 
-// Blend mode style - makes black pixels transparent
-const blendStyle = Platform.OS === 'web' ? { mixBlendMode: 'screen' } : {};
+// Nebula blob config
+const NEBULA_BLOBS = [
+  { top: -70, right: -90, size: 300, color: '#8B5CF6', opacity: 0.055 },
+  { bottom: -100, left: -70, size: 260, color: '#3B82F6', opacity: 0.050 },
+  { top: '30%', right: -60, size: 200, color: '#00D4FF', opacity: 0.035 },
+  { top: '60%', left: -50, size: 180, color: '#7C3AED', opacity: 0.040 },
+  { top: '10%', left: '30%', size: 140, color: '#F59E0B', opacity: 0.018 },
+];
 
-// Reusable god background component
-function GodBackground({ source, size, opacity, bottom, right, left }) {
-  const fadeIn = useRef(new Animated.Value(0)).current;
-  const { isDark } = useTheme();
-
-  useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 1500, useNativeDriver: true }).start();
-  }, []);
-
-  if (!source) return null; if (isDark) return null;
-
-  // Slightly higher opacity in dark mode since blend mode works better
-  const finalOpacity = isDark ? opacity * 1.4 : opacity;
-
+function NebulaBlobs() {
   return (
-    <Animated.View style={{
-      position: 'absolute',
-      bottom: bottom ?? 60,
-      right: right ?? -20,
-      left: left,
-      width: size,
-      height: size,
-      opacity: Animated.multiply(fadeIn, new Animated.Value(finalOpacity)),
-    }}>
-      <Image
-        source={source}
-        style={[{ width: '100%', height: '100%' }, blendStyle]}
-        resizeMode="contain"
-      />
-    </Animated.View>
+    <>
+      {NEBULA_BLOBS.map((b, i) => (
+        <View
+          key={i}
+          style={{
+            position: 'absolute',
+            ...(b.top !== undefined ? { top: b.top } : {}),
+            ...(b.bottom !== undefined ? { bottom: b.bottom } : {}),
+            ...(b.left !== undefined ? { left: b.left } : {}),
+            ...(b.right !== undefined ? { right: b.right } : {}),
+            width: b.size,
+            height: b.size,
+            borderRadius: b.size / 2,
+            backgroundColor: b.color,
+            opacity: b.opacity,
+          }}
+        />
+      ))}
+    </>
   );
 }
 
-// ====== CHAT SCREEN - Om ======
-export function ChatBackground() {
-  return <GodBackground source={GODS.om} size={width * 0.6} opacity={0.07} bottom={80} right={-20} />;
+function StarGroup({ stars, anim }) {
+  return (
+    <>
+      {stars.map((s) => (
+        <Animated.View
+          key={s.id}
+          style={{
+            position: 'absolute',
+            left: s.x,
+            top: s.y,
+            width: s.size,
+            height: s.size,
+            borderRadius: s.size / 2,
+            backgroundColor: '#FFFFFF',
+            opacity: Animated.multiply(anim, s.baseOpacity),
+          }}
+        />
+      ))}
+    </>
+  );
 }
 
-// ====== HOME SCREEN - Lotus (full corner) ======
-export function LotusHomeBackground() {
-  return <GodBackground source={GODS.lotus} size={width * 0.85} opacity={0.08} bottom={0} left={0} right={undefined} />;
+export function StarfieldBackground() {
+  const anims = [
+    useRef(new Animated.Value(0.45)).current,
+    useRef(new Animated.Value(0.70)).current,
+    useRef(new Animated.Value(0.30)).current,
+    useRef(new Animated.Value(0.60)).current,
+    useRef(new Animated.Value(0.50)).current,
+  ];
+
+  useEffect(() => {
+    const configs = [
+      { dur: 2000, delay: 0,    min: 0.15, max: 1.0 },
+      { dur: 1600, delay: 350,  min: 0.25, max: 0.95 },
+      { dur: 2600, delay: 700,  min: 0.10, max: 1.0 },
+      { dur: 1900, delay: 200,  min: 0.35, max: 1.0 },
+      { dur: 3100, delay: 550,  min: 0.20, max: 0.85 },
+    ];
+
+    const loops = anims.map((anim, i) => {
+      const { dur, delay, min, max } = configs[i];
+      return Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(anim, { toValue: max, duration: dur, useNativeDriver: true }),
+          Animated.timing(anim, { toValue: min, duration: dur * 0.85, useNativeDriver: true }),
+        ])
+      );
+    });
+
+    loops.forEach(l => l.start());
+    return () => loops.forEach(l => l.stop());
+  }, []);
+
+  return (
+    <View
+      pointerEvents="none"
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}
+    >
+      <NebulaBlobs />
+      {anims.map((anim, i) => (
+        <StarGroup
+          key={i}
+          anim={anim}
+          stars={ALL_STARS.filter(s => s.group === i)}
+        />
+      ))}
+    </View>
+  );
 }
 
-// ====== VERSES SCREEN - Krishna ======
-export function KrishnaVersesBackground() {
-  return <GodBackground source={GODS.krishna} size={width * 0.55} opacity={0.07} bottom={60} right={-10} />;
-}
-
-// ====== JOURNAL SCREEN - Shiva ======
-export function ShivaJournalBackground() {
-  return <GodBackground source={GODS.shiva} size={width * 0.5} opacity={0.08} bottom={60} right={-10} />;
-}
-
-// ====== SETTINGS SCREEN - Ganesh ======
-export function GaneshSettingsBackground() {
-  return <GodBackground source={GODS.ganesh} size={width * 0.55} opacity={0.08} bottom={80} right={-20} />;
-}
-
-// ====== QUIZ SCREEN - Hanuman ======
-export function HanumanQuizBackground() {
-  return <GodBackground source={GODS.hanuman} size={width * 0.45} opacity={0.08} bottom={40} right={-10} />;
-}
-
-// Disabled - not needed since each screen has its own god
-export function ResponseImage() { return null; }
+// All per-screen exports now delegate to StarfieldBackground
+export function ChatBackground()        { return <StarfieldBackground />; }
+export function LotusHomeBackground()   { return <StarfieldBackground />; }
+export function KrishnaVersesBackground() { return <StarfieldBackground />; }
+export function ShivaJournalBackground()  { return <StarfieldBackground />; }
+export function GaneshSettingsBackground() { return <StarfieldBackground />; }
+export function HanumanQuizBackground()    { return <StarfieldBackground />; }
+export function ResponseImage()            { return null; }

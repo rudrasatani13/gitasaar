@@ -206,7 +206,7 @@ export default function MeditationScreen({ navigation }) {
   const cyclePos = elapsed % 13;
   const breatheText = !isRunning ? '' : cyclePos < 4 ? 'Breathe In' : cyclePos < 6 ? 'Hold' : cyclePos < 12 ? 'Breathe Out' : '';
 
-  const bgColors = isDark ? ['#0A0808', '#12100E', '#0A0808'] : ['#FDF8EF', '#F8EDD8', '#FDF8EF'];
+  const bgColors = ['#000005', '#050510', '#000005'];
 
   if (isComplete) {
     return (

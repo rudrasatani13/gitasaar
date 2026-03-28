@@ -196,7 +196,7 @@ export default function PremiumScreen({ navigation }) {
         {/* Error */}
         {error ? (
           <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
-            <View style={{ backgroundColor: '#FFF0F0', borderRadius: 12, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: '#FFD0D0' }}>
+            <View style={{ backgroundColor: 'rgba(239,68,68,0.10)', borderRadius: 12, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: 'rgba(239,68,68,0.25)' }}>
               <MaterialCommunityIcons name="alert-circle" size={16} color={C.error} />
               <Text style={{ fontSize: FontSizes.sm, color: C.error, flex: 1 }}>{error}</Text>
               <TouchableOpacity onPress={() => setError('')}>

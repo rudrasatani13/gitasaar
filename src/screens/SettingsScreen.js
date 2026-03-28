@@ -184,9 +184,8 @@ export default function SettingsScreen() {
             onPress={notifEnabled ? () => { setTempHour(notifHour); setTempMinute(notifMinute); setShowTimePicker(true); } : undefined}
             right={<Switch value={notifEnabled} onValueChange={handleNotifToggle}
               trackColor={{ false: C.border, true: C.primarySoft }} thumbColor={notifEnabled ? C.primary : C.textMuted} />} />
-          <SettingRow C={C} icon={isDark ? 'weather-night' : 'white-balance-sunny'} label={tr('darkMode')} sublabel={isDark ? 'On' : 'Off'}
-            right={<Switch value={isDark} onValueChange={toggleTheme}
-              trackColor={{ false: C.border, true: C.primarySoft }} thumbColor={isDark ? C.primary : C.textMuted} />} isLast />
+          <SettingRow C={C} icon="star-four-points-outline" label="Space Theme" sublabel="Always On"
+            right={<View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: C.nebulaSoft, borderWidth: 1, borderColor: C.nebulaPurple + '40' }}><Text style={{ fontSize: 11, fontWeight: '700', color: C.nebulaPurple }}>Active</Text></View>} isLast />
         </GlassCard>
 
         {/* Time Picker */}
@@ -225,9 +224,9 @@ export default function SettingsScreen() {
           </GlassCard>
         )}
         {timeSaved && !showTimePicker && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#E8F5E9', borderRadius: 12, paddingVertical: 10, marginBottom: 12 }}>
-            <MaterialCommunityIcons name="check-circle" size={16} color="#2E7D50" />
-            <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: '#2E7D50' }}>Time saved!</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: 'rgba(16,185,129,0.12)', borderRadius: 12, paddingVertical: 10, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(16,185,129,0.25)' }}>
+            <MaterialCommunityIcons name="check-circle" size={16} color="#10B981" />
+            <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: '#10B981' }}>Time saved!</Text>
           </View>
         )}
 

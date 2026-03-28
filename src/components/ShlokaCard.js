@@ -60,7 +60,7 @@ export default function ShlokaCard({ verse, animate }) {
           {/* Chapter badge + theme */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
             <LinearGradient
-              colors={isDark ? ['rgba(224,168,80,0.20)', 'rgba(224,168,80,0.08)'] : ['rgba(194,136,64,0.18)', 'rgba(194,136,64,0.05)']}
+              colors={['rgba(224,168,80,0.18)', 'rgba(224,168,80,0.07)']}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: C.glassBorderGold }}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
             >
@@ -79,16 +79,14 @@ export default function ShlokaCard({ verse, animate }) {
           {/* Sanskrit text — rich warm bubble */}
           <View style={{ borderRadius: 18, overflow: 'hidden', marginBottom: 14 }}>
             <LinearGradient
-              colors={isDark
-                ? ['rgba(224,168,80,0.15)', 'rgba(0,0,0,0.8)']
-                : ['rgba(253,240,210,0.90)', 'rgba(255,248,230,0.70)']}
+              colors={['rgba(224,168,80,0.12)', 'rgba(5,5,20,0.85)']}
               style={{ padding: 20, alignItems: 'center', borderWidth: 1, borderColor: C.glassBorderGold, borderRadius: 18 }}
             >
               {/* Om watermark */}
               <Text style={{ position: 'absolute', fontSize: 80, color: C.primary, opacity: 0.05, fontWeight: '900' }}>ॐ</Text>
               <Text style={{
                 fontSize: FontSizes.lg,
-                color: isDark ? '#FFCC80' : '#8D5A00',
+                color: '#FCD34D',
                 lineHeight: 34,
                 textAlign: 'center',
                 fontWeight: '600',

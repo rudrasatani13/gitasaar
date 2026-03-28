@@ -67,9 +67,9 @@ function TabButton({ route, focused, onPress, C, isDark }) {
       <TouchableOpacity onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut} activeOpacity={1}
         style={{ alignItems: 'center', paddingVertical: 10, gap: 3 }}>
         <Animated.View style={{ transform: [{ scale: iconScale }] }}>
-          <AnimatedTabIcon name={route.name} focused={focused} color={focused ? C.primary : isDark ? 'rgba(255,255,255,0.40)' : 'rgba(0,0,0,0.30)'} size={22} />
+          <AnimatedTabIcon name={route.name} focused={focused} color={focused ? C.primary : 'rgba(139,92,246,0.50)'} size={22} />
         </Animated.View>
-        <Text style={{ fontSize: 10, fontWeight: focused ? '700' : '500', color: focused ? C.primary : isDark ? 'rgba(255,255,255,0.40)' : 'rgba(0,0,0,0.35)', letterSpacing: 0.2 }}>{label}</Text>
+        <Text style={{ fontSize: 10, fontWeight: focused ? '700' : '500', color: focused ? C.primary : 'rgba(139,92,246,0.50)', letterSpacing: 0.2 }}>{label}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -80,25 +80,25 @@ function CustomTabBar({ state, descriptors, navigation }) {
   return (
     // Floating pill wrapper — sits above the screen
     <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 28 : 16, left: 20, right: 20, zIndex: 100 }}>
-      {/* Glass pill — clean solid dark background to prevent BlurView grey glow in pure black mode */}
+      {/* Glass pill — cosmic dark background with purple border */}
       <View style={{
         borderRadius: 36,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(194,136,64,0.20)',
-        backgroundColor: isDark ? C.bgCardElevated : 'transparent',
+        borderColor: 'rgba(139,92,246,0.30)',
+        backgroundColor: C.bgCardElevated,
       }}>
-        {Platform.OS !== 'web' && !isDark && (
+        {Platform.OS !== 'web' && (
           <BlurView
             intensity={70}
-            tint="light"
+            tint="dark"
             style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
           />
         )}
         <View style={{
           flexDirection: 'row',
-          backgroundColor: Platform.OS === 'web' && !isDark
-            ? 'rgba(255,252,245,0.88)'
+          backgroundColor: Platform.OS === 'web'
+            ? 'rgba(8,8,30,0.92)'
             : 'transparent',
           paddingHorizontal: 4,
           paddingVertical: 2,
@@ -110,7 +110,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
               if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
             };
             return (
-              <View key={route.key} style={{ flex: 1, borderRadius: 32, overflow: 'hidden', backgroundColor: focused ? (isDark ? 'rgba(224,168,80,0.15)' : 'rgba(194,136,64,0.12)') : 'transparent' }}>
+              <View key={route.key} style={{ flex: 1, borderRadius: 32, overflow: 'hidden', backgroundColor: focused ? 'rgba(224,168,80,0.15)' : 'transparent' }}>
                 <TabButton route={route} focused={focused} onPress={onPress} C={C} isDark={isDark} />
               </View>
             );

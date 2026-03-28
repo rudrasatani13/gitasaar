@@ -151,9 +151,9 @@ export default function VerseReminderScreen({ navigation }) {
         {/* Permission warning */}
         {!permGranted && Platform.OS !== 'web' && (
           <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
-            <View style={{ backgroundColor: '#FFF3E0', borderRadius: 12, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: '#FFE0B2' }}>
-              <MaterialCommunityIcons name="alert-circle-outline" size={18} color="#E8793A" />
-              <Text style={{ fontSize: FontSizes.xs, color: '#E65100', flex: 1 }}>Notification permission needed. Enable it to receive verse reminders.</Text>
+            <View style={{ backgroundColor: 'rgba(245,158,11,0.10)', borderRadius: 12, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)' }}>
+              <MaterialCommunityIcons name="alert-circle-outline" size={18} color="#F59E0B" />
+              <Text style={{ fontSize: FontSizes.xs, color: '#FCD34D', flex: 1 }}>Notification permission needed. Enable it to receive verse reminders.</Text>
             </View>
           </View>
         )}

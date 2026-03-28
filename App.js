@@ -22,14 +22,14 @@ class ErrorBoundary extends React.Component {
       const errMsg = this.state.error?.message || String(this.state.error) || 'Unknown error';
       const errStack = this.state.error?.stack ? '\n\n' + this.state.error.stack.slice(0, 600) : '';
       return (
-        <View style={{ flex: 1, backgroundColor: '#FDF8EF', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+        <View style={{ flex: 1, backgroundColor: '#000005', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
           <Text style={{ fontSize: 32, marginBottom: 16 }}>{'\u0950'}</Text>
-          <Text style={{ fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 8 }}>Something went wrong</Text>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: '#F0F0FF', marginBottom: 8 }}>Something went wrong</Text>
           {/* [AUTH DEBUG] show real error so it's visible on device/APK — remove before production */}
-          <Text selectable style={{ fontSize: 11, color: '#c0392b', backgroundColor: '#fdecea', padding: 10, borderRadius: 8, marginBottom: 14, fontFamily: 'monospace', textAlign: 'left', width: '100%' }}>
+          <Text selectable style={{ fontSize: 11, color: '#F87171', backgroundColor: 'rgba(239,68,68,0.12)', padding: 10, borderRadius: 8, marginBottom: 14, fontFamily: 'monospace', textAlign: 'left', width: '100%' }}>
             {errMsg}{errStack}
           </Text>
-          <Text onPress={this.handleRetry} style={{ fontSize: 16, fontWeight: '700', color: '#C28840', paddingVertical: 12, paddingHorizontal: 28, borderWidth: 1.5, borderColor: '#C28840', borderRadius: 12, overflow: 'hidden' }}>Try Again</Text>
+          <Text onPress={this.handleRetry} style={{ fontSize: 16, fontWeight: '700', color: '#E0A850', paddingVertical: 12, paddingHorizontal: 28, borderWidth: 1.5, borderColor: '#E0A850', borderRadius: 12, overflow: 'hidden' }}>Try Again</Text>
         </View>
       );
     }
@@ -53,7 +53,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 
 function AppContent() {
   React.useEffect(() => { try { initSecurity(); } catch(e) {} }, []);
-  React.useEffect(() => { if (typeof document !== "undefined") { document.body.style.margin="0"; document.body.style.padding="0"; document.body.style.overflow="hidden"; document.body.style.background="#FDF8EF"; document.documentElement.style.height="100%"; document.body.style.height="100%"; const root=document.getElementById("root"); if(root){root.style.height="100%";root.style.width="100%"} } }, []);
+  React.useEffect(() => { if (typeof document !== "undefined") { document.body.style.margin="0"; document.body.style.padding="0"; document.body.style.overflow="hidden"; document.body.style.background="#000005"; document.documentElement.style.height="100%"; document.body.style.height="100%"; const root=document.getElementById("root"); if(root){root.style.height="100%";root.style.width="100%"} } }, []);
   const { colors } = useTheme();
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener(response => {
@@ -75,7 +75,7 @@ export default function App() {
     NotoSans_400Regular, NotoSans_500Medium, NotoSans_700Bold,
     NotoSerifDevanagari_400Regular, NotoSerifDevanagari_700Bold,
   });
-  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#FDF8EF' }} />;
+  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#000005' }} />;
 
   return (
     <ErrorBoundary>

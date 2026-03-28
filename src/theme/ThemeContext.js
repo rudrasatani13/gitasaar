@@ -1,17 +1,15 @@
 // src/theme/ThemeContext.js
-import React, { createContext, useContext, useState } from 'react';
-import { LightColors, DarkColors } from './colors';
+import React, { createContext, useContext } from 'react';
+import { SpaceColors } from './colors';
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(false);
-
-  const toggleTheme = () => setIsDark(!isDark);
-  const colors = isDark ? DarkColors : LightColors;
+  // Space theme is always active — no toggle needed
+  const toggleTheme = () => {};
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme, colors }}>
+    <ThemeContext.Provider value={{ isDark: true, toggleTheme, colors: SpaceColors }}>
       {children}
     </ThemeContext.Provider>
   );

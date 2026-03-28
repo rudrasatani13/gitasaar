@@ -116,7 +116,7 @@ export default function ProfileEditScreen({ navigation }) {
             <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: C.textPrimary }}>Edit Profile</Text>
           </View>
           <TouchableOpacity onPress={handleSave} disabled={saving}
-            style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999, backgroundColor: saved ? '#2E7D50' : C.primary, opacity: saving ? 0.7 : 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999, backgroundColor: saved ? '#10B981' : C.primary, opacity: saving ? 0.7 : 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             {saving && <ActivityIndicator size="small" color={C.textOnPrimary} />}
             <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: C.textOnPrimary }}>
               {saving ? 'Saving...' : saved ? 'Saved!' : 'Save'}
@@ -150,9 +150,9 @@ export default function ProfileEditScreen({ navigation }) {
             </TouchableOpacity>
             {isRealPhoto && (
               <TouchableOpacity onPress={() => setTempPhoto('__remove__')}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: '#FFF0F0', borderWidth: 1, borderColor: '#FFD0D0' }}>
-                <MaterialCommunityIcons name="trash-can-outline" size={14} color="#D63B2F" />
-                <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: '#D63B2F' }}>Remove</Text>
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: 'rgba(239,68,68,0.10)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.25)' }}>
+                <MaterialCommunityIcons name="trash-can-outline" size={14} color="#EF4444" />
+                <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: '#EF4444' }}>Remove</Text>
               </TouchableOpacity>
             )}
           </View>
