@@ -9,7 +9,7 @@ import { StarfieldBackground } from '../components/SpiritualBackground';
 
 // autoNavigate=false when used as a loading overlay — skips the Auth redirect timer
 export default function SplashScreen({ navigation, autoNavigate = true }) {
-  const { colors: C } = useTheme();
+  const { colors: C, isDark } = useTheme();
   const omScale = useRef(new Animated.Value(0.3)).current;
   const omOpacity = useRef(new Animated.Value(0)).current;
   const ringRotate = useRef(new Animated.Value(0)).current;
@@ -71,25 +71,25 @@ export default function SplashScreen({ navigation, autoNavigate = true }) {
   return (
     <LinearGradient colors={C.gradientWarm} style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
       <StarfieldBackground />
-      {/* Ocean glow blobs */}
-      <View style={{ position: 'absolute', top: -80, right: -80, width: 260, height: 260, borderRadius: 130, backgroundColor: '#0EA5E9', opacity: 0.07 }} />
-      <View style={{ position: 'absolute', bottom: -100, left: -100, width: 300, height: 300, borderRadius: 150, backgroundColor: '#0D9488', opacity: 0.06 }} />
-      <View style={{ position: 'absolute', top: '40%', right: -60, width: 160, height: 160, borderRadius: 80, backgroundColor: '#22D3EE', opacity: 0.05 }} />
+      {/* Background glows */}
+      <View style={{ position: 'absolute', top: -80, right: -80, width: 260, height: 260, borderRadius: 130, backgroundColor: C.primary, opacity: isDark ? 0.06 : 0.04 }} />
+      <View style={{ position: 'absolute', bottom: -100, left: -100, width: 300, height: 300, borderRadius: 150, backgroundColor: C.primaryDark, opacity: isDark ? 0.05 : 0.03 }} />
+      <View style={{ position: 'absolute', top: '40%', right: -60, width: 160, height: 160, borderRadius: 80, backgroundColor: C.primary, opacity: isDark ? 0.04 : 0.02 }} />
 
       {/* Main column - everything stacked vertically */}
       <View style={{ alignItems: 'center' }}>
         {/* Om + Ring box */}
         <View style={{ width: 160, height: 160, justifyContent: 'center', alignItems: 'center', marginBottom: 44 }}>
-          {/* Ocean glow pulse */}
-          <Animated.View style={{ position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: '#0EA5E9', opacity: Animated.multiply(glowPulse, new Animated.Value(0.7)) }} />
-          {/* Gold inner glow */}
-          <Animated.View style={{ position: 'absolute', width: 100, height: 100, borderRadius: 50, backgroundColor: C.primary, opacity: Animated.multiply(glowPulse, new Animated.Value(0.5)) }} />
+          {/* Gold glow pulse */}
+          <Animated.View style={{ position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: C.primary, opacity: Animated.multiply(glowPulse, new Animated.Value(0.65)) }} />
+          {/* Inner glow */}
+          <Animated.View style={{ position: 'absolute', width: 100, height: 100, borderRadius: 50, backgroundColor: C.primaryLight, opacity: Animated.multiply(glowPulse, new Animated.Value(0.45)) }} />
           <Animated.View style={{ position: 'absolute', width: 160, height: 160, opacity: ringOpacity, transform: [{ rotate: spin }] }}>
             <View style={{ width: 160, height: 160, borderRadius: 80, borderWidth: 1.5, borderColor: C.borderGoldStrong, borderStyle: 'dashed' }} />
             <View style={{ position: 'absolute', top: -4, left: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary }} />
-            <View style={{ position: 'absolute', bottom: -4, left: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: '#22D3EE' }} />
-            <View style={{ position: 'absolute', left: -4, top: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: '#14B8A6' }} />
-            <View style={{ position: 'absolute', right: -4, top: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary }} />
+            <View style={{ position: 'absolute', bottom: -4, left: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryLight }} />
+            <View style={{ position: 'absolute', left: -4, top: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primary }} />
+            <View style={{ position: 'absolute', right: -4, top: 76, width: 8, height: 8, borderRadius: 4, backgroundColor: C.primaryLight }} />
           </Animated.View>
           <Animated.View style={{ opacity: omOpacity, transform: [{ scale: omScale }] }}><AppLogo size={100} /></Animated.View>
         </View>

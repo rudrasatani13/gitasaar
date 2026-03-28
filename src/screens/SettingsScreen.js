@@ -184,8 +184,9 @@ export default function SettingsScreen() {
             onPress={notifEnabled ? () => { setTempHour(notifHour); setTempMinute(notifMinute); setShowTimePicker(true); } : undefined}
             right={<Switch value={notifEnabled} onValueChange={handleNotifToggle}
               trackColor={{ false: C.border, true: C.primarySoft }} thumbColor={notifEnabled ? C.primary : C.textMuted} />} />
-          <SettingRow C={C} icon="waves" label="Ocean Theme" sublabel="Serene & Always On"
-            right={<View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: C.nebulaSoft, borderWidth: 1, borderColor: C.nebulaPurple + '50' }}><Text style={{ fontSize: 11, fontWeight: '700', color: C.nebulaPurple }}>Active</Text></View>} isLast />
+          <SettingRow C={C} icon={isDark ? 'weather-night' : 'white-balance-sunny'} label={tr('darkMode')} sublabel={isDark ? 'Space Mode' : 'Light Mode'}
+            right={<Switch value={isDark} onValueChange={toggleTheme}
+              trackColor={{ false: C.border, true: C.primarySoft }} thumbColor={isDark ? C.primary : C.textMuted} />} isLast />
         </GlassCard>
 
         {/* Time Picker */}

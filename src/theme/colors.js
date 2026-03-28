@@ -1,101 +1,156 @@
 // src/theme/colors.js
-// SERENE OCEAN THEME — Deep midnight ocean with teal, cyan, sky-blue & spiritual gold
+// LIGHT: Warm Spiritual Parchment  |  DARK: Pure Black Starlight Gold
 
 const shared = {
-  saffron: '#F59E0B',
+  saffron: '#E8793A',
   maroon: '#7B1830',
   deepRed: '#A02530',
   lotusRose: '#C95A6A',
-  turmeric: '#F59E0B',
-  vermillion: '#EF4444',
-  success: '#10B981',
-  error: '#EF4444',
-  warning: '#F59E0B',
-  info: '#0EA5E9',
+  turmeric: '#D4962A',
+  vermillion: '#D63B2F',
+  success: '#2E7D50',
+  error: '#C62828',
+  warning: '#E88A2E',
+  info: '#1565C0',
 };
 
-// SERENE OCEAN — single universal palette
-export const SpaceColors = {
+// ─── LIGHT MODE: Warm Spiritual Parchment ───────────────────────────────────
+export const LightColors = {
   ...shared,
+  primary: '#C28840',
+  primaryLight: '#DBA04E',
+  primaryDark: '#9E6B2C',
+  peacockBlue: '#0E6B6B',
+  peacockLight: '#14918E',
 
-  // Primary: Spiritual Gold — kept sacred & warm for spiritual elements
-  primary: '#E0A850',
+  nebulaPurple: '#0E6B6B',
+  nebulaLight: '#14918E',
+  cosmicBlue: '#0E6B6B',
+  starlightCyan: '#14918E',
+
+  primarySoft: 'rgba(194, 136, 64, 0.10)',
+  primaryGlow: 'rgba(194, 136, 64, 0.25)',
+  saffronSoft: 'rgba(232, 121, 58, 0.12)',
+  lotusSoft: 'rgba(201, 90, 106, 0.10)',
+  nebulaSoft: 'rgba(14, 107, 107, 0.10)',
+  cosmicSoft: 'rgba(14, 107, 107, 0.10)',
+
+  bgPrimary: '#FAFAFA',
+  bgSecondary: '#F5F5F5',
+  bgTertiary: '#EEEEEE',
+  bgCard: '#FFFFFF',
+  bgCardElevated: '#FFFFFF',
+  bgInput: '#F5F5F5',
+
+  textPrimary: '#212121',
+  textSecondary: '#424242',
+  textMuted: '#757575',
+  textOnPrimary: '#FFFFFF',
+  textSanskrit: '#8D6E63',
+  textGold: '#B8860B',
+
+  border: '#E0E0E0',
+  borderLight: '#EEEEEE',
+  borderGold: 'rgba(194, 136, 64, 0.3)',
+  borderGoldStrong: 'rgba(194, 136, 64, 0.6)',
+  divider: '#E0E0E0',
+
+  glassBg: 'rgba(255, 252, 245, 0.55)',
+  glassBgStrong: 'rgba(255, 252, 245, 0.82)',
+  glassInputBg: 'rgba(255, 255, 255, 0.70)',
+  glassBorder: 'rgba(194, 136, 64, 0.18)',
+  glassBorderGold: 'rgba(194, 136, 64, 0.40)',
+  glassHighlight: 'rgba(255, 255, 255, 0.60)',
+  glassShadow: { shadowColor: '#C28840', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 24, elevation: 8 },
+  glassShimmer: 'rgba(255, 255, 255, 0.40)',
+
+  gradientWarm: ['#FDF8EF', '#FAF0DE', '#F5E8CC'],
+  gradientGold: ['#D4AF37', '#B8860B', '#9E6B2C'],
+  gradientSunrise: ['#FFF8E1', '#FFE0B2', '#FFCC80'],
+  gradientTemple: ['#E8793A', '#A02530'],
+  gradientGlass: ['rgba(255,252,245,0.75)', 'rgba(255,248,235,0.55)'],
+  gradientHeader: ['rgba(253,248,239,0.96)', 'rgba(250,240,222,0.90)'],
+  gradientNebula: ['#FDF8EF', '#FAF0DE', '#F5E8CC'],
+  gradientCosmic: ['#FDF8EF', '#FAF0DE', '#F5E8CC'],
+
+  shadow: { shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.10, shadowRadius: 16, elevation: 6 },
+  shadowGold: { shadowColor: '#C28840', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.20, shadowRadius: 12, elevation: 4 },
+  shadowLight: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+
+  statusBar: 'dark',
+};
+
+// ─── DARK MODE: Pure Black Starlight Gold ───────────────────────────────────
+export const DarkColors = {
+  ...shared,
+  primary: '#E0A850',           // Rich spiritual gold
   primaryLight: '#F5C842',
   primaryDark: '#C28840',
+  peacockBlue: '#D4AF37',       // Warm metallic gold (secondary accent)
+  peacockLight: '#F0C060',
 
-  // Ocean primary accents
-  peacockBlue: '#22D3EE',   // Bright ocean cyan — clear & calm
-  peacockLight: '#67E8F9',  // Light seafoam
+  // Reusing token names — all gold/starlight in dark mode
+  nebulaPurple: '#E0A850',      // gold
+  nebulaLight: '#F5C842',
+  cosmicBlue: '#D4AF37',
+  starlightCyan: '#FFF8DC',     // warm starlight white
 
-  // Ocean accent tokens (same key names, ocean values)
-  nebulaPurple: '#0EA5E9',  // Sky / ocean blue
-  nebulaLight: '#38BDF8',   // Lighter sky blue
-  cosmicBlue: '#14B8A6',    // Warm teal
-  starlightCyan: '#2DD4BF', // Bright turquoise
+  primarySoft: 'rgba(224, 168, 80, 0.18)',
+  primaryGlow: 'rgba(224, 168, 80, 0.32)',
+  saffronSoft: 'rgba(232, 121, 58, 0.18)',
+  lotusSoft: 'rgba(201, 90, 106, 0.18)',
+  nebulaSoft: 'rgba(224, 168, 80, 0.14)',
+  cosmicSoft: 'rgba(212, 175, 55, 0.14)',
 
-  // Soft accent fills
-  primarySoft: 'rgba(224, 168, 80, 0.14)',
-  primaryGlow: 'rgba(224, 168, 80, 0.30)',
-  saffronSoft: 'rgba(245, 158, 11, 0.14)',
-  lotusSoft: 'rgba(201, 90, 106, 0.14)',
-  nebulaSoft: 'rgba(14, 165, 233, 0.14)',   // ocean-blue soft
-  cosmicSoft: 'rgba(20, 184, 166, 0.14)',   // teal soft
+  // True PURE BLACK
+  bgPrimary:      '#000000',
+  bgSecondary:    '#050505',
+  bgTertiary:     '#0A0A0A',
+  bgCard:         '#0A0A0A',
+  bgCardElevated: '#111111',
+  bgInput:        '#0A0A0A',
 
-  // Deep ocean backgrounds — dark like looking up from the ocean floor
-  bgPrimary: '#000D1A',
-  bgSecondary: '#001428',
-  bgTertiary: '#001C35',
-  bgCard: '#00213F',
-  bgCardElevated: '#002550',
-  bgInput: '#001428',
+  textPrimary:   '#FFFFFF',
+  textSecondary: '#E0E0E0',
+  textMuted:     '#9E9E9E',
+  textOnPrimary: '#000000',
+  textSanskrit:  '#FFCC80',    // warm glowing amber
+  textGold:      '#E0A850',
 
-  // Text — cool seafoam-white
-  textPrimary: '#E8F7FC',
-  textSecondary: '#A8D5E0',
-  textMuted: '#4A7A90',
-  textOnPrimary: '#000D1A',
-  textSanskrit: '#FCD34D',    // Warm amber for Sanskrit verses
-  textGold: '#E0A850',
+  border:           '#1A1A1A',
+  borderLight:      '#111111',
+  borderGold:       'rgba(224, 168, 80, 0.28)',
+  borderGoldStrong: 'rgba(224, 168, 80, 0.52)',
+  divider:          '#1A1A1A',
 
-  // Borders
-  border: '#0A2540',
-  borderLight: '#061A30',
-  borderGold: 'rgba(224, 168, 80, 0.28)',
-  borderGoldStrong: 'rgba(224, 168, 80, 0.55)',
-  divider: '#0A2540',
-
-  // Glassmorphism — ocean glass panes
-  glassBg: 'rgba(14, 165, 233, 0.06)',
-  glassBgStrong: 'rgba(14, 165, 233, 0.12)',
-  glassInputBg: 'rgba(0, 20, 50, 0.72)',
-  glassBorder: 'rgba(34, 211, 238, 0.22)',
+  // Gold-tinted glass on pure black
+  glassBg:         'rgba(224, 168, 80, 0.05)',
+  glassBgStrong:   'rgba(224, 168, 80, 0.09)',
+  glassInputBg:    'rgba(10, 10, 10, 0.92)',
+  glassBorder:     'rgba(224, 168, 80, 0.18)',
   glassBorderGold: 'rgba(224, 168, 80, 0.45)',
-  glassHighlight: 'rgba(103, 232, 249, 0.08)',
-  glassShadow: { shadowColor: '#0EA5E9', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 24, elevation: 12 },
-  glassShimmer: 'rgba(34, 211, 238, 0.06)',
+  glassHighlight:  'rgba(255, 248, 220, 0.08)',
+  glassShadow:     { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.90, shadowRadius: 24, elevation: 12 },
+  glassShimmer:    'rgba(224, 168, 80, 0.05)',
 
-  // Ocean gradients
-  gradientWarm: ['#000D1A', '#001428', '#001C30'],
-  gradientGold: ['#F5C842', '#E0A850', '#C28840'],
-  gradientSunrise: ['#001020', '#000C18', '#000D1A'],
-  gradientTemple: ['#0EA5E9', '#0D9488'],    // sky blue → teal
-  gradientGlass: ['rgba(0,16,36,0.92)', 'rgba(0,12,28,0.82)'],
-  gradientHeader: ['rgba(0,13,26,0.98)', 'rgba(0,20,40,0.95)'],
-  gradientNebula: ['#0C4A6E', '#164E63', '#000D1A'],
-  gradientCosmic: ['#0A3050', '#041830', '#000D1A'],
+  gradientWarm:    ['#000000', '#050505', '#0A0A0A'],
+  gradientGold:    ['#F5C842', '#E0A850', '#C28840'],
+  gradientSunrise: ['#0A0A0A', '#050505', '#000000'],
+  gradientTemple:  ['#D4962A', '#A02530'],
+  gradientGlass:   ['rgba(10,10,10,0.88)', 'rgba(5,5,5,0.78)'],
+  gradientHeader:  ['rgba(0,0,0,0.96)', 'rgba(5,5,5,0.92)'],
+  gradientNebula:  ['#1A1000', '#0D0800', '#000000'],
+  gradientCosmic:  ['#120A00', '#080400', '#000000'],
 
-  // Shadows
-  shadow: { shadowColor: '#0EA5E9', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.25, shadowRadius: 16, elevation: 8 },
-  shadowGold: { shadowColor: '#E0A850', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.30, shadowRadius: 16, elevation: 6 },
-  shadowLight: { shadowColor: '#22D3EE', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 8, elevation: 3 },
+  shadow:      { shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.90, shadowRadius: 20, elevation: 10 },
+  shadowGold:  { shadowColor: '#E0A850', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.30, shadowRadius: 16, elevation: 6 },
+  shadowLight: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.60, shadowRadius: 12, elevation: 5 },
 
-  // Status bar
   statusBar: 'light',
 };
 
-// Aliases for backward-compat
-export const LightColors = SpaceColors;
-export const DarkColors = SpaceColors;
+// SpaceColors alias (dark mode = space)
+export const SpaceColors = DarkColors;
 
 export const FontSizes = {
   xs: 12,
