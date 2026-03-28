@@ -1,12 +1,13 @@
 {
   "expo": {
     "name": "GitaSaar",
-    "backgroundColor": "#FFF8E7",
     "slug": "gitasaar",
     "version": "1.0.0",
     "orientation": "portrait",
+    "backgroundColor": "#FFF8E7",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
+    "scheme": "gitasaar",
     "splash": {
       "image": "./assets/splash-icon.png",
       "backgroundColor": "#FFF8E7",
@@ -18,6 +19,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gitasaar.app",
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "backgroundColor": "#FFF8E7",
+        "resizeMode": "contain"
+      },
       "infoPlist": {
         "UIBackgroundModes": ["audio"],
         "NSMicrophoneUsageDescription": "GitaSaar needs microphone access for voice input.",
@@ -32,6 +38,12 @@
         "backgroundColor": "#FFF8E7"
       },
       "package": "com.gitasaar.app",
+      "versionCode": 1,
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "backgroundColor": "#FFF8E7",
+        "resizeMode": "contain"
+      },
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
