@@ -178,8 +178,16 @@ export default function AppNavigator() {
           setUser(prev => (prev?.uid === u.uid ? prev : u));
           setLoading(false);
         }
-        // Restore cloud in background — non-blocking
-        restoreFromCloud(u.uid).catch(e => console.log('restoreFromCloud skipped:', e.message));
+        // Restore cloud in background — non-blocking, but update nav state when done
+        restoreFromCloud(u.uid).then(async () => {
+          if (!isMounted) return;
+          const doneFresh = await AsyncStorage.getItem('@gitasaar_setup_done');
+          const onboardedFresh = await AsyncStorage.getItem('@gitasaar_onboarded');
+          if (isMounted) {
+            setSetupDone(doneFresh === 'true');
+            setOnboarded(onboardedFresh === 'true');
+          }
+        }).catch(e => console.log('restoreFromCloud skipped:', e.message));
       } else {
         // Fire-and-forget — don't block logout on cloud backup
         onUserLogout().catch(() => {});

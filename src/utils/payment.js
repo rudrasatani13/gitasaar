@@ -52,12 +52,12 @@ let razorpayLoaded = false;
 
 function loadRazorpay() {
   if (Platform.OS !== 'web' || razorpayLoaded) return Promise.resolve();
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (window.Razorpay) { razorpayLoaded = true; resolve(); return; }
     const s = document.createElement('script');
     s.src = 'https://checkout.razorpay.com/v1/checkout.js';
     s.onload = () => { razorpayLoaded = true; resolve(); };
-    s.onerror = () => resolve();
+    s.onerror = () => reject(new Error('Failed to load payment service. Please check your connection.'));
     document.head.appendChild(s);
   });
 }
@@ -89,7 +89,12 @@ export async function startPayment(planType, userEmail, userName, onSuccess, onF
     return;
   }
 
-  await loadRazorpay();
+  try {
+    await loadRazorpay();
+  } catch (e) {
+    onFailure(e.message || 'Payment service unavailable. Please check your connection.');
+    return;
+  }
   if (!window.Razorpay) { onFailure('Payment service not available'); return; }
 
   const options = {

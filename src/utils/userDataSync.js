@@ -76,6 +76,19 @@ export async function backupToCloud(uid) {
 // Helper: only overwrite local data if cloud version is newer
 async function mergeIfNewer(key, cloudValue, cloudTimestamp) {
   if (cloudValue === undefined || cloudValue === null) return;
+
+  // Daily usage: never let cloud overwrite today's local usage — prevents limit exploit on re-login
+  if (key === '@gitasaar_daily_usage') {
+    try {
+      const localRaw = await AsyncStorage.getItem(key);
+      if (localRaw) {
+        const localData = JSON.parse(localRaw);
+        const today = new Date().toISOString().slice(0, 10);
+        if (localData.date === today) return;
+      }
+    } catch {}
+  }
+
   try {
     const localRaw = await AsyncStorage.getItem(key);
     if (!localRaw) {
@@ -137,6 +150,13 @@ export async function restoreFromCloud(uid) {
           await mergeIfNewer(key, heavyData.data, heavyData.updatedAt);
         }
       }
+    }
+
+    // Sync setupComplete from users/{uid} → @gitasaar_setup_done (single source of truth)
+    const userRef = firestore.doc(firestore.db, 'users', uid);
+    const userSnap = await firestore.getDoc(userRef);
+    if (userSnap.exists() && userSnap.data().setupComplete === true) {
+      await AsyncStorage.setItem('@gitasaar_setup_done', 'true');
     }
 
     notifySync(); // Data restore hone ke baad app ko update karo

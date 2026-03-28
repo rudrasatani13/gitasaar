@@ -6,6 +6,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../utils/firebase';
+import { onSyncComplete } from '../utils/userDataSync';
 
 const PremiumContext = createContext();
 const USAGE_KEY = '@gitasaar_daily_usage';
@@ -111,6 +112,9 @@ export function PremiumProvider({ children }) {
   useEffect(() => {
     loadUsage();
 
+    // Re-read usage from AsyncStorage after cloud restore completes (fixes race condition)
+    const unsubSync = onSyncComplete(() => loadUsage());
+
     const unsubAuth = auth.onAuthStateChanged((user) => {
       if (user) {
         subscribeToFirestore(user.uid);
@@ -122,6 +126,7 @@ export function PremiumProvider({ children }) {
     });
 
     return () => {
+      unsubSync();
       unsubAuth();
       if (unsubFirestoreRef.current) unsubFirestoreRef.current();
     };
