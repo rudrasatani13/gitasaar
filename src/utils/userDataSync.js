@@ -10,13 +10,14 @@ try {
 } catch (e) {}
 
 // 1. CORE KEYS (Chhota data jo jaldi load hona chahiye)
+// NOTE: @gitasaar_premium is intentionally excluded — premium status is read exclusively
+// from Firestore users/{uid} via Cloud Functions, not from client-side sync.
 const CORE_KEYS = [
   '@gitasaar_streak',
   '@gitasaar_progress',
   '@gitasaar_read_dates',
   '@gitasaar_bm_folders',
   '@gitasaar_moods',
-  '@gitasaar_premium',
   '@gitasaar_daily_usage',
   '@gitasaar_med_sessions',
   '@gitasaar_reading_goal',
@@ -47,14 +48,20 @@ let currentUid = null;
 export async function backupToCloud(uid) {
   if (!firestore || !uid) return false;
   try {
+    const syncTs = new Date().toISOString();
+
     // A. Pehle Core Data save karo
-    const coreData = { _lastSync: new Date().toISOString(), _version: 2 };
+    const coreData = { _lastSync: syncTs, _version: 2 };
+    const backedUpKeys = [];
     for (const key of CORE_KEYS) {
       const value = await AsyncStorage.getItem(key);
-      if (value !== null) coreData[key] = value;
+      if (value !== null) { coreData[key] = value; backedUpKeys.push(key); }
     }
     const coreRef = firestore.doc(firestore.db, 'userData', uid);
     await firestore.setDoc(coreRef, coreData, { merge: true });
+
+    // Write local sync markers so mergeIfNewer won't overwrite newer local data on next restore
+    await AsyncStorage.multiSet(backedUpKeys.map(k => [k + '_syncTs', syncTs]));
 
     // B. Ab Heavy Data ko alag alag documents (sub-collections) mein save karo
     for (const key of HEAVY_KEYS) {
@@ -62,7 +69,8 @@ export async function backupToCloud(uid) {
       if (value !== null) {
         // Path banega: userData/{uid}/heavyData/{key_name}
         const heavyRef = firestore.doc(firestore.db, 'userData', uid, 'heavyData', key);
-        await firestore.setDoc(heavyRef, { data: value, updatedAt: new Date().toISOString() }, { merge: true });
+        await firestore.setDoc(heavyRef, { data: value, updatedAt: syncTs }, { merge: true });
+        await AsyncStorage.setItem(key + '_syncTs', syncTs);
       }
     }
     return true;
@@ -188,7 +196,7 @@ export async function clearLocalData() {
 
 // ============ AUTO SYNC ============
 let lastSyncTime = 0;
-const SYNC_INTERVAL = 5 * 1000; // 5 Seconds cooldown
+const SYNC_INTERVAL = 60 * 1000; // 60 Seconds cooldown
 
 export async function autoSync(uid) {
   if (!uid) return;

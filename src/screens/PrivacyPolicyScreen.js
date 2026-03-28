@@ -131,10 +131,11 @@ function TermsContent({ C }) {
         {`GitaSaar offers both free and premium tiers:
 
 Free Plan includes:
-• 10 AI chat messages per day
+• 5 AI chat messages per day
+• 3 audio recitations per day
 • 1 quiz play per day
 • 2 share card templates
-• Basic bookmark (Favorites folder only)
+• 4 bookmark folders
 • Full verse library access
 
 Premium Plan (₹149/month or ₹999/year for India; $5.99/month or $49.99/year internationally) includes:
@@ -196,9 +197,9 @@ Premium Plan (₹149/month or ₹999/year for India; $5.99/month or $49.99/year 
   );
 }
 
-export default function PrivacyPolicyScreen({ navigation }) {
+export default function PrivacyPolicyScreen({ navigation, route }) {
   const { colors: C } = useTheme();
-  const [activeTab, setActiveTab] = useState('privacy');
+  const [activeTab, setActiveTab] = useState(route?.params?.tab || 'privacy');
 
   return (
     <LinearGradient colors={C.gradientWarm} style={{ flex: 1 }}>

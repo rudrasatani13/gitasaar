@@ -139,7 +139,7 @@ export default function ChatScreen() {
   const { tr } = useTranslation();
   
   // --- NAYA PAYWALL LOGIC ---
-  const { useChatMessage, refundChatMessage, chatRemaining, isPremium } = usePremium();
+  const { useChatMessage, chatRemaining, isPremium } = usePremium();
   const [showPaywall, setShowPaywall] = useState(false);
   // --------------------------
 
@@ -161,14 +161,14 @@ export default function ChatScreen() {
     const msg = text || inputText.trim();
     if (!msg || isTyping) return;
 
-    // --- LIMIT CHECK KARO ---
-    const canChat = useChatMessage();
+    // --- LIMIT CHECK (without deducting yet) ---
+    const canChat = isPremium || chatRemaining > 0;
     if (!canChat) {
       tapError();
       setShowPaywall(true); // Limit khatam, banner dikhao
       return;
     }
-    // ------------------------
+    // -------------------------------------------
 
     setShowPaywall(false);
     setShowSuggestions(false);
@@ -187,13 +187,14 @@ export default function ChatScreen() {
       const aiTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
       if (result.success) {
+        useChatMessage(); // Deduct only after confirmed success
         setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.data.text, verse: result.data.verse, advice: result.data.advice, time: aiTime }].slice(-100));
       } else {
-        refundChatMessage();
+        // No deduct on failure
         setMessages((p) => [...p, { id: (Date.now() + 1).toString(), type: 'ai', text: result.error || 'Kuch gadbad ho gayi. Please try again.', verse: null, advice: null, time: aiTime }]);
       }
     } catch (e) {
-      refundChatMessage();
+      // No deduct on error/timeout
       const aiTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
       const errText = e.message === 'timeout'
         ? 'Response timed out. Please check your connection and try again.'

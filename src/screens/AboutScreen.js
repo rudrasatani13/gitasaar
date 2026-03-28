@@ -151,7 +151,7 @@ export default function AboutScreen({ navigation }) {
             <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')} style={{ flex: 1, paddingVertical: 14, borderRadius: 14, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, alignItems: 'center' }}>
               <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>Privacy Policy</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => openLink('https://gitasaar.app/terms')} style={{ flex: 1, paddingVertical: 14, borderRadius: 14, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy', { tab: 'terms' })} style={{ flex: 1, paddingVertical: 14, borderRadius: 14, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, alignItems: 'center' }}>
               <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>Terms of Service</Text>
             </TouchableOpacity>
           </View>
