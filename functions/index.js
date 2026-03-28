@@ -195,7 +195,7 @@ function isRateLimited(uid, maxPerMinute) {
 // TASK 3 — GEMINI CHAT PROXY
 // Keeps API key off the client. Accepts conversation history for multi-turn.
 // ─────────────────────────────────────────────────────────────────────────────
-exports.generateGeminiResponse = onCall(async (request) => {
+exports.generateGeminiResponse = onCall({ secrets: ["GEMINI_API_KEY"] }, async (request) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Login required.");
   if (isRateLimited(uid, 15)) {
@@ -252,7 +252,7 @@ exports.generateGeminiResponse = onCall(async (request) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // TASK 3B — GEMINI QUIZ PROXY (bonus — removes last client-side key usage)
 // ─────────────────────────────────────────────────────────────────────────────
-exports.generateQuizQuestions = onCall(async (request) => {
+exports.generateQuizQuestions = onCall({ secrets: ["GEMINI_API_KEY"] }, async (request) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Login required.");
   if (isRateLimited(uid, 5)) {
