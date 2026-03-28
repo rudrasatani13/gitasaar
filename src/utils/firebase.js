@@ -1,5 +1,5 @@
 // src/utils/firebase.js
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getAuth,
   initializeAuth,
@@ -21,9 +21,9 @@ import { getFunctions }  from 'firebase/functions';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from 'react-native';
 
-// All config values from env — set these in .env file
+// All config values from env — set EXPO_PUBLIC_FIREBASE_API_KEY in eas.json env block for EAS builds
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "",
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "gitasaar2004.firebaseapp.com",
   projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "gitasaar2004",
   storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "gitasaar2004.firebasestorage.app",
@@ -31,14 +31,28 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:886569809716:web:ebe280002920f5e5a89761",
 };
 
-const app = initializeApp(firebaseConfig);
+// [AUTH DEBUG] Log config on startup to verify env vars are reaching the build
+console.log('[AUTH DEBUG] Firebase config — apiKey present:', !!firebaseConfig.apiKey, '| projectId:', firebaseConfig.projectId, '| platform:', Platform.OS);
+if (!firebaseConfig.apiKey) {
+  console.warn('[AUTH DEBUG] WARNING: EXPO_PUBLIC_FIREBASE_API_KEY is missing — add it to eas.json env block for EAS builds');
+}
+
+// Guard against double-init on hot reload / Fast Refresh
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+
 let auth;
 if (Platform.OS === "web") {
   auth = getAuth(app);
 } else {
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-  });
+  try {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } catch (e) {
+    // initializeAuth throws if already initialized (hot reload / duplicate call) — fall back safely
+    console.log('[AUTH DEBUG] initializeAuth fallback to getAuth:', e.message);
+    auth = getAuth(app);
+  }
 }
 export { auth };
 
@@ -184,6 +198,10 @@ export async function logout() {
 export function onAuthChange(callback) {
   return onAuthStateChanged(auth, (user) => {
     console.log('[AUTH DEBUG] onAuthStateChanged triggered — uid:', user?.uid ?? 'null', '| email:', user?.email ?? 'null');
-    callback(user);
+    try {
+      callback(user);
+    } catch (e) {
+      console.log('[AUTH DEBUG] onAuthChange callback error:', e.message);
+    }
   });
 }

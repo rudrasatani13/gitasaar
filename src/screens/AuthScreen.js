@@ -86,7 +86,9 @@ export default function AuthScreen({ navigation }) {
         else if (code.includes('email-already-in-use')) msg = 'You already have an account. Please login instead.';
         else if (code.includes('invalid-email')) msg = 'Invalid email format.';
         else if (code.includes('too-many-requests')) msg = 'Too many attempts. Please reset your password or try again later.';
-        else msg = 'Something went wrong. Please try again.';
+        else if (code.includes('network-request-failed')) msg = 'Network error. Check your internet connection and try again.';
+        else if (code.includes('api-key-not-valid') || code.includes('app-not-authorized') || code.includes('invalid-api-key')) msg = 'App configuration error. Please reinstall the app or contact support.';
+        else msg = 'Something went wrong (' + code + '). Please try again.'; // [AUTH DEBUG] raw code shown
         setAuthError(msg);
       }
     } catch (error) {

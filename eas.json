@@ -7,11 +7,17 @@
       "android": {
         "buildType": "apk"
       },
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "REPLACE_WITH_YOUR_FIREBASE_API_KEY"
+      }
     },
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "REPLACE_WITH_YOUR_FIREBASE_API_KEY"
       }
     }
   }
