@@ -191,7 +191,7 @@ export default function OnboardingScreen({ navigation }) {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           bounces={false}
-          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: true })}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
           style={{ flex: 1 }}
