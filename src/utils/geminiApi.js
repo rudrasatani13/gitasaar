@@ -96,13 +96,17 @@ export async function sendMessageToGemini(userMessage, language) {
       data: { text: parsed.text || 'Namaste!', verse: parsed.verse, advice: parsed.advice },
     };
   } catch (e) {
-    console.error('Gemini Cloud Function error:', e);
+    console.error('Gemini Cloud Function error:', e?.code, e?.message, e);
     // Reset session state on failure to prevent permanent lockout
     history         = [];
     currentLanguage = null;
     if (e.code === 'resource-exhausted')
       return { success: false, error: 'Too many requests. Please wait a moment.' };
-    return { success: false, error: 'Could not connect to AI. Please check your internet and try again.' };
+    if (e.code === 'unauthenticated')
+      return { success: false, error: 'Please log in to use the chat.' };
+    if (e.code === 'internal' && e.message)
+      return { success: false, error: e.message };
+    return { success: false, error: `Connection error (${e.code || 'unknown'}): ${e.message || 'Please check your internet and try again.'}` };
   }
 }
 

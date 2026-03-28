@@ -240,11 +240,15 @@ exports.generateGeminiResponse = onCall({ secrets: ["GEMINI_API_KEY"] }, async (
 
   const data = await resp.json();
   if (data.error) {
+    console.error("Gemini API error response:", JSON.stringify(data.error));
     throw new HttpsError("internal", data.error.message || "Gemini API error.");
   }
 
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new HttpsError("internal", "Empty response from AI.");
+  if (!text) {
+    console.error("Gemini empty response, full data:", JSON.stringify(data));
+    throw new HttpsError("internal", "Empty response from AI.");
+  }
 
   return { success: true, text };
 });
