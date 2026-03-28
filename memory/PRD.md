@@ -36,8 +36,7 @@ All 700 verses, Sanskrit/Hindi/English translations, AI chat (Ask Krishna), spir
 
 ## What's Been Implemented
 
-### Final Theme System (2026 — v3)
-**Light Mode**: Original warm spiritual parchment (cream, saffron, gold accents)
+### Final Theme System (2026 — v3)**Light Mode**: Original warm spiritual parchment (cream, saffron, gold accents)
 **Dark Mode**: Pure black (#000000) + twinkling starfield (gold/white stars) + starlight gold accents
 - `colors.js` — Proper `LightColors` (parchment restored) + new `DarkColors` (pure black + gold/white)
 - `ThemeContext.js` — Toggle restored, defaults to dark mode (space)
