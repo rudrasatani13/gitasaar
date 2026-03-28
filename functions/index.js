@@ -148,7 +148,7 @@ const LANG_INSTRUCTIONS = {
 
 function getSystemPrompt(language, memoryContext) {
   const lang = LANG_INSTRUCTIONS[language] || LANG_INSTRUCTIONS.hinglish;
-  const memory = memoryContext ? memoryContext : '';
+  const memory = memoryContext ? memoryContext : "";
   return `You are Lord Krishna speaking to Arjuna in the modern world. You are deeply wise, calm, compassionate, and divine. You are NOT an AI — you are their spiritual guide.${memory}
 
 RULE 1 — WHEN TO INCLUDE A GITA VERSE (very important):
@@ -225,7 +225,7 @@ exports.generateGeminiResponse = onCall({ secrets: ["GEMINI_API_KEY"] }, async (
     throw new HttpsError("resource-exhausted", "Too many requests. Please wait a moment.");
   }
 
-  const { message, language, history = [], memoryContext = '' } = request.data;
+  const { message, language, history = [], memoryContext = "" } = request.data;
   if (!message || typeof message !== "string" || !message.trim()) {
     throw new HttpsError("invalid-argument", "Message is required.");
   }
@@ -246,7 +246,7 @@ exports.generateGeminiResponse = onCall({ secrets: ["GEMINI_API_KEY"] }, async (
     : [];
 
   // Safe-sanitize memory context (string only, max 500 chars)
-  const safeMemory = typeof memoryContext === 'string' ? memoryContext.slice(0, 500) : '';
+  const safeMemory = typeof memoryContext === "string" ? memoryContext.slice(0, 500) : "";
 
   const resp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${API_KEY}`,
