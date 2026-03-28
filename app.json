@@ -1,13 +1,14 @@
 {
   "expo": {
     "name": "GitaSaar",
-    "backgroundColor": "#FDF8EF",
+    "backgroundColor": "#FFF8E7",
     "slug": "gitasaar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
+      "image": "./assets/splash-icon.png",
       "backgroundColor": "#FFF8E7",
       "resizeMode": "contain"
     },
@@ -18,23 +19,57 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.gitasaar.app",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ]
+        "UIBackgroundModes": ["audio"],
+        "NSMicrophoneUsageDescription": "GitaSaar needs microphone access for voice input.",
+        "NSCameraUsageDescription": "GitaSaar needs camera access to update your profile photo.",
+        "NSPhotoLibraryUsageDescription": "GitaSaar needs photo library access to select your profile photo.",
+        "NSPhotoLibraryAddUsageDescription": "GitaSaar needs photo library access to save shared cards."
       }
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFF8E7"
       },
-      "package": "com.gitasaar.app"
+      "package": "com.gitasaar.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
+      ]
     },
     "plugins": [
       "expo-font",
       "expo-asset",
       "expo-sharing",
       "expo-image",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#C28840",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "GitaSaar needs access to your photos to update your profile picture.",
+          "cameraPermission": "GitaSaar needs camera access to take a profile photo."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow GitaSaar to access your photos.",
+          "savePhotosPermission": "Allow GitaSaar to save shared verse cards."
+        }
+      ],
+      "expo-av"
     ],
     "extra": {
       "eas": {

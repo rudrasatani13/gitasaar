@@ -1,6 +1,6 @@
 // src/screens/VerseReminderScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
@@ -105,9 +105,7 @@ export default function VerseReminderScreen({ navigation }) {
       const granted = await requestPermissions();
       if (!granted) {
         setPermGranted(false);
-        if (typeof window !== 'undefined' && window.alert) {
-          window.alert('Please enable notifications in your device settings');
-        }
+        Alert.alert('Notifications', 'Please enable notifications in your device settings to receive verse reminders.');
         return;
       }
       setPermGranted(true);

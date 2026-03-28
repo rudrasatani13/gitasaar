@@ -31,12 +31,6 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:886569809716:web:ebe280002920f5e5a89761",
 };
 
-// [AUTH DEBUG] Log config on startup to verify env vars are reaching the build
-console.log('[AUTH DEBUG] Firebase config — apiKey present:', !!firebaseConfig.apiKey, '| projectId:', firebaseConfig.projectId, '| platform:', Platform.OS);
-if (!firebaseConfig.apiKey) {
-  console.warn('[AUTH DEBUG] WARNING: EXPO_PUBLIC_FIREBASE_API_KEY is missing — add it to eas.json env block for EAS builds');
-}
-
 // Guard against double-init on hot reload / Fast Refresh
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
@@ -49,8 +43,7 @@ if (Platform.OS === "web") {
       persistence: getReactNativePersistence(AsyncStorage),
     });
   } catch (e) {
-    // initializeAuth throws if already initialized (hot reload / duplicate call) — fall back safely
-    console.log('[AUTH DEBUG] initializeAuth fallback to getAuth:', e.message);
+    // initializeAuth throws if already initialized (hot reload) — fall back safely
     auth = getAuth(app);
   }
 }
@@ -66,10 +59,9 @@ export const functions = getFunctions(app, 'asia-south1');
 export async function signup(email, password) {
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
-    console.log('[AUTH DEBUG] signup success:', result.user?.uid, result.user?.email);
     return { success: true, user: result.user };
   } catch (e) {
-    console.log('[AUTH DEBUG] signup error — code:', e.code, '| message:', e.message, '| full:', JSON.stringify(e));
+    console.log('[AUTH] signup error — code:', e.code, '| message:', e.message);
     return { success: false, error: e.code || e.message, code: e.code, message: e.message, raw: JSON.stringify(e) };
   }
 }
@@ -77,10 +69,9 @@ export async function signup(email, password) {
 export async function login(email, password) {
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    console.log('[AUTH DEBUG] login success:', result.user?.uid, result.user?.email);
     return { success: true, user: result.user };
   } catch (e) {
-    console.log('[AUTH DEBUG] login error — code:', e.code, '| message:', e.message, '| full:', JSON.stringify(e));
+    console.log('[AUTH] login error — code:', e.code, '| message:', e.message);
     return { success: false, error: e.code || e.message, code: e.code, message: e.message, raw: JSON.stringify(e) };
   }
 }
@@ -197,11 +188,10 @@ export async function logout() {
 
 export function onAuthChange(callback) {
   return onAuthStateChanged(auth, (user) => {
-    console.log('[AUTH DEBUG] onAuthStateChanged triggered — uid:', user?.uid ?? 'null', '| email:', user?.email ?? 'null');
     try {
       callback(user);
     } catch (e) {
-      console.log('[AUTH DEBUG] onAuthChange callback error:', e.message);
+      console.log('[AUTH] onAuthChange callback error:', e.message);
     }
   });
 }

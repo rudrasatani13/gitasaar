@@ -34,7 +34,10 @@ async function detectRegion() {
       AsyncStorage.setItem(REGION_CACHE_KEY, detectedRegion).catch(() => {});
       return 'india';
     }
-    const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+    clearTimeout(tid);
     const data = await res.json();
     detectedRegion = data.country_code === 'IN' ? 'india' : 'international';
     AsyncStorage.setItem(REGION_CACHE_KEY, detectedRegion).catch(() => {});

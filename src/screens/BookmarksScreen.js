@@ -61,7 +61,7 @@ export default function BookmarksScreen({ navigation }) {
               <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }}>{bookmarkCount} saved verses</Text>
             </View>
           </View>
-          <TouchableOpacity onPress={() => { if (isPremium) setShowAddFolder(!showAddFolder); else { if (typeof window !== 'undefined') window.alert('Custom folders are a Premium feature!'); } }} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.glassBg, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: C.glassBorderGold }}>
+          <TouchableOpacity onPress={() => { if (isPremium) setShowAddFolder(!showAddFolder); else { Alert.alert('Premium Feature', 'Custom folders are a Premium feature! Upgrade to unlock.'); } }} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.glassBg, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: C.glassBorderGold }}>
             <MaterialCommunityIcons name="folder-plus-outline" size={18} color={C.primary} />
           </TouchableOpacity>
         </View>
@@ -91,7 +91,7 @@ export default function BookmarksScreen({ navigation }) {
             const count = getFolderCount(f.id);
             const active = activeFolder === f.id;
             return (
-              <TouchableOpacity key={f.id} onPress={() => { if (f.id === 'favorites' || isPremium) setActiveFolder(f.id); else { if (typeof window !== 'undefined') window.alert('Custom folders are a Premium feature!'); } }}
+              <TouchableOpacity key={f.id} onPress={() => { if (f.id === 'favorites' || isPremium) setActiveFolder(f.id); else { Alert.alert('Premium Feature', 'Custom folders are a Premium feature! Upgrade to unlock.'); } }}
                 onLongPress={() => f.id.startsWith('custom_') ? handleDeleteFolder(f.id) : null}
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: active ? f.color + '15' : 'transparent', borderWidth: 1, borderColor: active ? f.color : C.glassBorder }}>
                 <MaterialCommunityIcons name={f.icon} size={14} color={active ? f.color : C.textMuted} />

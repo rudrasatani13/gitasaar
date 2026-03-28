@@ -80,9 +80,7 @@ export default function AuthScreen({ navigation }) {
       if (!result.success) {
         const code = result.code || result.error || '';
         const rawMessage = result.message || '';
-        // [AUTH DEBUG] show exact Firebase error in Alert so it's visible in EAS build
-        console.log('[AUTH DEBUG] handleEmailAuth error — code:', code, '| message:', rawMessage, '| raw:', result.raw);
-        Alert.alert('[AUTH DEBUG] Firebase Error', `code: ${code}\nmessage: ${rawMessage}`);
+        console.log('[AUTH] error — code:', code, '| message:', rawMessage);
         let msg;
         if (code.includes('account-exists-with-different-credential')) msg = 'This email is linked to Google. Please use the Google login button.';
         else if (code.includes('user-not-found')) msg = 'Account not found. Please sign up first.';
@@ -97,8 +95,7 @@ export default function AuthScreen({ navigation }) {
       }
     } catch (error) {
       setLoading(false);
-      console.log('[AUTH DEBUG] handleEmailAuth catch — message:', error.message, '| full:', JSON.stringify(error));
-      Alert.alert('[AUTH DEBUG] Unexpected Error', error.message || 'Unknown error');
+      console.log('[AUTH] catch — message:', error.message);
       setAuthError(error.message || 'Something went wrong. Please try again.');
     }
   };

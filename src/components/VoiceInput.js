@@ -1,6 +1,6 @@
 // src/components/VoiceInput.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, Animated, Platform } from 'react-native';
+import { View, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { tapMedium } from '../utils/haptics';
@@ -81,9 +81,7 @@ export default function VoiceInput({ onResult, onAutoSend, disabled }) {
     tapMedium();
 
     if (!supportedRef.current) {
-      if (typeof window !== 'undefined' && window.alert) {
-        window.alert('Voice input sirf Chrome desktop mein kaam karta hai.');
-      }
+      Alert.alert('Voice Input', 'Voice input is only available on web browsers. On the app, please type your message.');
       return;
     }
 
