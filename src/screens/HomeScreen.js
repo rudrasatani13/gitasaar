@@ -126,8 +126,19 @@ export default function HomeScreen({ navigation }) {
           </View>
         </FadeSlide>
 
-        {/* Streak + Progress */}
+        {/* Daily Shloka */}
         <FadeSlide delay={50}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: C.textMuted }} />
+            <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: C.primary, letterSpacing: 2 }}>{tr('shlokaOfDay')}</Text>
+          </View>
+          <TouchableOpacity onPress={() => navigation.navigate("VerseOfDay")} activeOpacity={0.9} style={{ marginBottom: 24 }}>
+            <ShlokaCard verse={verse} animate />
+          </TouchableOpacity>
+        </FadeSlide>
+
+        {/* Streak + Progress */}
+        <FadeSlide delay={100}>
           <GlassCard style={{ marginBottom: 16 }} intensity={55}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 }}>
               {streakWeek.map((day, i) => (
@@ -146,11 +157,11 @@ export default function HomeScreen({ navigation }) {
               ))}
             </View>
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1, backgroundColor: C.glassBg, borderRadius: 12, padding: 12, alignItems: 'center', gap: 2, borderWidth: 1, borderColor: C.glassBorder }}>
+              <View style={{ flex: 1, backgroundColor: C.glassBg, borderRadius: 12, padding: 14, alignItems: 'center', gap: 4, borderWidth: 1, borderColor: C.glassBorder }}>
                 <Text style={{ fontSize: FontSizes.xl, fontWeight: '800', color: C.saffron }}>{streak.count}</Text>
                 <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }}>{tr('dayStreak')}</Text>
               </View>
-              <View style={{ flex: 2, backgroundColor: C.glassBg, borderRadius: 12, padding: 12, justifyContent: 'center', borderWidth: 1, borderColor: C.glassBorder }}>
+              <View style={{ flex: 2, backgroundColor: C.glassBg, borderRadius: 12, padding: 14, justifyContent: 'center', borderWidth: 1, borderColor: C.glassBorder }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                   <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: C.textSecondary }}>{tr('readingProgress')}</Text>
                   <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.peacockBlue }}>{totalRead}/700</Text>
@@ -190,7 +201,7 @@ export default function HomeScreen({ navigation }) {
         <FadeSlide delay={140}>
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
             <TouchableOpacity onPress={() => navigation.navigate("Quiz")} activeOpacity={0.8} style={{ width: 155 }}>
-              <GlassCard noPadding style={{ borderRadius: 16, padding: 14 }} intensity={40}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={40}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: C.saffronSoft, justifyContent: "center", alignItems: "center" }}>
                     <MaterialCommunityIcons name="head-question-outline" size={18} color={C.saffron} />
@@ -203,7 +214,7 @@ export default function HomeScreen({ navigation }) {
               </GlassCard>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate("ChatHistory")} activeOpacity={0.8} style={{ flex: 1 }}>
-              <GlassCard noPadding style={{ borderRadius: 16, padding: 14 }} intensity={40}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={40}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: C.peacockBlue + '14', justifyContent: "center", alignItems: "center" }}>
                     <MaterialCommunityIcons name="chat-outline" size={18} color={C.peacockBlue} />
@@ -218,7 +229,7 @@ export default function HomeScreen({ navigation }) {
           </View>
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 16 }}>
             <TouchableOpacity onPress={() => navigation.navigate("Streak")} activeOpacity={0.8} style={{ flex: 1 }}>
-              <GlassCard noPadding style={{ borderRadius: 16, padding: 14 }} intensity={40}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={40}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: "#E8793A14", justifyContent: "center", alignItems: "center" }}>
                     <MaterialCommunityIcons name="fire" size={18} color="#E8793A" />
@@ -231,7 +242,7 @@ export default function HomeScreen({ navigation }) {
               </GlassCard>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate("MoodTracker")} activeOpacity={0.8} style={{ flex: 1 }}>
-              <GlassCard noPadding style={{ borderRadius: 16, padding: 14 }} intensity={40}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={40}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: "#14918E14", justifyContent: "center", alignItems: "center" }}>
                     <MaterialCommunityIcons name="emoticon-happy-outline" size={18} color="#14918E" />
@@ -266,20 +277,9 @@ export default function HomeScreen({ navigation }) {
           </View>
         </FadeSlide>
 
-        {/* Daily Shloka */}
-        <FadeSlide delay={200}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 24, marginBottom: 16 }}>
-            <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: C.textMuted }} />
-            <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: C.primary, letterSpacing: 2 }}>{tr('shlokaOfDay')}</Text>
-          </View>
-          <TouchableOpacity onPress={() => navigation.navigate("VerseOfDay")} activeOpacity={0.9}>
-            <ShlokaCard verse={verse} animate />
-          </TouchableOpacity>
-        </FadeSlide>
-
         {/* Reflection */}
         <FadeSlide delay={250}>
-          <PressableCard onPress={() => navigation.navigate('Journal')} style={{ marginTop: 22 }}>
+          <PressableCard onPress={() => navigation.navigate('Journal')} style={{ marginTop: 24 }}>
             <GlassCard noPadding intensity={45}>
               <LinearGradient colors={[C.peacockBlue + '12', C.peacockBlue + '04']} style={{ padding: 20, borderRadius: 20 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -306,7 +306,7 @@ export default function HomeScreen({ navigation }) {
               { icon: 'book-open-page-variant', num: String(totalRead), label: tr('versesRead'), color: C.peacockBlue },
               { icon: 'bookmark-multiple', num: String(bookmarkCount), label: tr('saved'), color: C.primary },
             ].map((s) => (
-              <GlassCard key={s.label} noPadding style={{ flex: 1, paddingVertical: 14, alignItems: 'center', gap: 3 }} intensity={35}>
+              <GlassCard key={s.label} noPadding style={{ flex: 1, paddingVertical: 16, alignItems: 'center', gap: 4 }} intensity={35}>
                 <MaterialCommunityIcons name={s.icon} size={18} color={s.color} />
                 <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: C.textPrimary }}>{s.num}</Text>
                 <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontWeight: '500' }}>{s.label}</Text>

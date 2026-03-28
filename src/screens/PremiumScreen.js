@@ -123,15 +123,15 @@ export default function PremiumScreen({ navigation }) {
         </View>
 
         {/* Hero */}
-        <Animated.View style={{ alignItems: 'center', paddingHorizontal: 16, marginTop: 16, marginBottom: 24, opacity: fadeIn }}>
-          <Animated.View style={{ transform: [{ scale: crownScale }, { translateY: crownY }], marginBottom: 16 }}>
-            <LinearGradient colors={C.gradientGold} style={{ width: 80, height: 80, borderRadius: 40, justifyContent: 'center', alignItems: 'center', ...C.shadowGold }}>
-              <MaterialCommunityIcons name="crown" size={40} color={C.textOnPrimary} />
+        <Animated.View style={{ alignItems: 'center', paddingHorizontal: 16, marginTop: 24, marginBottom: 24, opacity: fadeIn }}>
+          <Animated.View style={{ transform: [{ scale: crownScale }, { translateY: crownY }], marginBottom: 20 }}>
+            <LinearGradient colors={C.gradientGold} style={{ width: 88, height: 88, borderRadius: 44, justifyContent: 'center', alignItems: 'center', ...C.shadowGold }}>
+              <MaterialCommunityIcons name="crown" size={44} color={C.textOnPrimary} />
             </LinearGradient>
           </Animated.View>
-          <Text style={{ fontSize: FontSizes.xxxl, fontWeight: '800', color: C.textPrimary, textAlign: 'center' }}>GitaSaar Premium</Text>
-          <Text style={{ fontSize: FontSizes.md, color: C.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 22 }}>
-            Unlock the complete spiritual experience
+          <Text style={{ fontSize: FontSizes.xxxl, fontWeight: '800', color: C.textPrimary, textAlign: 'center', letterSpacing: -0.5 }}>GitaSaar Premium</Text>
+          <Text style={{ fontSize: FontSizes.md, color: C.textMuted, textAlign: 'center', marginTop: 10, lineHeight: 24 }}>
+            The complete Bhagavad Gita experience,{'\n'}unlimited and ad-free.
           </Text>
           {/* Region badge */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10, backgroundColor: C.bgSecondary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 }}>
@@ -207,9 +207,9 @@ export default function PremiumScreen({ navigation }) {
         ) : null}
 
         {/* Subscribe Button */}
-        <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+        <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
           <TouchableOpacity onPress={handlePurchase} disabled={processing || plansLoading} activeOpacity={0.85}>
-            <LinearGradient colors={processing ? [C.textMuted, C.textMuted] : C.gradientGold} style={{ borderRadius: 16, paddingVertical: 18, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, ...C.shadowGold }}>
+            <LinearGradient colors={processing ? [C.textMuted, C.textMuted] : C.gradientGold} style={{ borderRadius: 20, paddingVertical: 20, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, ...C.shadowGold }}>
               <MaterialCommunityIcons name={processing ? 'loading' : 'crown'} size={20} color={processing ? '#FFF' : C.textOnPrimary} />
               <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: processing ? '#FFF' : C.textOnPrimary }}>
                 {processing ? 'Processing...' : selectedPlan === 'yearly' ? `Get Premium — ${yearly?.label ?? ''}` : `Get Premium — ${monthly?.label ?? ''}`}
@@ -238,15 +238,15 @@ export default function PremiumScreen({ navigation }) {
         <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
           <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 16 }}>WHAT YOU GET</Text>
           <View style={{ backgroundColor: C.bgCard, borderRadius: 20, borderWidth: 1, borderColor: C.border, overflow: 'hidden' }}>
-            <View style={{ flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 12, backgroundColor: C.bgSecondary, borderBottomWidth: 1, borderBottomColor: C.border }}>
+            <View style={{ flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: C.bgSecondary, borderBottomWidth: 1, borderBottomColor: C.border }}>
               <Text style={{ flex: 2, fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted }}>FEATURE</Text>
               <Text style={{ flex: 1, fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, textAlign: 'center' }}>FREE</Text>
               <Text style={{ flex: 1, fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, textAlign: 'center' }}>PREMIUM</Text>
             </View>
             {FEATURES.map((f, i) => (
-              <View key={f.title} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: i < FEATURES.length - 1 ? 1 : 0, borderBottomColor: C.borderLight }}>
-                <View style={{ flex: 2, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <MaterialCommunityIcons name={f.icon} size={16} color={f.color} />
+              <View key={f.title} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16, borderBottomWidth: i < FEATURES.length - 1 ? 1 : 0, borderBottomColor: C.borderLight }}>
+                <View style={{ flex: 2, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <MaterialCommunityIcons name={f.icon} size={18} color={f.color} />
                   <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: C.textPrimary, flexShrink: 1 }}>{f.title}</Text>
                 </View>
                 <Text style={{ flex: 1, fontSize: FontSizes.xs, color: C.textMuted, textAlign: 'center' }}>{f.free}</Text>

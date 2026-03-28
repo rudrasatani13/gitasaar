@@ -54,8 +54,8 @@ function MessageBubble({ item, C, tr, isLatest }) {
 
   if (item.type === 'user') {
     return (
-      <Animated.View style={{ alignItems: 'flex-end', marginBottom: 14, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
-        <LinearGradient colors={C.gradientGold} style={{ borderRadius: 20, borderBottomRightRadius: 6, paddingHorizontal: 18, paddingVertical: 13, maxWidth: '80%' }}>
+      <Animated.View style={{ alignItems: 'flex-end', marginBottom: 16, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
+        <LinearGradient colors={C.gradientGold} style={{ borderRadius: 22, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 12, maxWidth: '76%' }}>
           <Text style={{ fontSize: FontSizes.md, color: C.textOnPrimary, lineHeight: 22 }}>{item.text}</Text>
         </LinearGradient>
         {item.time && <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 4, marginRight: 4, opacity: 0.6 }}>{item.time}</Text>}
@@ -64,9 +64,9 @@ function MessageBubble({ item, C, tr, isLatest }) {
   }
 
   return (
-    <Animated.View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 20, gap: 10, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
-      <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorderGold, justifyContent: 'center', alignItems: 'center', marginTop: 2, overflow: 'hidden' }}>
-        <Image source={require('../../assets/images/flute.png')} style={{ width: 24, height: 24, borderRadius: 12 }} resizeMode='cover' />
+    <Animated.View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 24, gap: 12, opacity: fadeIn, transform: [{ translateY: slideUp }] }}>
+      <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.glassBg, borderWidth: 1.5, borderColor: C.glassBorderGold, justifyContent: 'center', alignItems: 'center', marginTop: 2, overflow: 'hidden' }}>
+        <Image source={require('../../assets/images/flute.png')} style={{ width: 28, height: 28, borderRadius: 14 }} resizeMode='cover' />
       </View>
       <View style={{ flex: 1, gap: 8 }}>
         {/* AI text bubble — glass */}
@@ -147,6 +147,7 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [inputFocused, setInputFocused] = useState(false);
   const flatListRef = useRef(null);
   const currentLang = profile.language || 'hinglish';
 
@@ -219,12 +220,13 @@ export default function ChatScreen() {
               <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingRight: 5 }}>
                 <MaterialCommunityIcons name="arrow-left" size={24} color={C.textPrimary} />
               </TouchableOpacity>
-              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.primarySoft, borderWidth: 1.5, borderColor: C.borderGoldStrong, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
-                <Image source={require('../../assets/images/flute.png')} style={{ width: 32, height: 32, borderRadius: 16 }} resizeMode='cover' />
+              <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: C.primarySoft, borderWidth: 2, borderColor: C.borderGoldStrong, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                <Image source={require('../../assets/images/flute.png')} style={{ width: 40, height: 40, borderRadius: 20 }} resizeMode='cover' />
               </View>
               <View>
-                <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: C.textPrimary }}>Ask Krishna</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 1 }}>
+                <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: C.textPrimary, letterSpacing: -0.2 }}>Ask Krishna</Text>
+                <Text style={{ fontSize: FontSizes.xs, color: C.primary, fontWeight: '600', marginTop: 1 }}>Bhagavad Gita Guide</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
                   <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isTyping ? C.turmeric : '#34C759' }} />
                   <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }}>{isTyping ? 'Typing...' : 'Online'}</Text>
                 </View>
@@ -305,8 +307,8 @@ export default function ChatScreen() {
             flexDirection: 'row', alignItems: 'center', gap: 6,
             backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : C.glassBgStrong,
             borderRadius: 36,
-            borderWidth: 1.5,
-            borderColor: C.glassBorderGold,
+            borderWidth: inputFocused ? 2 : 1.5,
+            borderColor: inputFocused ? C.borderGoldStrong : C.glassBorderGold,
             paddingHorizontal: 8,
             paddingVertical: 4,
           }}>
@@ -332,6 +334,8 @@ export default function ChatScreen() {
               multiline maxLength={500} editable={!isTyping}
               selectionColor={C.primary}
               underlineColorAndroid="transparent"
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
             />
 
             {/* Voice input */}
