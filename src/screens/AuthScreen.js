@@ -78,7 +78,11 @@ export default function AuthScreen({ navigation }) {
       const result = isLogin ? await login(email.trim(), password) : await signup(email.trim(), password);
       setLoading(false);
       if (!result.success) {
-        const code = result.error || '';
+        const code = result.code || result.error || '';
+        const rawMessage = result.message || '';
+        // [AUTH DEBUG] show exact Firebase error in Alert so it's visible in EAS build
+        console.log('[AUTH DEBUG] handleEmailAuth error — code:', code, '| message:', rawMessage, '| raw:', result.raw);
+        Alert.alert('[AUTH DEBUG] Firebase Error', `code: ${code}\nmessage: ${rawMessage}`);
         let msg;
         if (code.includes('account-exists-with-different-credential')) msg = 'This email is linked to Google. Please use the Google login button.';
         else if (code.includes('user-not-found')) msg = 'Account not found. Please sign up first.';
@@ -88,11 +92,13 @@ export default function AuthScreen({ navigation }) {
         else if (code.includes('too-many-requests')) msg = 'Too many attempts. Please reset your password or try again later.';
         else if (code.includes('network-request-failed')) msg = 'Network error. Check your internet connection and try again.';
         else if (code.includes('api-key-not-valid') || code.includes('app-not-authorized') || code.includes('invalid-api-key')) msg = 'App configuration error. Please reinstall the app or contact support.';
-        else msg = 'Something went wrong (' + code + '). Please try again.'; // [AUTH DEBUG] raw code shown
+        else msg = rawMessage || ('Something went wrong (' + code + '). Please try again.');
         setAuthError(msg);
       }
     } catch (error) {
       setLoading(false);
+      console.log('[AUTH DEBUG] handleEmailAuth catch — message:', error.message, '| full:', JSON.stringify(error));
+      Alert.alert('[AUTH DEBUG] Unexpected Error', error.message || 'Unknown error');
       setAuthError(error.message || 'Something went wrong. Please try again.');
     }
   };

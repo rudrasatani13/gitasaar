@@ -70,7 +70,7 @@ export async function signup(email, password) {
     return { success: true, user: result.user };
   } catch (e) {
     console.log('[AUTH DEBUG] signup error — code:', e.code, '| message:', e.message, '| full:', JSON.stringify(e));
-    return { success: false, error: e.code || e.message };
+    return { success: false, error: e.code || e.message, code: e.code, message: e.message, raw: JSON.stringify(e) };
   }
 }
 
@@ -81,7 +81,7 @@ export async function login(email, password) {
     return { success: true, user: result.user };
   } catch (e) {
     console.log('[AUTH DEBUG] login error — code:', e.code, '| message:', e.message, '| full:', JSON.stringify(e));
-    return { success: false, error: e.code || e.message };
+    return { success: false, error: e.code || e.message, code: e.code, message: e.message, raw: JSON.stringify(e) };
   }
 }
 
