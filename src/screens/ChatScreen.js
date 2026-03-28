@@ -58,7 +58,7 @@ function MessageBubble({ item, C, tr, isLatest }) {
         <LinearGradient colors={C.gradientGold} style={{ borderRadius: 20, borderBottomRightRadius: 6, paddingHorizontal: 18, paddingVertical: 13, maxWidth: '80%' }}>
           <Text style={{ fontSize: FontSizes.md, color: C.textOnPrimary, lineHeight: 22 }}>{item.text}</Text>
         </LinearGradient>
-        {item.time && <Text style={{ fontSize: 10, color: C.textMuted, marginTop: 4, marginRight: 4, opacity: 0.6 }}>{item.time}</Text>}
+        {item.time && <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginTop: 4, marginRight: 4, opacity: 0.6 }}>{item.time}</Text>}
       </Animated.View>
     );
   }
@@ -88,10 +88,10 @@ function MessageBubble({ item, C, tr, isLatest }) {
             <View style={{ padding: 16 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: C.glassBg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1, borderColor: C.glassBorderGold }}>
-                  <MaterialCommunityIcons name="book-open-variant" size={10} color={C.primary} />
-                  <Text style={{ fontSize: 10, fontWeight: '800', color: C.primary }}>Gita {item.verse.chapter}.{item.verse.verse}</Text>
+                  <MaterialCommunityIcons name="book-open-variant" size={12} color={C.primary} />
+                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: C.primary }}>Gita {item.verse.chapter}.{item.verse.verse}</Text>
                 </View>
-                {item.verse.theme ? <Text style={{ fontSize: 10, color: C.textMuted, fontStyle: 'italic' }}>{item.verse.theme}</Text> : null}
+                {item.verse.theme ? <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontStyle: 'italic' }}>{item.verse.theme}</Text> : null}
               </View>
 
               <View style={{ backgroundColor: C.glassBg, borderRadius: 10, padding: 14, marginBottom: 10, flexDirection: 'row', borderWidth: 1, borderColor: C.glassBorder }}>
@@ -120,13 +120,13 @@ function MessageBubble({ item, C, tr, isLatest }) {
               <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: C.saffronSoft, justifyContent: 'center', alignItems: 'center' }}>
                 <MaterialCommunityIcons name="lightbulb-on-outline" size={12} color={C.turmeric} />
               </View>
-              <Text style={{ fontSize: 10, fontWeight: '800', color: C.turmeric, letterSpacing: 0.5 }}>{tr('practicalTakeaway')}</Text>
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: C.turmeric, letterSpacing: 0.5 }}>{tr('practicalTakeaway')}</Text>
             </View>
             <Text style={{ fontSize: FontSizes.sm, color: C.textPrimary, lineHeight: 22 }}>{item.advice}</Text>
           </GlassCard>
         )}
 
-        {item.time && <Text style={{ fontSize: 10, color: C.textMuted, marginLeft: 4, opacity: 0.6 }}>{item.time}</Text>}
+        {item.time && <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, marginLeft: 4, opacity: 0.6 }}>{item.time}</Text>}
       </View>
     </Animated.View>
   );
@@ -246,7 +246,7 @@ export default function ChatScreen() {
       <FlatList ref={flatListRef} data={messages}
         renderItem={({ item, index }) => <MessageBubble item={item} C={C} tr={tr} isLatest={item.type === 'ai' && index === messages.length - 1} />}
         keyExtractor={(i) => i.id}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 120 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         ListFooterComponent={<>
@@ -293,7 +293,7 @@ export default function ChatScreen() {
           {!isPremium && !showPaywall && (
             <View style={{ alignItems: 'center', marginBottom: 6 }}>
               <View style={{ backgroundColor: C.glassBg, borderWidth: 1, borderColor: chatRemaining <= 2 ? '#D63B2F40' : C.glassBorder, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 3 }}>
-                <Text style={{ fontSize: 11, color: chatRemaining <= 2 ? '#D63B2F' : C.textMuted, fontWeight: '700', letterSpacing: 0.3 }}>
+                <Text style={{ fontSize: FontSizes.xs, color: chatRemaining <= 2 ? '#D63B2F' : C.textMuted, fontWeight: '700', letterSpacing: 0.3 }}>
                   {chatRemaining} free messages left today
                 </Text>
               </View>

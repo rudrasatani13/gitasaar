@@ -92,11 +92,11 @@ export default function HomeScreen({ navigation }) {
   return (
     <LinearGradient colors={C.gradientWarm} style={{ flex: 1 }}>
       <LotusHomeBackground />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 54, paddingBottom: 120 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 56, paddingBottom: 120 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}>
 
         {/* Header with profile */}
         <FadeSlide delay={0}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <TouchableOpacity onPress={() => navigation.navigate('Settings')} activeOpacity={0.8}>
                 <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: C.glassBg, borderWidth: 1.5, borderColor: C.glassBorderGold, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
@@ -113,12 +113,12 @@ export default function HomeScreen({ navigation }) {
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <TouchableOpacity onPress={() => navigation.navigate('Bookmarks')} activeOpacity={0.8}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorderGold }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder }}>
                   <MaterialCommunityIcons name="bookmark-multiple" size={14} color={C.saffron} />
                   <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.saffron }}>{bookmarkCount}</Text>
                 </View>
               </TouchableOpacity>
-              <LinearGradient colors={['#E8793A', '#DBA04E']} style={{ flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999 }}>
+              <LinearGradient colors={['#E8793A', '#DBA04E']} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 }}>
                 <MaterialCommunityIcons name="fire" size={14} color="#FFF" />
                 <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: '#FFF' }}>{streak.count}</Text>
               </LinearGradient>
@@ -128,11 +128,11 @@ export default function HomeScreen({ navigation }) {
 
         {/* Streak + Progress */}
         <FadeSlide delay={50}>
-          <GlassCard style={{ marginBottom: 18 }} intensity={55}>
+          <GlassCard style={{ marginBottom: 16 }} intensity={55}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 }}>
               {streakWeek.map((day, i) => (
-                <View key={i} style={{ alignItems: 'center', gap: 5 }}>
-                  <Text style={{ fontSize: 10, color: day.isToday ? C.primary : C.textMuted, fontWeight: day.isToday ? '700' : '400' }}>{day.label}</Text>
+                <View key={i} style={{ alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontSize: FontSizes.xs, color: day.isToday ? C.primary : C.textMuted, fontWeight: day.isToday ? '700' : '400' }}>{day.label}</Text>
                   <View style={{
                     width: 30, height: 30, borderRadius: 15,
                     backgroundColor: day.active ? C.saffron + '20' : C.glassBg,
@@ -148,12 +148,12 @@ export default function HomeScreen({ navigation }) {
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 1, backgroundColor: C.glassBg, borderRadius: 12, padding: 12, alignItems: 'center', gap: 2, borderWidth: 1, borderColor: C.glassBorder }}>
                 <Text style={{ fontSize: FontSizes.xl, fontWeight: '800', color: C.saffron }}>{streak.count}</Text>
-                <Text style={{ fontSize: 10, color: C.textMuted }}>{tr('dayStreak')}</Text>
+                <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }}>{tr('dayStreak')}</Text>
               </View>
               <View style={{ flex: 2, backgroundColor: C.glassBg, borderRadius: 12, padding: 12, justifyContent: 'center', borderWidth: 1, borderColor: C.glassBorder }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <Text style={{ fontSize: 11, fontWeight: '600', color: C.textSecondary }}>{tr('readingProgress')}</Text>
-                  <Text style={{ fontSize: 11, fontWeight: '700', color: C.peacockBlue }}>{totalRead}/700</Text>
+                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: C.textSecondary }}>{tr('readingProgress')}</Text>
+                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.peacockBlue }}>{totalRead}/700</Text>
                 </View>
                 <View style={{ height: 5, backgroundColor: C.glassBorder, borderRadius: 3, overflow: 'hidden' }}>
                   <View style={{ height: '100%', width: totalPercent + '%', backgroundColor: C.peacockBlue, borderRadius: 3 }} />
@@ -166,7 +166,7 @@ export default function HomeScreen({ navigation }) {
         {/* Chat CTA */}
         <FadeSlide delay={100}>
           <PressableCard onPress={() => navigation.navigate('Chat')}>
-            <LinearGradient colors={C.gradientGold} style={{ borderRadius: 24, padding: 22, marginBottom: 18, overflow: 'hidden' }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+            <LinearGradient colors={C.gradientGold} style={{ borderRadius: 24, padding: 24, marginBottom: 16, overflow: 'hidden' }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
               <View style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(255,255,255,0.08)' }} />
               <View style={{ position: 'absolute', bottom: -30, left: -30, width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(255,255,255,0.05)' }} />
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 }}>
@@ -188,7 +188,7 @@ export default function HomeScreen({ navigation }) {
 
         {/* Quick Actions */}
         <FadeSlide delay={140}>
-          <View style={{ flexDirection: "row", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+          <View style={{ flexDirection: "row", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
             <TouchableOpacity onPress={() => navigation.navigate("Quiz")} activeOpacity={0.8} style={{ width: 155 }}>
               <GlassCard noPadding style={{ borderRadius: 16, padding: 14 }} intensity={40}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -197,7 +197,7 @@ export default function HomeScreen({ navigation }) {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Daily Quiz</Text>
-                    <Text style={{ fontSize: 10, color: C.textMuted }} numberOfLines={1}>Test your knowledge</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Test your knowledge</Text>
                   </View>
                 </View>
               </GlassCard>
@@ -210,13 +210,13 @@ export default function HomeScreen({ navigation }) {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Chat History</Text>
-                    <Text style={{ fontSize: 10, color: C.textMuted }} numberOfLines={1}>Past conversations</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Past conversations</Text>
                   </View>
                 </View>
               </GlassCard>
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: "row", gap: 10, marginBottom: 18 }}>
+          <View style={{ flexDirection: "row", gap: 10, marginBottom: 16 }}>
             <TouchableOpacity onPress={() => navigation.navigate("Streak")} activeOpacity={0.8} style={{ flex: 1 }}>
               <GlassCard noPadding style={{ borderRadius: 16, padding: 14 }} intensity={40}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -225,7 +225,7 @@ export default function HomeScreen({ navigation }) {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>My Journey</Text>
-                    <Text style={{ fontSize: 10, color: C.textMuted }} numberOfLines={1}>Streaks & badges</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Streaks & badges</Text>
                   </View>
                 </View>
               </GlassCard>
@@ -238,7 +238,7 @@ export default function HomeScreen({ navigation }) {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Mood Tracker</Text>
-                    <Text style={{ fontSize: 10, color: C.textMuted }} numberOfLines={1}>How are you today?</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>How are you today?</Text>
                   </View>
                 </View>
               </GlassCard>
@@ -248,8 +248,8 @@ export default function HomeScreen({ navigation }) {
 
         {/* Topics Grid */}
         <FadeSlide delay={150}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-            <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: C.primary }} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: C.textMuted }} />
             <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: C.primary, letterSpacing: 2 }}>{tr('exploreTopics')}</Text>
           </View>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
@@ -268,8 +268,8 @@ export default function HomeScreen({ navigation }) {
 
         {/* Daily Shloka */}
         <FadeSlide delay={200}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 22, marginBottom: 14 }}>
-            <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: C.primary }} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 24, marginBottom: 16 }}>
+            <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: C.textMuted }} />
             <Text style={{ fontSize: FontSizes.xs, fontWeight: '800', color: C.primary, letterSpacing: 2 }}>{tr('shlokaOfDay')}</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate("VerseOfDay")} activeOpacity={0.9}>
@@ -300,7 +300,7 @@ export default function HomeScreen({ navigation }) {
 
         {/* Stats */}
         <FadeSlide delay={300}>
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 22 }}>
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 24 }}>
             {[
               { icon: 'fire', num: String(streak.count), label: tr('dayStreak'), color: C.saffron },
               { icon: 'book-open-page-variant', num: String(totalRead), label: tr('versesRead'), color: C.peacockBlue },
@@ -309,7 +309,7 @@ export default function HomeScreen({ navigation }) {
               <GlassCard key={s.label} noPadding style={{ flex: 1, paddingVertical: 14, alignItems: 'center', gap: 3 }} intensity={35}>
                 <MaterialCommunityIcons name={s.icon} size={18} color={s.color} />
                 <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: C.textPrimary }}>{s.num}</Text>
-                <Text style={{ fontSize: 10, color: C.textMuted, fontWeight: '500' }}>{s.label}</Text>
+                <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontWeight: '500' }}>{s.label}</Text>
               </GlassCard>
             ))}
           </View>
