@@ -8,6 +8,19 @@ try { SecureStore = require('expo-secure-store'); } catch (e) {}
 let Crypto = null;
 try { Crypto = require('expo-crypto'); } catch (e) {}
 
+// ============ SHARED — Web SHA-256 via crypto.subtle ============
+async function webSHA256(input) {
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    const data = new TextEncoder().encode(input);
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  // Last-resort fallback: simple non-crypto hash (never used in security-critical paths)
+  let h = 0;
+  for (let i = 0; i < input.length; i++) { h = (h << 5) - h + input.charCodeAt(i); h |= 0; }
+  return Math.abs(h).toString(16);
+}
+
 // ============ 1. SECURE KEY STORAGE ============
 // Store sensitive data in encrypted storage (not plain AsyncStorage)
 export async function secureSet(key, value) {
@@ -103,20 +116,20 @@ export function checkRateLimit(action, maxPerMinute = 30) {
 export async function signRequest(payload) {
   const timestamp = Date.now();
   const nonce = Math.random().toString(36).substring(2, 10);
+  const raw = timestamp + nonce + JSON.stringify(payload).substring(0, 100);
 
   let hash = '';
   if (Crypto) {
     try {
       hash = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
-        timestamp + nonce + JSON.stringify(payload).substring(0, 100)
+        raw
       );
     } catch (e) {
-      hash = (timestamp + nonce).toString(36);
+      hash = await webSHA256(raw);
     }
   } else {
-    // Web fallback
-    hash = btoa(timestamp + nonce).substring(0, 16);
+    hash = await webSHA256(raw);
   }
 
   return { timestamp, nonce, hash };
@@ -144,50 +157,7 @@ export function isValidEmail(email) {
   return re.test(email);
 }
 
-// ============ 6. PREMIUM VALIDATION ============
-// Extra check to prevent premium bypass — requires BOTH paymentId AND valid expiryDate + signature
-const PREMIUM_SIGN_SECRET = 'gs_prem_2026';
-
-export async function generatePremiumSignature(premiumData) {
-  const payload = `${premiumData.paymentId}|${premiumData.expiryDate}|${premiumData.planType}|${PREMIUM_SIGN_SECRET}`;
-  if (Crypto) {
-    try {
-      return await Crypto.digestStringAsync(
-        Crypto.CryptoDigestAlgorithm.SHA256,
-        payload
-      );
-    } catch (e) {}
-  }
-  // Web fallback
-  return btoa(payload).substring(0, 32);
-}
-
-export function validatePremiumToken(premiumData) {
-  if (!premiumData) return false;
-  // Must have a non-empty paymentId (no bypassing with just isPremium flag)
-  if (!premiumData.paymentId || typeof premiumData.paymentId !== 'string' || premiumData.paymentId.trim() === '') return false;
-  // Must have a valid plan type
-  if (!premiumData.planType || !['monthly', 'yearly'].includes(premiumData.planType)) return false;
-  // Must have a valid future expiry date
-  if (!premiumData.expiryDate) return false;
-  const expiry = new Date(premiumData.expiryDate);
-  if (isNaN(expiry.getTime()) || expiry <= new Date()) return false;
-  // Expiry must not be unreasonably far in the future (max 13 months)
-  const maxExpiry = new Date();
-  maxExpiry.setMonth(maxExpiry.getMonth() + 13);
-  if (expiry > maxExpiry) return false;
-  // Must have a signature (prevents raw AsyncStorage tampering)
-  if (!premiumData.signature || typeof premiumData.signature !== 'string') return false;
-  return true;
-}
-
-export async function verifyPremiumSignature(premiumData) {
-  if (!validatePremiumToken(premiumData)) return false;
-  const expected = await generatePremiumSignature(premiumData);
-  return premiumData.signature === expected;
-}
-
-// ============ 7. ANTI-TAMPERING ============
+// ============ 6. ANTI-TAMPERING ============
 // Basic check if app bundle is modified
 export function getAppIntegrity() {
   const checks = {
@@ -206,22 +176,7 @@ export function getAppIntegrity() {
   return checks;
 }
 
-// ============ 8. PREVENT CONSOLE ACCESS ============
-// Disable console in production to prevent data scraping
-export function lockConsole() {
-  try { if (typeof __DEV__ !== 'undefined' && __DEV__) return; } catch(e) { return; } // Keep console in development
-  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    const noop = () => {};
-    window.console.log = noop;
-    window.console.debug = noop;
-    window.console.info = noop;
-    window.console.warn = noop;
-    // Keep console.error for crash reporting
-  }
-}
-
 // ============ INIT SECURITY ============
 export function initSecurity() {
-  try { lockConsole(); } catch(e) {}
   try { return getAppIntegrity(); } catch(e) { return {}; }
 }

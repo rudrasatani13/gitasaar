@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useProfile } from '../theme/ProfileContext';
-import { usePremium, generatePaymentCallerToken } from '../theme/PremiumContext';
+import { usePremium } from '../theme/PremiumContext';
 import { FontSizes } from '../theme/colors';
 import { startPayment, detectRegion, getPlans } from '../utils/payment';
 
@@ -23,7 +23,7 @@ const FEATURES = [
 export default function PremiumScreen({ navigation }) {
   const { colors: C } = useTheme();
   const { displayName, email } = useProfile();
-  const { isPremium, planType, expiryDate, activatePremium, cancelPremium } = usePremium();
+  const { isPremium, planType, expiryDate, cancelPremium } = usePremium();
   const [selectedPlan, setSelectedPlan] = useState('yearly');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
@@ -66,11 +66,11 @@ export default function PremiumScreen({ navigation }) {
   const handlePurchase = () => {
     setProcessing(true);
     setError('');
-    // Generate one-time token before initiating payment
-    const callerToken = generatePaymentCallerToken();
+    // Cloud Function verifies payment + writes premium to Firestore.
+    // PremiumContext's onSnapshot listener picks up the change automatically.
     startPayment(
       selectedPlan, email, displayName,
-      async (result) => { await activatePremium(selectedPlan, result.paymentId, callerToken); setProcessing(false); },
+      () => { setProcessing(false); },
       (errMsg) => { setError(errMsg); setProcessing(false); }
     );
   };

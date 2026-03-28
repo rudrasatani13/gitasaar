@@ -5,26 +5,54 @@ service cloud.firestore {
 
     // ── Users ────────────────────────────────────────────────────────────────
     // Each user can only read/write their own document.
-    // Premium fields (isPremium, planType, expiryDate, paymentId) live here
-    // and are written exclusively by Cloud Functions — clients can only read.
+    // Premium fields are written exclusively by Cloud Functions (Admin SDK
+    // bypasses rules), so clients are blocked from touching them.
     match /users/{uid} {
       allow read:  if request.auth != null && request.auth.uid == uid;
       allow write: if request.auth != null && request.auth.uid == uid
-                   // Block clients from directly setting premium fields;
-                   // those must come through Cloud Functions only.
-                   && !('isPremium'   in request.resource.data)
-                   && !('planType'    in request.resource.data)
-                   && !('paymentId'   in request.resource.data)
-                   && !('orderId'     in request.resource.data)
-                   && !('expiryDate'  in request.resource.data)
-                   && !('activatedAt' in request.resource.data);
+                   // Block clients from directly setting premium fields
+                   && !request.resource.data.diff(resource.data).affectedKeys()
+                       .hasAny(['isPremium', 'planType', 'paymentId', 'orderId', 'expiryDate', 'activatedAt']);
+
+      // Heavy data subcollection (journal, bookmarks, chat history)
+      match /heavyData/{docId} {
+        allow read:  if request.auth != null && request.auth.uid == uid;
+        allow write: if request.auth != null && request.auth.uid == uid
+                     && request.resource.data.keys().size() <= 20
+                     && request.resource.size() < 1048576; // 1 MB max per doc
+      }
     }
 
     // ── Community ────────────────────────────────────────────────────────────
-    // Anyone can read. Only authenticated users can write.
-    match /community/{document=**} {
-      allow read:  if true;
-      allow write: if request.auth != null;
+    // Anyone can read. Authenticated users can write with constraints.
+    match /community/{postId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    // Must have required fields
+                    && request.resource.data.keys().hasAll(['text', 'userId', 'createdAt'])
+                    // Limit to allowed fields only
+                    && request.resource.data.keys().hasOnly([
+                         'text', 'userId', 'userName', 'userPhoto',
+                         'createdAt', 'likes', 'likedBy', 'tags', 'type'
+                       ])
+                    // userId must match the authenticated user
+                    && request.resource.data.userId == request.auth.uid
+                    // Text length limit (2000 chars)
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() > 0
+                    && request.resource.data.text.size() <= 2000;
+
+      allow update: if request.auth != null
+                    // Only allow updating likes/likedBy (reactions)
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['likes', 'likedBy'])
+                    // Prevent negative likes
+                    && request.resource.data.likes is int
+                    && request.resource.data.likes >= 0;
+
+      allow delete: if request.auth != null
+                    // Only the post author can delete
+                    && resource.data.userId == request.auth.uid;
     }
 
     // ── Default: deny everything else ────────────────────────────────────────
