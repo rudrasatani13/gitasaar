@@ -202,9 +202,10 @@ export default function OnboardingScreen({ navigation }) {
           {/* Dots */}
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 }}>
             {SLIDES.map((_, i) => {
-              const dotWidth = scrollX.interpolate({
+              // width is not supported by the native animated driver — use scaleX instead
+              const dotScale = scrollX.interpolate({
                 inputRange: [(i - 1) * width, i * width, (i + 1) * width],
-                outputRange: [8, 24, 8],
+                outputRange: [1 / 3, 1, 1 / 3],
                 extrapolate: 'clamp',
               });
               const dotOpacity = scrollX.interpolate({
@@ -214,8 +215,9 @@ export default function OnboardingScreen({ navigation }) {
               });
               return (
                 <Animated.View key={i} style={{
-                  width: dotWidth, height: 8, borderRadius: 4,
+                  width: 24, height: 8, borderRadius: 4,
                   backgroundColor: C.primary, opacity: dotOpacity,
+                  transform: [{ scaleX: dotScale }],
                 }} />
               );
             })}
