@@ -23,11 +23,22 @@ function parseResponse(text) {
   try {
     const hasVerse = text.includes('[VERSE_START]') && text.includes('[VERSE_END]');
 
+    // ── No verse case ──────────────────────────────────────────────────────
     if (!hasVerse) {
-      const clean = text.replace(/\[RESPONSE\]\s*/gi, '').replace(/\[ADVICE\]\s*/gi, '').trim();
-      return { text: clean, verse: null, advice: null };
+      const hasAdvice = /\[ADVICE\]/i.test(text);
+      const cleanResponse = text.replace(/\[RESPONSE\]\s*/gi, '').trim();
+      if (hasAdvice) {
+        const parts = cleanResponse.split(/\[ADVICE\]/i);
+        return {
+          text: parts[0].trim() || cleanResponse,
+          verse: null,
+          advice: parts[1] ? parts[1].trim() : null,
+        };
+      }
+      return { text: cleanResponse.replace(/\[ADVICE\]\s*/gi, '').trim(), verse: null, advice: null };
     }
 
+    // ── Verse present case ─────────────────────────────────────────────────
     const beforeVerse     = text.split(/\[VERSE_START\]/i)[0].replace(/\[RESPONSE\]\s*/gi, '').trim();
     const verseBlockMatch = text.match(/\[VERSE_START\]([\s\S]*?)\[VERSE_END\]/i);
     let verse = null;

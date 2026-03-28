@@ -468,17 +468,17 @@ export default function ChatScreen() {
           <View style={{
             flexDirection: 'row', alignItems: 'center',
             backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : C.glassBgStrong,
-            borderRadius: 36,
+            borderRadius: 32,
             borderWidth: inputFocused ? 2 : 1.5,
             borderColor: inputFocused ? C.borderGoldStrong : C.glassBorderGold,
-            paddingHorizontal: 8, paddingVertical: 4,
+            paddingLeft: 6, paddingRight: 6, paddingVertical: 3,
             ...(inputFocused ? C.glassShadow : {}),
           }}>
             <TextInput
               style={{
                 flex: 1, fontSize: FontSizes.md, color: C.textPrimary,
-                paddingHorizontal: 12, paddingVertical: 10,
-                maxHeight: 100, minHeight: 42, lineHeight: 22,
+                paddingHorizontal: 12, paddingVertical: 8,
+                maxHeight: 90, minHeight: 36, lineHeight: 20,
               }}
               placeholder={tr('askAnything') || 'Ask Krishna anything...'}
               placeholderTextColor={C.textMuted}
@@ -492,33 +492,35 @@ export default function ChatScreen() {
             />
             {/* Character counter near limit */}
             {inputText.length > 400 && (
-              <Text style={{ fontSize: 10, color: C.textMuted, paddingRight: 4 }}>{inputText.length}/500</Text>
+              <Text style={{ fontSize: 10, color: C.textMuted, paddingHorizontal: 4 }}>{inputText.length}/500</Text>
             )}
-            {/* Voice */}
-            {!inputText.trim() && (
-              <VoiceInput
-                onResult={(t) => setInputText(t)}
-                onAutoSend={sendMessage}
-                disabled={isTyping}
-              />
-            )}
-            {/* Send button */}
-            <TouchableOpacity
-              onPress={() => { tapMedium(); sendMessage(); }}
-              disabled={!inputText.trim() || isTyping}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={inputText.trim() && !isTyping ? C.gradientGold : [C.glassBg, C.glassBg]}
-                style={{ width: 42, height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', borderWidth: inputText.trim() ? 0 : 1, borderColor: C.glassBorder }}
-              >
-                <MaterialCommunityIcons
-                  name="send"
-                  size={19}
-                  color={inputText.trim() && !isTyping ? C.textOnPrimary : C.textMuted}
+            {/* Voice + Send row with proper spacing */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingRight: 2 }}>
+              {!inputText.trim() && (
+                <VoiceInput
+                  onResult={(t) => setInputText(t)}
+                  onAutoSend={sendMessage}
+                  disabled={isTyping}
                 />
-              </LinearGradient>
-            </TouchableOpacity>
+              )}
+              {/* Send button — arrow-up like ChatGPT */}
+              <TouchableOpacity
+                onPress={() => { tapMedium(); sendMessage(); }}
+                disabled={!inputText.trim() || isTyping}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={inputText.trim() && !isTyping ? C.gradientGold : [C.glassBg, C.glassBg]}
+                  style={{ width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center', borderWidth: inputText.trim() ? 0 : 1, borderColor: C.glassBorder }}
+                >
+                  <MaterialCommunityIcons
+                    name="arrow-up"
+                    size={20}
+                    color={inputText.trim() && !isTyping ? C.textOnPrimary : C.textMuted}
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
