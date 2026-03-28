@@ -3,8 +3,11 @@
 // via Firebase Cloud Functions. API key and secret never touch the client.
 
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from './firebase';
+
+const REGION_CACHE_KEY = '@gitasaar_region';
 
 // Razorpay KEY_ID is safe to expose on client (it's a public identifier, not the secret)
 const RAZORPAY_KEY_ID = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
@@ -28,13 +31,21 @@ async function detectRegion() {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     if (tz.startsWith('Asia/Kolkata') || tz.startsWith('Asia/Calcutta')) {
       detectedRegion = 'india';
+      AsyncStorage.setItem(REGION_CACHE_KEY, detectedRegion).catch(() => {});
       return 'india';
     }
     const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
     const data = await res.json();
     detectedRegion = data.country_code === 'IN' ? 'india' : 'international';
+    AsyncStorage.setItem(REGION_CACHE_KEY, detectedRegion).catch(() => {});
   } catch {
     try {
+      // Use cached region from previous session before guessing from offset
+      const cached = await AsyncStorage.getItem(REGION_CACHE_KEY);
+      if (cached === 'india' || cached === 'international') {
+        detectedRegion = cached;
+        return detectedRegion;
+      }
       const offset = new Date().getTimezoneOffset();
       detectedRegion = offset === -330 ? 'india' : 'international';
     } catch {

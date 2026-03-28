@@ -254,8 +254,6 @@ export default function AppNavigator() {
             <Stack.Screen name="Auth" component={AuthScreen} />
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-            <Stack.Screen name="Main" component={MainTabs} />
-            {extras}
           </>
         )}
       </Stack.Navigator>

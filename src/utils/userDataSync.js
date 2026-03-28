@@ -121,14 +121,11 @@ async function mergeIfNewer(key, cloudValue, cloudTimestamp) {
         if (!localSyncMarker || new Date(cloudTimestamp) > new Date(localSyncMarker)) {
           await AsyncStorage.setItem(key, cloudValue);
         }
-      } else {
-        // No timestamp info — fallback to cloud (first-time sync)
-        await AsyncStorage.setItem(key, cloudValue);
       }
+      // No cloudTimestamp and local data exists — keep local to avoid overwriting newer local changes
     }
   } catch {
-    // On any error, accept cloud data as fallback
-    await AsyncStorage.setItem(key, cloudValue);
+    // On error — keep local if it exists (checked above); skip overwrite
   }
 }
 

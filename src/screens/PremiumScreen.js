@@ -54,8 +54,8 @@ export default function PremiumScreen({ navigation }) {
         setPlans(getPlans(r));
       })
       .catch(() => {
-        setRegion('india');
-        setPlans(getPlans('india'));
+        setRegion('international');
+        setPlans(getPlans('international'));
       })
       .finally(() => setPlansLoading(false));
   }, []);

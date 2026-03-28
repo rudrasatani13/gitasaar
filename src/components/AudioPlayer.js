@@ -12,7 +12,7 @@ import { tapLight } from '../utils/haptics';
 import { useNavigation } from '@react-navigation/native';
 import GlassCard from './GlassCard';
 
-const generateSpeechAudio = httpsCallable(functions, 'generateSpeechAudio');
+const generateSpeechAudio = httpsCallable(functions, 'generateSpeechAudio', { timeout: 15000 });
 
 const hashString = (str) => {
   let hash = 0;
@@ -117,18 +117,9 @@ function stopWebAudio() {
 async function playNative(source) {
   try {
     const { Audio } = require('expo-av');
-    let uri = source.uri;
+    if (!source.uri) return;
 
-    if (!source.isLocal && source.blob) {
-      const reader = new FileReader();
-      const base64 = await new Promise((resolve) => {
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(source.blob);
-      });
-      uri = `data:audio/mpeg;base64,${base64}`;
-    }
-
-    const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true });
+    const { sound } = await Audio.Sound.createAsync({ uri: source.uri }, { shouldPlay: true });
     return new Promise((resolve) => {
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.didJustFinish) {

@@ -79,7 +79,10 @@ export async function sendMessageToGemini(userMessage, language) {
   }
 
   try {
-    const result      = await geminiCallable({ message: sanitized, language: lang, history });
+    const safeHistory = Array.isArray(history)
+      ? history.filter(h => h && h.role && Array.isArray(h.parts) && h.parts.length > 0)
+      : [];
+    const result      = await geminiCallable({ message: sanitized, language: lang, history: safeHistory });
     const responseText = result.data?.text;
 
     if (!responseText || typeof responseText !== 'string')

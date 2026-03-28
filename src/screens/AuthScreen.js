@@ -71,6 +71,7 @@ export default function AuthScreen({ navigation }) {
     if (!email.trim() || !password.trim()) return setAuthError('Please enter your email and password.');
     if (!isValidEmail(email.trim())) return setAuthError('Please enter a valid email address.');
     if (password.length < 6) return setAuthError('Password must be at least 6 characters.');
+    if (!isLogin && !confirmPassword.trim()) return setAuthError('Please confirm your password.');
     if (!isLogin && password !== confirmPassword) return setAuthError('Passwords do not match.');
     setLoading(true);
     try {
