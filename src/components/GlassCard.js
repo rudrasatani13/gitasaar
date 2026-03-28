@@ -23,7 +23,7 @@ export default function GlassCard({
 }) {
   const { colors: C, isDark } = useTheme();
 
-  const borderColor = C.glassBorder;
+  const borderColor = isDark ? C.glassBorder : C.border;
 
   const containerStyle = [
     styles.base,
@@ -98,9 +98,11 @@ export default function GlassCard({
     );
   }
 
-  // Android + noBlur: warm translucent background matching the app theme
+  // Android + noBlur: solid white card with elevation shadow in light mode
   return (
-    <View style={[containerStyle, { backgroundColor: isDark ? C.glassBg : C.glassBgStrong }]}>
+    <View style={[containerStyle, {
+      backgroundColor: isDark ? C.glassBg : '#FFFFFF',
+    }]}>
       {children}
     </View>
   );

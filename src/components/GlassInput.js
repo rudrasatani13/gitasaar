@@ -26,7 +26,7 @@ export default function GlassInput({
   const { colors: C, isDark } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
-  const borderColor = isFocused ? C.glassBorderGold : C.glassBorder;
+  const borderColor = isFocused ? C.glassBorderGold : (isDark ? C.glassBorder : C.border);
   const shadowStyle = isFocused ? C.glassShadow : C.shadowLight;
 
   const inner = (
@@ -92,7 +92,7 @@ export default function GlassInput({
         style={[
           containerStyle,
           {
-            backgroundColor: C.glassInputBg,
+            backgroundColor: isDark ? C.glassInputBg : '#FFFFFF',
             backdropFilter: `blur(${intensity}px)`,
             WebkitBackdropFilter: `blur(${intensity}px)`,
           },
@@ -105,9 +105,9 @@ export default function GlassInput({
 
   return (
     <BlurView
-      intensity={intensity}
+      intensity={isDark ? intensity : 0}
       tint={isDark ? 'dark' : 'light'}
-      style={[containerStyle, { backgroundColor: 'transparent' }]}
+      style={[containerStyle, { backgroundColor: isDark ? 'transparent' : '#FFFFFF' }]}
     >
       {inner}
     </BlurView>

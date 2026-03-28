@@ -113,14 +113,14 @@ export default function VerseLibraryScreen({ navigation }) {
             style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}
             activeOpacity={0.7}
           >
-            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: isExpanded ? C.primary : C.glassBg, justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1, borderColor: isExpanded ? C.primary : C.glassBorder }}>
+            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: isExpanded ? C.primary : C.bgSecondary, justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1.5, borderColor: isExpanded ? C.primary : C.border }}>
               <Text style={{ fontSize: FontSizes.lg, fontWeight: 'bold', color: isExpanded ? C.textOnPrimary : C.textPrimary }}>{ch.number}</Text>
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary, marginBottom: 2 }}>{ch.name}</Text>
               <Text style={{ fontSize: FontSizes.xs, color: C.textMuted, fontStyle: 'italic', marginBottom: 6 }}>{ch.theme}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <View style={{ flex: 1, height: 4, backgroundColor: C.glassBg, borderRadius: 2, overflow: 'hidden' }}>
+                <View style={{ flex: 1, height: 4, backgroundColor: C.bgTertiary, borderRadius: 2, overflow: 'hidden' }}>
                   <View style={{ width: `${progressPct}%`, height: '100%', backgroundColor: C.success }} />
                 </View>
                 <Text style={{ fontSize: 10, color: C.textMuted, fontWeight: '600' }}>{completedCount}/{ch.verses}</Text>
@@ -130,7 +130,7 @@ export default function VerseLibraryScreen({ navigation }) {
           </TouchableOpacity>
 
           {isExpanded && (
-            <View style={{ backgroundColor: C.glassBg, borderTopWidth: 1, borderTopColor: C.glassBorder, padding: 8 }}>
+            <View style={{ backgroundColor: C.bgSecondary, borderTopWidth: 1, borderTopColor: C.border, padding: 8 }}>
               {gitaData && gitaData[ch.number] ? (
                 Array.from({ length: ch.verses }, (_, i) => i + 1).map((num) => {
                   const vNum = num.toString();
@@ -180,7 +180,7 @@ export default function VerseLibraryScreen({ navigation }) {
       <KrishnaVersesBackground />
       
       {/* Header */}
-      <View style={{ paddingTop: 50, paddingBottom: 15, paddingHorizontal: 20, backgroundColor: C.bgPrimary, borderBottomWidth: 1, borderBottomColor: C.glassBorder, zIndex: 10 }}>
+      <View style={{ paddingTop: 50, paddingBottom: 15, paddingHorizontal: 20, backgroundColor: C.bgCard, borderBottomWidth: 1.5, borderBottomColor: C.border, zIndex: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 15 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
@@ -211,7 +211,7 @@ export default function VerseLibraryScreen({ navigation }) {
         </GlassCard>
 
         {/* Search Bar */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.glassInputBg, borderRadius: 16, paddingHorizontal: 16, height: 50, borderWidth: 1, borderColor: C.glassBorder }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bgCard, borderRadius: 16, paddingHorizontal: 16, height: 50, borderWidth: 1.5, borderColor: C.border }}>
           <MaterialCommunityIcons name="magnify" size={22} color={C.textMuted} />
           <TextInput
             style={{ flex: 1, marginLeft: 10, fontSize: FontSizes.md, color: C.textPrimary, height: '100%' }}

@@ -28,54 +28,58 @@ export const LightColors = {
   cosmicBlue: '#0E6B6B',
   starlightCyan: '#14918E',
 
-  primarySoft: 'rgba(194, 136, 64, 0.10)',
-  primaryGlow: 'rgba(194, 136, 64, 0.25)',
-  saffronSoft: 'rgba(232, 121, 58, 0.12)',
-  lotusSoft: 'rgba(201, 90, 106, 0.10)',
-  nebulaSoft: 'rgba(14, 107, 107, 0.10)',
-  cosmicSoft: 'rgba(14, 107, 107, 0.10)',
+  primarySoft: 'rgba(194, 136, 64, 0.13)',
+  primaryGlow: 'rgba(194, 136, 64, 0.28)',
+  saffronSoft: 'rgba(232, 121, 58, 0.13)',
+  lotusSoft: 'rgba(201, 90, 106, 0.12)',
+  nebulaSoft: 'rgba(14, 107, 107, 0.12)',
+  cosmicSoft: 'rgba(14, 107, 107, 0.12)',
 
-  bgPrimary: '#FAFAFA',
-  bgSecondary: '#F5F5F5',
-  bgTertiary: '#EEEEEE',
-  bgCard: '#FFFFFF',
-  bgCardElevated: '#FFFFFF',
-  bgInput: '#F5F5F5',
+  // Backgrounds — warm but with clear contrast
+  bgPrimary:       '#FAF6EF',   // Warm off-white (background)
+  bgSecondary:     '#F2EBE0',   // Warm cream (input/secondary areas)
+  bgTertiary:      '#E8DFD0',   // Warm tan (dividers, tertiary)
+  bgCard:          '#FFFFFF',   // Pure white cards — clearly distinct
+  bgCardElevated:  '#FFFFFF',
+  bgInput:         '#FFFFFF',   // White input fields
 
-  textPrimary: '#212121',
-  textSecondary: '#424242',
-  textMuted: '#757575',
+  // Text — warm dark tones for readability
+  textPrimary:   '#1A1208',   // Deep warm black
+  textSecondary: '#3D2E1A',   // Warm dark brown
+  textMuted:     '#7A6248',   // Medium warm brown (was #757575 — too neutral)
   textOnPrimary: '#FFFFFF',
-  textSanskrit: '#8D6E63',
-  textGold: '#B8860B',
+  textSanskrit:  '#6B4423',   // Warm deep brown for Sanskrit
+  textGold:      '#9A6E22',   // Darker gold for readability on white
 
-  border: '#E0E0E0',
-  borderLight: '#EEEEEE',
-  borderGold: 'rgba(194, 136, 64, 0.3)',
-  borderGoldStrong: 'rgba(194, 136, 64, 0.6)',
-  divider: '#E0E0E0',
+  // Borders — clearly visible warm tones
+  border:           '#CEC0A4',   // Warm tan border (was #E0E0E0 — too light)
+  borderLight:      '#DDD2BC',   // Lighter tan
+  borderGold:       'rgba(194, 136, 64, 0.45)',   // Clearly visible gold
+  borderGoldStrong: 'rgba(194, 136, 64, 0.70)',   // Strong gold border
+  divider:          '#CEC0A4',   // Match border
 
-  glassBg: 'rgba(255, 252, 245, 0.55)',
-  glassBgStrong: 'rgba(255, 252, 245, 0.82)',
-  glassInputBg: 'rgba(255, 255, 255, 0.70)',
-  glassBorder: 'rgba(194, 136, 64, 0.18)',
-  glassBorderGold: 'rgba(194, 136, 64, 0.40)',
-  glassHighlight: 'rgba(255, 255, 255, 0.60)',
-  glassShadow: { shadowColor: '#C28840', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 24, elevation: 8 },
-  glassShimmer: 'rgba(255, 255, 255, 0.40)',
+  // GLASS TOKENS — solid white cards visible on warm background
+  glassBg:         '#FFFFFF',                       // Solid white (was 55% — invisible)
+  glassBgStrong:   '#FFFFFF',                       // Solid white
+  glassInputBg:    '#FFFFFF',                       // White inputs
+  glassBorder:     'rgba(164, 120, 60, 0.38)',      // Warm visible border (was 0.18)
+  glassBorderGold: 'rgba(194, 136, 64, 0.65)',      // Strong gold border (was 0.40)
+  glassHighlight:  'rgba(255, 255, 255, 1.0)',      // Solid white shimmer
+  glassShadow:     { shadowColor: '#9A6E22', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 6 },
+  glassShimmer:    'rgba(255, 252, 245, 0.90)',
 
   gradientWarm: ['#FDF8EF', '#FAF0DE', '#F5E8CC'],
   gradientGold: ['#D4AF37', '#B8860B', '#9E6B2C'],
   gradientSunrise: ['#FFF8E1', '#FFE0B2', '#FFCC80'],
   gradientTemple: ['#E8793A', '#A02530'],
-  gradientGlass: ['rgba(255,252,245,0.75)', 'rgba(255,248,235,0.55)'],
-  gradientHeader: ['rgba(253,248,239,0.96)', 'rgba(250,240,222,0.90)'],
+  gradientGlass: ['rgba(255,255,255,0.98)', 'rgba(255,252,245,0.92)'],
+  gradientHeader: ['rgba(253,248,239,0.99)', 'rgba(250,240,222,0.97)'],
   gradientNebula: ['#FDF8EF', '#FAF0DE', '#F5E8CC'],
   gradientCosmic: ['#FDF8EF', '#FAF0DE', '#F5E8CC'],
 
-  shadow: { shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.10, shadowRadius: 16, elevation: 6 },
-  shadowGold: { shadowColor: '#C28840', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.20, shadowRadius: 12, elevation: 4 },
-  shadowLight: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  shadow:      { shadowColor: '#8B6030', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.14, shadowRadius: 12, elevation: 5 },
+  shadowGold:  { shadowColor: '#C28840', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.22, shadowRadius: 10, elevation: 4 },
+  shadowLight: { shadowColor: '#8B6030', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 6,  elevation: 3 },
 
   statusBar: 'dark',
 };

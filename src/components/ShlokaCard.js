@@ -123,7 +123,7 @@ export default function ShlokaCard({ verse, animate }) {
           {/* Translations */}
           <View style={{ gap: 12 }}>
             {verse.hindi && (
-              <View style={{ backgroundColor: C.glassBg, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: C.glassBorder }}>
+              <View style={{ backgroundColor: C.bgCard, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: C.border }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 }}>
                   <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: C.primary }} />
                   <Text style={{ fontSize: 10, fontWeight: '800', color: C.primary, letterSpacing: 1 }}>हिंदी</Text>
@@ -134,7 +134,7 @@ export default function ShlokaCard({ verse, animate }) {
               </View>
             )}
             {verse.english && (
-              <View style={{ backgroundColor: C.glassBg, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: C.glassBorder }}>
+              <View style={{ backgroundColor: C.bgCard, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: C.border }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 }}>
                   <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: C.peacockBlue }} />
                   <Text style={{ fontSize: 10, fontWeight: '800', color: C.peacockBlue, letterSpacing: 1 }}>ENGLISH</Text>
