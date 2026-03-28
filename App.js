@@ -19,11 +19,16 @@ class ErrorBoundary extends React.Component {
   };
   render() {
     if (this.state.hasError) {
+      const errMsg = this.state.error?.message || String(this.state.error) || 'Unknown error';
+      const errStack = this.state.error?.stack ? '\n\n' + this.state.error.stack.slice(0, 600) : '';
       return (
         <View style={{ flex: 1, backgroundColor: '#FDF8EF', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
           <Text style={{ fontSize: 32, marginBottom: 16 }}>{'\u0950'}</Text>
           <Text style={{ fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 8 }}>Something went wrong</Text>
-          <Text style={{ fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 20 }}>We apologize for the inconvenience.</Text>
+          {/* [AUTH DEBUG] show real error so it's visible on device/APK — remove before production */}
+          <Text selectable style={{ fontSize: 11, color: '#c0392b', backgroundColor: '#fdecea', padding: 10, borderRadius: 8, marginBottom: 14, fontFamily: 'monospace', textAlign: 'left', width: '100%' }}>
+            {errMsg}{errStack}
+          </Text>
           <Text onPress={this.handleRetry} style={{ fontSize: 16, fontWeight: '700', color: '#C28840', paddingVertical: 12, paddingHorizontal: 28, borderWidth: 1.5, borderColor: '#C28840', borderRadius: 12, overflow: 'hidden' }}>Try Again</Text>
         </View>
       );
