@@ -118,6 +118,7 @@ export function PremiumProvider({ children }) {
     const unsubAuth = auth.onAuthStateChanged((user) => {
       if (user) {
         subscribeToFirestore(user.uid);
+        loadUsage();
       } else {
         subscribeToFirestore(null);
         const fresh = { chatMessages: 0, audioRecitations: 0, quizPlays: 0, date: getTodayDate() };

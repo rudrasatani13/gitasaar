@@ -329,6 +329,8 @@ export default function ChatScreen() {
                 if (showPaywall) setShowPaywall(false);
               }}
               multiline maxLength={500} editable={!isTyping}
+              selectionColor={C.primary}
+              underlineColorAndroid="transparent"
             />
 
             {/* Voice input */}

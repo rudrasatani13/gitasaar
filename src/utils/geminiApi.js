@@ -97,6 +97,9 @@ export async function sendMessageToGemini(userMessage, language) {
     };
   } catch (e) {
     console.error('Gemini Cloud Function error:', e);
+    // Reset session state on failure to prevent permanent lockout
+    history         = [];
+    currentLanguage = null;
     if (e.code === 'resource-exhausted')
       return { success: false, error: 'Too many requests. Please wait a moment.' };
     return { success: false, error: 'Could not connect to AI. Please check your internet and try again.' };
