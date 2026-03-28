@@ -12,7 +12,7 @@ import { tapLight } from '../utils/haptics';
 import { useNavigation } from '@react-navigation/native';
 import GlassCard from './GlassCard';
 
-const generateSpeechAudio = httpsCallable(functions, 'generateSpeechAudio', { timeout: 15000 });
+const generateSpeechAudio = httpsCallable(functions, 'generateSpeechAudio', { timeout: 28000 });
 
 const hashString = (str) => {
   let hash = 0;
@@ -69,7 +69,8 @@ async function generateSpeech(text, label) {
     const blob = new Blob([byteArray], { type: 'audio/mpeg' });
     return { blob, isLocal: false };
   } catch (e) {
-    // On error, return fallback marker for device TTS
+    // Log real error so it's visible in console/EAS logs — do NOT silently swallow
+    console.warn('[AUDIO] ElevenLabs cloud function failed — code:', e?.code, '| message:', e?.message, '| details:', e?.details);
     return { fallback: true, text };
   }
 }

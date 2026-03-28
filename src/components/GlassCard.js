@@ -67,8 +67,8 @@ export default function GlassCard({
     );
   }
 
-  // Native: BlurView with tint
-  if (!noBlur) {
+  // iOS only: BlurView with tint — Android BlurView renders grey/white regardless of theme
+  if (!noBlur && Platform.OS === 'ios') {
     return (
       <BlurView
         intensity={intensity}
@@ -98,9 +98,9 @@ export default function GlassCard({
     );
   }
 
-  // Fallback: no blur, just translucent
+  // Android + noBlur: warm translucent background matching the app theme
   return (
-    <View style={[containerStyle, { backgroundColor: C.glassBgStrong }]}>
+    <View style={[containerStyle, { backgroundColor: isDark ? C.glassBg : C.glassBgStrong }]}>
       {children}
     </View>
   );
