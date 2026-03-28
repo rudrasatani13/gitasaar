@@ -334,7 +334,7 @@ const ELEVENLABS_MODEL_ID = "eleven_multilingual_v2";
 const MAX_TTS_TEXT_LENGTH = 2000;
 
 exports.generateSpeechAudio = onCall(
-    { timeoutSeconds: 30 },
+    { timeoutSeconds: 30, secrets: ["ELEVENLABS_API_KEY"] },
     async (request) => {
       const uid = request.auth?.uid;
       if (!uid) throw new HttpsError("unauthenticated", "Login required.");
