@@ -22,14 +22,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from 'react-native';
 
 // All config values from env — set EXPO_PUBLIC_FIREBASE_API_KEY in eas.json env block for EAS builds
+const FIREBASE_API_KEY = process.env.EXPO_PUBLIC_FIREBASE_API_KEY;
+
+// Validate Firebase API Key at startup - fail fast with clear error
+if (!FIREBASE_API_KEY || FIREBASE_API_KEY.trim() === '') {
+  console.error('[FIREBASE] CRITICAL: EXPO_PUBLIC_FIREBASE_API_KEY is not set!');
+  console.error('[FIREBASE] Please set this in your eas.json or .env file.');
+  // Don't throw in production - app will show auth errors with helpful message
+}
+
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "",
+  apiKey: FIREBASE_API_KEY || "MISSING_API_KEY", // Will cause clear Firebase error instead of silent failure
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "gitasaar2004.firebaseapp.com",
   projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "gitasaar2004",
   storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "gitasaar2004.firebasestorage.app",
   messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "886569809716",
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:886569809716:web:ebe280002920f5e5a89761",
 };
+
+// Export config validation helper for UI to check
+export const isFirebaseConfigValid = () => !!FIREBASE_API_KEY && FIREBASE_API_KEY.trim() !== '';
 
 // Guard against double-init on hot reload / Fast Refresh
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();

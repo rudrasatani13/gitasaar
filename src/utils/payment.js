@@ -12,6 +12,14 @@ const REGION_CACHE_KEY = '@gitasaar_region';
 // Razorpay KEY_ID is safe to expose on client (it's a public identifier, not the secret)
 const RAZORPAY_KEY_ID = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
 
+// Bug #4 fix: Validate payment key at module load and export helper
+export const isPaymentConfigured = () => !!RAZORPAY_KEY_ID && RAZORPAY_KEY_ID.trim() !== '';
+
+// Log warning at module load if payment not configured
+if (!isPaymentConfigured()) {
+  console.warn('[Payment] EXPO_PUBLIC_RAZORPAY_KEY is not set. Payment features will be unavailable.');
+}
+
 const PLANS = {
   india: {
     monthly: { display: '₹149',   label: '₹149/month' },
@@ -86,8 +94,10 @@ export async function startPayment(planType, userEmail, userName, onSuccess, onF
     return;
   }
 
-  if (!RAZORPAY_KEY_ID) {
-    onFailure('Payment config error. Check API keys.');
+  // Bug #4 fix: Better error message for missing payment config
+  if (!isPaymentConfigured()) {
+    onFailure('Payment is not available. The app administrator needs to configure payment settings.');
+    console.error('[Payment] EXPO_PUBLIC_RAZORPAY_KEY must be set for payments to work.');
     return;
   }
 

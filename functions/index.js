@@ -198,12 +198,43 @@ IMPORTANT: The [RESPONSE] text always comes BEFORE the verse. Never put the vers
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SHARED — Per-user in-memory rate limiter (resets on function cold start)
+// SHARED — Per-user in-memory rate limiter with automatic cleanup
+// Cleanup runs every 5 minutes to prevent memory leak (Bug #7 fix)
 // ─────────────────────────────────────────────────────────────────────────────
 const rateLimits = new Map();
+const RATE_LIMIT_CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const RATE_LIMIT_ENTRY_TTL = 2 * 60 * 1000; // 2 minutes (entries older than this are stale)
+
+// Cleanup stale rate limit entries periodically
+let lastCleanup = Date.now();
+
+function cleanupRateLimits() {
+  const now = Date.now();
+  // Only run cleanup every 5 minutes
+  if (now - lastCleanup < RATE_LIMIT_CLEANUP_INTERVAL) return;
+  
+  lastCleanup = now;
+  let cleaned = 0;
+  
+  for (const [uid, entry] of rateLimits.entries()) {
+    // Remove entries that are past their reset time + TTL buffer
+    if (now > entry.resetAt + RATE_LIMIT_ENTRY_TTL) {
+      rateLimits.delete(uid);
+      cleaned++;
+    }
+  }
+  
+  if (cleaned > 0) {
+    console.log(`[RateLimit] Cleaned up ${cleaned} stale entries. Active: ${rateLimits.size}`);
+  }
+}
 
 function isRateLimited(uid, maxPerMinute) {
   const now   = Date.now();
+  
+  // Trigger cleanup check on each rate limit call
+  cleanupRateLimits();
+  
   const entry = rateLimits.get(uid) || { count: 0, resetAt: now + 60000 };
   if (now > entry.resetAt) {
     entry.count = 0; entry.resetAt = now + 60000;

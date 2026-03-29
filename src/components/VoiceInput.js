@@ -1,25 +1,26 @@
 // src/components/VoiceInput.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
+import { View, TouchableOpacity, Animated, Platform, Alert, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
-import { tapMedium } from '../utils/haptics';
+import { tapMedium, tapLight } from '../utils/haptics';
 
 export default function VoiceInput({ onResult, onAutoSend, disabled }) {
   const { colors: C } = useTheme();
   const [isListening, setIsListening] = useState(false);
+  const [isSupported, setIsSupported] = useState(null); // null = checking, true/false = determined
   const ring1 = useRef(new Animated.Value(0)).current;
   const ring2 = useRef(new Animated.Value(0)).current;
   const ring3 = useRef(new Animated.Value(0)).current;
   const iconScale = useRef(new Animated.Value(1)).current;
   const recognitionRef = useRef(null);
-  const supportedRef = useRef(false);
 
   useEffect(() => {
+    // Check voice support on mount
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SR) {
-        supportedRef.current = true;
+        setIsSupported(true);
         const recognition = new SR();
         recognition.continuous = false;
         recognition.interimResults = false;
@@ -37,7 +38,12 @@ export default function VoiceInput({ onResult, onAutoSend, disabled }) {
         recognition.onerror = () => setIsListening(false);
         recognition.onend = () => setIsListening(false);
         recognitionRef.current = recognition;
+      } else {
+        setIsSupported(false);
       }
+    } else {
+      // Native platforms - voice input not available yet
+      setIsSupported(false);
     }
   }, [onResult, onAutoSend]);
 
@@ -80,8 +86,15 @@ export default function VoiceInput({ onResult, onAutoSend, disabled }) {
   const toggleListening = () => {
     tapMedium();
 
-    if (!supportedRef.current) {
-      Alert.alert('Voice Input', 'Voice input is only available on web browsers. On the app, please type your message.');
+    if (!isSupported) {
+      tapLight();
+      Alert.alert(
+        'Voice Input Unavailable', 
+        Platform.OS === 'web' 
+          ? 'Your browser does not support voice input. Please type your message instead.'
+          : 'Voice input will be available in a future app update. Please type your message for now.',
+        [{ text: 'OK' }]
+      );
       return;
     }
 
@@ -97,6 +110,33 @@ export default function VoiceInput({ onResult, onAutoSend, disabled }) {
       }
     }
   };
+
+  // Don't render if checking support or not supported (cleaner UI)
+  if (isSupported === false) {
+    // Show disabled mic icon for native users as hint
+    return (
+      <View style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}>
+        <TouchableOpacity 
+          onPress={toggleListening} 
+          disabled={disabled} 
+          activeOpacity={0.7}
+          style={{
+            width: 44, height: 44, borderRadius: 22,
+            backgroundColor: C.glassBg,
+            borderWidth: 1, borderColor: C.glassBorder,
+            justifyContent: 'center', alignItems: 'center',
+            opacity: 0.5,
+          }}
+        >
+          <MaterialCommunityIcons
+            name="microphone-off"
+            size={18}
+            color={C.textMuted}
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   const makeRingStyle = (anim) => ({
     position: 'absolute',

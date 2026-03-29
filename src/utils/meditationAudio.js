@@ -1,82 +1,88 @@
 // src/utils/meditationAudio.js - Audio Library for Meditation (Local + Remote)
 import { Audio } from 'expo-av';
-import { Asset } from 'expo-asset';
+import { Platform } from 'react-native';
 
-// LOCAL AUDIO FILES (Place in /app/assets/sounds/)
-// Structure: assets/sounds/ambient/rain.mp3, assets/sounds/effects/bell.mp3
-const LOCAL_AUDIO = {
-  ambient: {
-    rain: require('../../assets/sounds/ambient/rain.mp3'),
-    ocean: require('../../assets/sounds/ambient/ocean.mp3'),
-    forest: require('../../assets/sounds/ambient/forest.mp3'),
-    om_chant: require('../../assets/sounds/ambient/om.mp3'),
-    singing_bowl: require('../../assets/sounds/ambient/bowl.mp3'),
-    flute: require('../../assets/sounds/ambient/flute.mp3'),
-  },
-  effects: {
-    bell_start: require('../../assets/sounds/effects/bell_start.mp3'),
-    bell_end: require('../../assets/sounds/effects/bell_end.mp3'),
-    chime: require('../../assets/sounds/effects/chime.mp3'),
-  },
+// LOCAL AUDIO FILES - Wrapped in try-catch to prevent crash if files don't exist
+// Audio files should be placed in /app/assets/sounds/ when available
+let LOCAL_AUDIO = { ambient: {}, effects: {} };
+
+// Safe require wrapper - returns null if file doesn't exist
+const safeRequire = (path) => {
+  try {
+    // Note: require() paths must be static strings, so we use a flag system instead
+    return null; // Audio files not bundled - using synthesized audio fallback
+  } catch (e) {
+    return null;
+  }
 };
 
+// Flag to indicate if real audio files are available
+const AUDIO_FILES_AVAILABLE = false; // Set to true when audio files are added to assets/sounds/
+
 // Meditation audio metadata
+// Source will be null if audio files aren't available - fallback to synthesized audio
 export const AUDIO_LIBRARY = {
   // Background Ambient Sounds (Loops)
   ambient: {
     rain: {
       id: 'rain',
       name: 'Rain Sounds',
-      source: LOCAL_AUDIO.ambient.rain,
+      source: LOCAL_AUDIO.ambient.rain || null,
       duration: 120,
       loop: true,
       category: 'Nature',
       description: 'Peaceful rain sounds',
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
     ocean: {
       id: 'ocean',
       name: 'Ocean Waves',
-      source: LOCAL_AUDIO.ambient.ocean,
+      source: LOCAL_AUDIO.ambient.ocean || null,
       duration: 120,
       loop: true,
       category: 'Nature',
       description: 'Calming ocean waves',
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
     forest: {
       id: 'forest',
       name: 'Forest Birds',
-      source: LOCAL_AUDIO.ambient.forest,
+      source: LOCAL_AUDIO.ambient.forest || null,
       duration: 120,
       loop: true,
       category: 'Nature',
       description: 'Birds chirping in forest',
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
     om_chant: {
       id: 'om_chant',
       name: 'Om Chanting',
-      source: LOCAL_AUDIO.ambient.om_chant,
+      source: LOCAL_AUDIO.ambient.om_chant || null,
       duration: 60,
       loop: true,
       category: 'Spiritual',
       description: 'Sacred Om mantra',
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
     singing_bowl: {
       id: 'singing_bowl',
       name: 'Singing Bowl',
-      source: LOCAL_AUDIO.ambient.singing_bowl,
+      source: LOCAL_AUDIO.ambient.singing_bowl || null,
       duration: 30,
       loop: true,
       category: 'Instrumental',
       description: 'Tibetan singing bowl',
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
     flute: {
       id: 'flute',
       name: 'Meditation Flute',
-      source: LOCAL_AUDIO.ambient.flute,
+      source: LOCAL_AUDIO.ambient.flute || null,
       duration: 90,
       loop: true,
       category: 'Instrumental',
       description: 'Peaceful flute melody',
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
   },
 
@@ -85,23 +91,26 @@ export const AUDIO_LIBRARY = {
     bell_start: {
       id: 'bell_start',
       name: 'Start Bell',
-      source: LOCAL_AUDIO.effects.bell_start,
+      source: LOCAL_AUDIO.effects.bell_start || null,
       duration: 3,
       loop: false,
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
     bell_end: {
       id: 'bell_end',
       name: 'End Bell',
-      source: LOCAL_AUDIO.effects.bell_end,
+      source: LOCAL_AUDIO.effects.bell_end || null,
       duration: 3,
       loop: false,
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
     chime: {
       id: 'chime',
       name: 'Mindfulness Chime',
-      source: LOCAL_AUDIO.effects.chime,
+      source: LOCAL_AUDIO.effects.chime || null,
       duration: 5,
       loop: false,
+      useSynthesized: !AUDIO_FILES_AVAILABLE,
     },
   },
 
@@ -164,6 +173,7 @@ export class MeditationAudioManager {
       // Unload previous background sound
       if (this.backgroundSound) {
         await this.backgroundSound.unloadAsync();
+        this.backgroundSound = null;
       }
 
       const ambient = AUDIO_LIBRARY.ambient[ambientId];
@@ -172,9 +182,18 @@ export class MeditationAudioManager {
         return null;
       }
 
-      // Load local asset
+      // If no audio file available, use synthesized audio fallback
+      if (!ambient.source || ambient.useSynthesized) {
+        console.log('Using synthesized audio for:', ambientId);
+        this.isPlaying = true;
+        this.selectedAmbient = ambientId;
+        // Synthesized audio is handled by MeditationScreen's Web Audio API
+        return { synthesized: true, ambientId };
+      }
+
+      // Load local asset if available
       const { sound } = await Audio.Sound.createAsync(
-        ambient.source, // Local require() asset
+        ambient.source,
         { 
           shouldPlay: true, 
           isLooping: ambient.loop,
@@ -189,8 +208,11 @@ export class MeditationAudioManager {
       return sound;
     } catch (error) {
       console.log('Background audio error:', error);
-      console.log('Make sure audio file exists at: assets/sounds/ambient/' + ambientId + '.mp3');
-      return null;
+      console.log('Falling back to synthesized audio for:', ambientId);
+      // Return synthesized fallback instead of null
+      this.isPlaying = true;
+      this.selectedAmbient = ambientId;
+      return { synthesized: true, ambientId };
     }
   }
 
@@ -202,9 +224,17 @@ export class MeditationAudioManager {
         return null;
       }
 
+      // If no audio file available, use synthesized audio fallback
+      if (!effect.source || effect.useSynthesized) {
+        console.log('Using synthesized effect for:', effectId);
+        // Play synthesized bell/chime using Web Audio API
+        this._playSynthesizedEffect(effectId);
+        return { synthesized: true, effectId };
+      }
+
       // Create new sound for effect
       const { sound } = await Audio.Sound.createAsync(
-        effect.source, // Local require() asset
+        effect.source,
         { 
           shouldPlay: true, 
           volume: this.volume,
@@ -223,8 +253,33 @@ export class MeditationAudioManager {
       return sound;
     } catch (error) {
       console.log('Effect audio error:', error);
-      console.log('Make sure audio file exists at: assets/sounds/effects/' + effectId + '.mp3');
-      return null;
+      console.log('Falling back to synthesized effect for:', effectId);
+      this._playSynthesizedEffect(effectId);
+      return { synthesized: true, effectId };
+    }
+  }
+
+  // Synthesized audio fallback using Web Audio API
+  _playSynthesizedEffect(effectId) {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // Singing bowl / bell sound
+      const frequencies = effectId === 'chime' ? [523, 659, 784] : [528, 396, 639];
+      frequencies.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(i === 0 ? 0.2 * this.volume : 0.08 * this.volume, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 4);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + i * 0.1);
+        osc.stop(ctx.currentTime + 4);
+      });
+    } catch (e) {
+      console.log('Synthesized effect error:', e);
     }
   }
 

@@ -184,8 +184,10 @@ export default function AppNavigator() {
           setUser(prev => (prev?.uid === u.uid ? prev : u));
           setLoading(false);
         }
-        // Restore cloud in background — non-blocking, but update nav state when done
-        restoreFromCloud(u.uid).then(async () => {
+        
+        // Restore cloud in background — with timeout fallback (Bug #6 fix)
+        const RESTORE_TIMEOUT = 5000; // 5 second timeout
+        const restorePromise = restoreFromCloud(u.uid).then(async () => {
           if (!isMounted) return;
           const doneFresh = await AsyncStorage.getItem('@gitasaar_setup_done');
           const onboardedFresh = await AsyncStorage.getItem('@gitasaar_onboarded');
@@ -193,7 +195,18 @@ export default function AppNavigator() {
             setSetupDone(doneFresh === 'true');
             setOnboarded(onboardedFresh === 'true');
           }
-        }).catch(e => console.log('restoreFromCloud skipped:', e.message));
+        });
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Cloud restore timeout')), RESTORE_TIMEOUT)
+        );
+        
+        // Race between restore and timeout - accept local state if cloud is slow
+        Promise.race([restorePromise, timeoutPromise]).catch((e) => {
+          console.log('restoreFromCloud skipped/timeout:', e.message);
+          // On timeout, trust local AsyncStorage state (already loaded above)
+          // This prevents stuck onboarding loop for existing users with poor network
+        });
       } else {
         // Fire-and-forget — don't block logout on cloud backup
         onUserLogout().catch(() => {});

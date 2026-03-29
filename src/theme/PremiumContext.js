@@ -1,6 +1,6 @@
 // src/theme/PremiumContext.js
 // Premium status is read exclusively from Firestore (written only by Cloud Functions).
-// AsyncStorage is used only for daily usage counters (non-security-critical).
+// AsyncStorage is used for daily usage counters AND offline premium cache fallback.
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
@@ -11,6 +11,7 @@ import { onSyncComplete } from '../utils/userDataSync';
 
 const PremiumContext = createContext();
 const USAGE_KEY = '@gitasaar_daily_usage';
+const PREMIUM_CACHE_KEY = '@gitasaar_premium_cache'; // Offline fallback cache
 
 const FREE_LIMITS = {
   chatMessages:     5,
@@ -33,6 +34,41 @@ export function PremiumProvider({ children }) {
   const unsubFirestoreRef = useRef(null);
 
   const getTodayDate = () => new Date().toISOString().slice(0, 10);
+
+  // ─── Load cached premium status for offline support ────────────────────────
+  const loadCachedPremium = async () => {
+    try {
+      const cached = await AsyncStorage.getItem(PREMIUM_CACHE_KEY);
+      if (cached) {
+        const data = JSON.parse(cached);
+        // Check if cached premium is still valid (not expired)
+        if (data.isPremium && data.expiryDate && new Date(data.expiryDate) > new Date()) {
+          setIsPremium(true);
+          setPlanType(data.planType);
+          setExpiryDate(data.expiryDate);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.log('Error loading cached premium:', e);
+    }
+    return false;
+  };
+
+  // ─── Save premium status to cache for offline fallback ─────────────────────
+  const cachePremiumStatus = async (isActive, plan, expiry) => {
+    try {
+      const cacheData = {
+        isPremium: isActive,
+        planType: plan,
+        expiryDate: expiry,
+        cachedAt: new Date().toISOString(),
+      };
+      await AsyncStorage.setItem(PREMIUM_CACHE_KEY, JSON.stringify(cacheData));
+    } catch (e) {
+      console.log('Error caching premium status:', e);
+    }
+  };
 
   // ─── Daily usage — AsyncStorage only (not security-sensitive) ─────────────
   const loadUsage = async () => {
@@ -83,6 +119,13 @@ export function PremiumProvider({ children }) {
       return;
     }
 
+    // First, load cached premium for immediate offline access
+    loadCachedPremium().then((hadCache) => {
+      if (hadCache) {
+        console.log('[Premium] Loaded from cache for offline support');
+      }
+    });
+
     unsubFirestoreRef.current = onSnapshot(
       doc(db, 'users', uid),
       (snapshot) => {
@@ -94,18 +137,29 @@ export function PremiumProvider({ children }) {
           setIsPremium(isActive);
           setPlanType(isActive ? data.planType  : null);
           setExpiryDate(isActive ? data.expiryDate : null);
+          
+          // Cache the premium status for offline fallback
+          cachePremiumStatus(isActive, data.planType, data.expiryDate);
         } else {
           setIsPremium(false);
           setPlanType(null);
           setExpiryDate(null);
+          // Clear cache when user has no premium
+          cachePremiumStatus(false, null, null);
         }
         setLoaded(true);
       },
       (error) => {
-        // Fail safe — no premium on error
+        // On Firestore error (offline/network), fall back to cached premium
         console.error('Firestore premium listener error:', error);
-        setIsPremium(false);
-        setLoaded(true);
+        console.log('[Premium] Falling back to cached status due to network error');
+        loadCachedPremium().then((hadCache) => {
+          if (!hadCache) {
+            // No cache available - default to non-premium
+            setIsPremium(false);
+          }
+          setLoaded(true);
+        });
       }
     );
   };

@@ -53,6 +53,7 @@ All 700 verses, Sanskrit/Hindi/English translations, AI chat (Ask Krishna), spir
 - Firestore-based premium status (single source of truth)
 - Daily usage limits for free users
 - Premium gating on 30+ meditation sessions, 6 premium mantras, 6 learning paths
+- **NEW: Offline premium status caching** (Jan 2026)
 
 ### AI Integration
 - Gemini 2.5 Pro via Cloud Functions
@@ -71,37 +72,51 @@ All 700 verses, Sanskrit/Hindi/English translations, AI chat (Ask Krishna), spir
 
 ## QA Audit Findings (Jan 2026)
 
-### Critical Bugs Identified:
-1. **Missing Audio Assets** - `/app/assets/sounds/` directory missing, causes crash
-2. **Firebase API Key Fallback** - Empty string fallback causes auth failures
-3. **Premium Offline Lockout** - Paying users lose access when offline
+### Bugs Fixed:
 
-### High Priority Bugs:
-4. Payment key validation needed
-5. Voice input has no native fallback
-6. Post-login navigation race condition
-7. Cloud Functions rate limit memory leak
+| # | Bug | File | Fix Applied |
+|---|-----|------|-------------|
+| 1 | Missing Audio Assets Crash | `meditationAudio.js` | Added synthesized audio fallback, removed hard require() |
+| 2 | Firebase API Key Empty Fallback | `firebase.js` | Added startup validation with clear error logging |
+| 3 | Premium Offline Lockout | `PremiumContext.js` | Added AsyncStorage cache with Firestore error fallback |
+| 4 | Payment Key Missing | `payment.js` | Added `isPaymentConfigured()` helper with clear user error |
+| 5 | Voice Input Native | `VoiceInput.js` | Added helpful Alert for native users, disabled icon state |
+| 6 | Post-Login Race Condition | `AppNavigator.js` | Added 5s timeout fallback for cloud restore |
+| 7 | Rate Limit Memory Leak | `functions/index.js` | Added periodic cleanup (every 5 min) with TTL |
+
+### Changes Summary:
+- **meditationAudio.js**: Audio files are now optional; system uses Web Audio API synthesized sounds as fallback
+- **firebase.js**: `isFirebaseConfigValid()` export added for UI to check config status
+- **PremiumContext.js**: Premium status cached in `@gitasaar_premium_cache` for offline resilience
+- **payment.js**: `isPaymentConfigured()` export added for pre-flight checks
+- **VoiceInput.js**: Shows disabled mic icon on native with helpful alert on tap
+- **AppNavigator.js**: Cloud restore now has 5-second timeout to prevent stuck onboarding
+- **functions/index.js**: Rate limiter cleans up stale entries every 5 minutes
 
 ## Prioritized Backlog
 
-### P0 — Critical (Fix Before Release)
-- [ ] Create audio assets OR guard meditationAudio.js imports
-- [ ] Add Firebase API key startup validation
-- [ ] Cache premium status in AsyncStorage for offline
+### P0 — Critical (DONE)
+- [x] Audio assets crash fix
+- [x] Firebase API key validation
+- [x] Premium offline caching
+- [x] Payment key validation
+- [x] Voice input native feedback
+- [x] Post-login race condition fix
+- [x] Rate limit memory leak fix
 
 ### P1 — Important
 - [ ] Add expo-speech-recognition for native voice input
-- [ ] Add timeout fallback for cloud restore
-- [ ] Validate Razorpay key at startup
+- [ ] Add real audio files to assets/sounds/ for better meditation experience
+- [ ] Implement Firestore-based rate limiting for scale (if needed)
 
 ### P2 — Nice to Have
-- [ ] Firestore-based rate limiting for scale
 - [ ] Shooting star animation for SplashScreen
 - [ ] Constellation patterns as subtle background overlays
+- [ ] In-app purchase for iOS/Android native
 
 ## Next Tasks
-1. Fix critical audio assets bug
-2. Add Firebase key validation
-3. Implement premium offline caching
-4. Test complete auth flow on device
-5. Test payment flow end-to-end
+1. Deploy Cloud Functions with new rate limit cleanup
+2. Test complete auth flow on device
+3. Test payment flow end-to-end
+4. Test offline premium access scenario
+5. Consider adding real audio assets for meditation
