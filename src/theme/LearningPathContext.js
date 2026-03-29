@@ -130,7 +130,7 @@ export function LearningPathProvider({ children }) {
   const [completedPaths, setCompletedPaths] = useState([]);
 
   useEffect(() => {
-    loadPathData();
+    loadPathData().catch(e => console.log('Learning path load error:', e));
   }, []);
 
   const loadPathData = async () => {

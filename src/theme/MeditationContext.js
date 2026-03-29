@@ -51,7 +51,7 @@ export function MeditationProvider({ children }) {
   const [favoritesMed, setFavoritesMed] = useState([]);
 
   useEffect(() => {
-    loadSessions();
+    loadSessions().catch(e => console.log('Meditation load error:', e));
   }, []);
 
   const loadSessions = async () => {

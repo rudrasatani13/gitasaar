@@ -144,7 +144,7 @@ export function MantraProvider({ children }) {
   const [totalChants, setTotalChants] = useState(0);
 
   useEffect(() => {
-    loadMantraData();
+    loadMantraData().catch(e => console.log('Mantra load error:', e));
   }, []);
 
   const loadMantraData = async () => {

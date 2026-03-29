@@ -47,7 +47,7 @@ export function BadgeProvider({ children }) {
   const [newBadges, setNewBadges] = useState([]); // For showing notifications
 
   useEffect(() => {
-    loadBadges();
+    loadBadges().catch(e => console.log('Badge load error:', e));
   }, []);
 
   const loadBadges = async () => {

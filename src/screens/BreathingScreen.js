@@ -1,6 +1,6 @@
 // src/screens/BreathingScreen.js
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react';
+import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import GlassCard from '../components/GlassCard';
