@@ -136,7 +136,7 @@ export default function MeditationPlayerScreen({ navigation, route }) {
       <StarfieldBackground />
 
       {/* Header */}
-      <View style={{ paddingHorizontal: 16, paddingTop: 56, paddingBottom: 24 }}>
+      <View style={{ paddingHorizontal: 16, paddingTop: 56, paddingBottom: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
             <MaterialCommunityIcons name="arrow-left" size={24} color={C.textPrimary} />
@@ -148,18 +148,18 @@ export default function MeditationPlayerScreen({ navigation, route }) {
         </View>
       </View>
 
-      {/* Main Player */}
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 }}>
-        <View style={{ width: width - 100, height: width - 100, justifyContent: 'center', alignItems: 'center' }}>
+      {/* Main Player - Timer Circle Centered */}
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40, paddingVertical: 20 }}>
+        <View style={{ width: width - 120, height: width - 120, justifyContent: 'center', alignItems: 'center' }}>
           {/* Progress Circle */}
-          <View style={{ width: '100%', height: '100%', borderRadius: (width - 100) / 2, backgroundColor: C.primarySoft, justifyContent: 'center', alignItems: 'center', borderWidth: 8, borderColor: C.primary, opacity: 0.3 + (progress / 100) * 0.7 }}>
-            <Text style={{ fontSize: 64, fontWeight: '800', color: C.textPrimary, marginBottom: 8 }}>{formatTime(elapsed)}</Text>
+          <View style={{ width: '100%', height: '100%', borderRadius: (width - 120) / 2, backgroundColor: C.primarySoft, justifyContent: 'center', alignItems: 'center', borderWidth: 8, borderColor: C.primary, opacity: 0.3 + (progress / 100) * 0.7 }}>
+            <Text style={{ fontSize: 56, fontWeight: '800', color: C.textPrimary, marginBottom: 8 }}>{formatTime(elapsed)}</Text>
             <Text style={{ fontSize: FontSizes.md, color: C.textMuted }}>{formatTime(totalSeconds - elapsed)} left</Text>
           </View>
         </View>
 
         {/* Progress Bar */}
-        <View style={{ width: width - 80, marginTop: 40 }}>
+        <View style={{ width: width - 80, marginTop: 32 }}>
           <View style={{ height: 6, backgroundColor: C.glassBg, borderRadius: 3, overflow: 'hidden' }}>
             <View style={{ height: '100%', width: `${progress}%`, backgroundColor: C.primary, borderRadius: 3 }} />
           </View>
@@ -167,12 +167,12 @@ export default function MeditationPlayerScreen({ navigation, route }) {
       </View>
 
       {/* Controls */}
-      <View style={{ paddingHorizontal: 16, paddingBottom: 100 }}>
+      <View style={{ paddingHorizontal: 16, paddingBottom: 40 }}>
         <GlassCard noPadding style={{ padding: 20 }}>
           <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, lineHeight: 22, marginBottom: 20, textAlign: 'center' }}>{meditation.description}</Text>
           
           {/* Playback Controls */}
-          <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 24 }}>
             <TouchableOpacity onPress={handleReset} activeOpacity={0.8} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
               <MaterialCommunityIcons name="refresh" size={24} color={C.textSecondary} />
             </TouchableOpacity>
@@ -188,20 +188,21 @@ export default function MeditationPlayerScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
 
-          {/* Music Settings Button */}
+          {/* Music Settings Button - Moved Down with Better Spacing */}
           <TouchableOpacity 
             onPress={() => {
               setShowAudioModal(true);
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }} 
             activeOpacity={0.8}
+            style={{ marginTop: 8 }}
           >
             <View style={{ 
               flexDirection: 'row', 
               alignItems: 'center', 
               justifyContent: 'center', 
               gap: 8, 
-              paddingVertical: 14,
+              paddingVertical: 16,
               paddingHorizontal: 20,
               backgroundColor: C.glassBg,
               borderRadius: 14,
