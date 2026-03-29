@@ -1,57 +1,82 @@
-// src/utils/meditationAudio.js - Free Audio Library for Meditation
+// src/utils/meditationAudio.js - Audio Library for Meditation (Local + Remote)
 import { Audio } from 'expo-av';
+import { Asset } from 'expo-asset';
 
-// Free meditation audio resources
+// LOCAL AUDIO FILES (Place in /app/assets/sounds/)
+// Structure: assets/sounds/ambient/rain.mp3, assets/sounds/effects/bell.mp3
+const LOCAL_AUDIO = {
+  ambient: {
+    rain: require('../../assets/sounds/ambient/rain.mp3'),
+    ocean: require('../../assets/sounds/ambient/ocean.mp3'),
+    forest: require('../../assets/sounds/ambient/forest.mp3'),
+    om_chant: require('../../assets/sounds/ambient/om.mp3'),
+    singing_bowl: require('../../assets/sounds/ambient/bowl.mp3'),
+    flute: require('../../assets/sounds/ambient/flute.mp3'),
+  },
+  effects: {
+    bell_start: require('../../assets/sounds/effects/bell_start.mp3'),
+    bell_end: require('../../assets/sounds/effects/bell_end.mp3'),
+    chime: require('../../assets/sounds/effects/chime.mp3'),
+  },
+};
+
+// Meditation audio metadata
 export const AUDIO_LIBRARY = {
   // Background Ambient Sounds (Loops)
   ambient: {
     rain: {
       id: 'rain',
       name: 'Rain Sounds',
-      url: 'https://freesound.org/data/previews/258/258420_1474204-lq.mp3', // Rain loop
+      source: LOCAL_AUDIO.ambient.rain,
       duration: 120,
       loop: true,
       category: 'Nature',
+      description: 'Peaceful rain sounds',
     },
     ocean: {
       id: 'ocean',
       name: 'Ocean Waves',
-      url: 'https://freesound.org/data/previews/233/233156_1015240-lq.mp3', // Ocean waves
+      source: LOCAL_AUDIO.ambient.ocean,
       duration: 120,
       loop: true,
       category: 'Nature',
+      description: 'Calming ocean waves',
     },
     forest: {
       id: 'forest',
       name: 'Forest Birds',
-      url: 'https://freesound.org/data/previews/416/416529_5121236-lq.mp3', // Birds chirping
+      source: LOCAL_AUDIO.ambient.forest,
       duration: 120,
       loop: true,
       category: 'Nature',
+      description: 'Birds chirping in forest',
     },
     om_chant: {
       id: 'om_chant',
       name: 'Om Chanting',
-      url: 'https://freesound.org/data/previews/368/368682_6546945-lq.mp3', // Om chanting
+      source: LOCAL_AUDIO.ambient.om_chant,
       duration: 60,
       loop: true,
       category: 'Spiritual',
+      description: 'Sacred Om mantra',
     },
     singing_bowl: {
       id: 'singing_bowl',
       name: 'Singing Bowl',
-      url: 'https://freesound.org/data/previews/411/411089_5121236-lq.mp3', // Tibetan bowl
+      source: LOCAL_AUDIO.ambient.singing_bowl,
       duration: 30,
       loop: true,
       category: 'Instrumental',
+      description: 'Tibetan singing bowl',
     },
     flute: {
       id: 'flute',
       name: 'Meditation Flute',
-      url: 'https://freesound.org/data/previews/456/456966_5674468-lq.mp3', // Flute meditation
+      source: LOCAL_AUDIO.ambient.flute,
       duration: 90,
       loop: true,
       category: 'Instrumental',
+      description: 'Peaceful flute melody',
     },
   },
 
@@ -60,28 +85,27 @@ export const AUDIO_LIBRARY = {
     bell_start: {
       id: 'bell_start',
       name: 'Start Bell',
-      url: 'https://freesound.org/data/previews/411/411090_5121236-lq.mp3', // Meditation bell
+      source: LOCAL_AUDIO.effects.bell_start,
       duration: 3,
       loop: false,
     },
     bell_end: {
       id: 'bell_end',
       name: 'End Bell',
-      url: 'https://freesound.org/data/previews/411/411090_5121236-lq.mp3', // Same bell
+      source: LOCAL_AUDIO.effects.bell_end,
       duration: 3,
       loop: false,
     },
     chime: {
       id: 'chime',
       name: 'Mindfulness Chime',
-      url: 'https://freesound.org/data/previews/411/411091_5121236-lq.mp3', // Wind chime
+      source: LOCAL_AUDIO.effects.chime,
       duration: 5,
       loop: false,
     },
   },
 
-  // Voice Guidance (Text-to-Speech or Pre-recorded)
-  // Note: For demo, using bell sounds. In production, use actual voice recordings
+  // Voice Guidance (Text-to-Speech)
   voice: {
     breathe_in: {
       id: 'breathe_in',
@@ -143,10 +167,14 @@ export class MeditationAudioManager {
       }
 
       const ambient = AUDIO_LIBRARY.ambient[ambientId];
-      if (!ambient) return;
+      if (!ambient) {
+        console.log('Ambient not found:', ambientId);
+        return null;
+      }
 
+      // Load local asset
       const { sound } = await Audio.Sound.createAsync(
-        { uri: ambient.url },
+        ambient.source, // Local require() asset
         { 
           shouldPlay: true, 
           isLooping: ambient.loop,
@@ -161,6 +189,7 @@ export class MeditationAudioManager {
       return sound;
     } catch (error) {
       console.log('Background audio error:', error);
+      console.log('Make sure audio file exists at: assets/sounds/ambient/' + ambientId + '.mp3');
       return null;
     }
   }
@@ -168,11 +197,14 @@ export class MeditationAudioManager {
   async playEffect(effectId) {
     try {
       const effect = AUDIO_LIBRARY.effects[effectId];
-      if (!effect) return;
+      if (!effect) {
+        console.log('Effect not found:', effectId);
+        return null;
+      }
 
-      // Create new sound for effect (don't interfere with background)
+      // Create new sound for effect
       const { sound } = await Audio.Sound.createAsync(
-        { uri: effect.url },
+        effect.source, // Local require() asset
         { 
           shouldPlay: true, 
           volume: this.volume,
@@ -191,6 +223,7 @@ export class MeditationAudioManager {
       return sound;
     } catch (error) {
       console.log('Effect audio error:', error);
+      console.log('Make sure audio file exists at: assets/sounds/effects/' + effectId + '.mp3');
       return null;
     }
   }
@@ -271,7 +304,6 @@ export const speakGuidance = async (text, language = 'en') => {
       language: language === 'hi' ? 'hi-IN' : 'en-US',
       pitch: 0.9,
       rate: 0.7, // Slower for meditation
-      voice: 'com.apple.ttsbundle.Samantha-compact', // iOS voice
     });
   } catch (error) {
     console.log('Speech error:', error);
