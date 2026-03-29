@@ -1,8 +1,9 @@
 // src/components/ShareCardModal.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView, Dimensions, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView, Dimensions, Platform, Share, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { usePremium } from "../theme/PremiumContext";
 import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
@@ -221,6 +222,7 @@ const TEMPLATES = [
 
 export default function ShareCardModal({ visible, verse, onClose }) {
   const { colors: C } = useTheme();
+  const navigation = useNavigation(); // Bug #2 fix: Get navigation from hook
   const { isTemplateAvailable, isPremium } = usePremium();
   const [activeTemplate, setActiveTemplate] = useState('cosmos');
   const [downloading, setDownloading] = useState(false);
@@ -269,12 +271,40 @@ export default function ShareCardModal({ visible, verse, onClose }) {
             setTimeout(() => setDownloaded(false), 3000);
           }
         }, 'image/png');
+      } else if (Platform.OS !== 'web') {
+        // Native: Use Share API with text content as fallback
+        try {
+          await Share.share({
+            message: `Bhagavad Gita ${verse.chapter}.${verse.verse}\n\n${verse.sanskrit}\n\n"${verse.english}"\n\n— GitaSaar App`,
+            title: `Gita ${verse.chapter}.${verse.verse}`,
+          });
+          setDownloaded(true);
+          setTimeout(() => setDownloaded(false), 3000);
+        } catch (shareError) {
+          console.log('Share error:', shareError);
+          Alert.alert('Share', 'Could not share. Please try again.');
+        }
       }
     } catch (e) {
       console.log('Download error:', e);
+      Alert.alert('Error', 'Could not download the card. Please try again.');
     }
 
     setDownloading(false);
+  };
+
+  // Bug #2 fix: Safe navigation to Premium screen
+  const handleLockedTemplate = (templateId) => {
+    if (isTemplateAvailable(templateId)) {
+      setActiveTemplate(templateId);
+    } else {
+      try {
+        onClose(); // Close modal first
+        setTimeout(() => navigation.navigate("Premium"), 300);
+      } catch (e) {
+        Alert.alert('Premium Templates', 'Upgrade to Premium to unlock all templates!');
+      }
+    }
   };
 
   return (
@@ -317,7 +347,7 @@ export default function ShareCardModal({ visible, verse, onClose }) {
               {TEMPLATES.map((t) => (
                 <TouchableOpacity key={t.id}
                   style={{ width: 72, alignItems: 'center', gap: 5, paddingVertical: 8, backgroundColor: activeTemplate === t.id ? C.primarySoft : C.bgCard, borderRadius: 12, borderWidth: 1.5, borderColor: activeTemplate === t.id ? C.primary : C.border }}
-                  onPress={() => { if (isTemplateAvailable(t.id)) setActiveTemplate(t.id); else navigation.navigate("Premium"); }} activeOpacity={0.7}>
+                  onPress={() => handleLockedTemplate(t.id)} activeOpacity={0.7}>
                   <MaterialCommunityIcons name={t.icon} size={18} color={activeTemplate === t.id ? t.color : C.textMuted} />
                   {!isTemplateAvailable(t.id) && <View style={{ position: "absolute", top: 2, right: 2 }}><MaterialCommunityIcons name="lock" size={10} color={C.primary} /></View>}
                   <Text style={{ fontSize: 10, fontWeight: '600', color: activeTemplate === t.id ? C.primary : C.textMuted }}>{t.label}</Text>

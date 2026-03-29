@@ -1,6 +1,6 @@
 // src/screens/AboutScreen.js
 import React, { useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Animated, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Animated, Linking, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
@@ -23,9 +23,35 @@ export default function AboutScreen({ navigation }) {
     ]).start();
   }, []);
 
-  const openLink = (url) => {
-    if (typeof window !== 'undefined') window.open(url, '_blank');
-    else Linking.openURL(url).catch(() => {});
+  // Bug #4 fix: Safe link opening with proper error handling for native
+  const openLink = async (url) => {
+    try {
+      if (Platform.OS === 'web') {
+        window.open(url, '_blank');
+      } else {
+        // Check if the URL can be opened on native
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+          await Linking.openURL(url);
+        } else {
+          // Fallback for mailto: or unsupported URLs
+          if (url.startsWith('mailto:')) {
+            Alert.alert('Email', 'Please email us at: support@gitasaar.app');
+          } else if (url.includes('instagram.com')) {
+            Alert.alert('Instagram', 'Follow us on Instagram: @gitasaar');
+          } else {
+            Alert.alert('Cannot Open Link', 'Unable to open this link on your device.');
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Error opening link:', error);
+      if (url.startsWith('mailto:')) {
+        Alert.alert('Email', 'Please email us at: support@gitasaar.app');
+      } else {
+        Alert.alert('Error', 'Could not open the link. Please try again.');
+      }
+    }
   };
 
   return (

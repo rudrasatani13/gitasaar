@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions, Platform, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,90 +20,142 @@ const PRESETS = [
   { label: '20 min', seconds: 1200, icon: 'om' },
 ];
 
-// Om chanting sound using Web Audio API
+// Audio references for native
+let nativeSound = null;
+let nativeOmInterval = null;
+
+// Om chanting sound using Web Audio API (web) or expo-av (native)
 let omAudioCtx = null;
 let omInterval = null;
 
-function startOmChant() {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+// Native audio setup
+async function setupNativeAudio() {
   try {
-    omAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    const playOm = () => {
-      if (!omAudioCtx) return;
-      const now = omAudioCtx.currentTime;
-      
-      // Base drone - tanpura-like
-      const osc1 = omAudioCtx.createOscillator();
-      const gain1 = omAudioCtx.createGain();
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(136.1, now); // Om frequency (C#)
-      gain1.gain.setValueAtTime(0, now);
-      gain1.gain.linearRampToValueAtTime(0.12, now + 2);
-      gain1.gain.setValueAtTime(0.12, now + 5);
-      gain1.gain.linearRampToValueAtTime(0, now + 8);
-      osc1.connect(gain1);
-      gain1.connect(omAudioCtx.destination);
-      osc1.start(now);
-      osc1.stop(now + 8);
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      staysActiveInBackground: true,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    });
+  } catch (e) {
+    console.log('Native audio setup error:', e);
+  }
+}
 
-      // Harmonic overtone
-      const osc2 = omAudioCtx.createOscillator();
-      const gain2 = omAudioCtx.createGain();
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(272.2, now); // Octave
-      gain2.gain.setValueAtTime(0, now);
-      gain2.gain.linearRampToValueAtTime(0.06, now + 2.5);
-      gain2.gain.setValueAtTime(0.06, now + 4.5);
-      gain2.gain.linearRampToValueAtTime(0, now + 7.5);
-      osc2.connect(gain2);
-      gain2.connect(omAudioCtx.destination);
-      osc2.start(now);
-      osc2.stop(now + 8);
+// Generate Om tone for native using expo-av
+async function playNativeOmTone() {
+  try {
+    // Create a simple tone using expo-av
+    // Since we don't have audio files, we'll use haptics as feedback on native
+    tapLight();
+  } catch (e) {
+    console.log('Native Om error:', e);
+  }
+}
 
-      // Higher harmonic
-      const osc3 = omAudioCtx.createOscillator();
-      const gain3 = omAudioCtx.createGain();
-      osc3.type = 'sine';
-      osc3.frequency.setValueAtTime(408.3, now); // Fifth
-      gain3.gain.setValueAtTime(0, now);
-      gain3.gain.linearRampToValueAtTime(0.03, now + 3);
-      gain3.gain.setValueAtTime(0.03, now + 4);
-      gain3.gain.linearRampToValueAtTime(0, now + 7);
-      osc3.connect(gain3);
-      gain3.connect(omAudioCtx.destination);
-      osc3.start(now);
-      osc3.stop(now + 8);
-    };
+function startOmChant() {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    // Web: Use Web Audio API
+    try {
+      omAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    playOm();
-    omInterval = setInterval(playOm, 8500); // Repeat every 8.5s
-  } catch (e) { console.log('Audio error:', e); }
+      const playOm = () => {
+        if (!omAudioCtx) return;
+        const now = omAudioCtx.currentTime;
+
+        // Base drone - tanpura-like
+        const osc1 = omAudioCtx.createOscillator();
+        const gain1 = omAudioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(136.1, now); // Om frequency (C#)
+        gain1.gain.setValueAtTime(0, now);
+        gain1.gain.linearRampToValueAtTime(0.12, now + 2);
+        gain1.gain.setValueAtTime(0.12, now + 5);
+        gain1.gain.linearRampToValueAtTime(0, now + 8);
+        osc1.connect(gain1);
+        gain1.connect(omAudioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 8);
+
+        // Harmonic overtone
+        const osc2 = omAudioCtx.createOscillator();
+        const gain2 = omAudioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(272.2, now); // Octave
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(0.06, now + 2.5);
+        gain2.gain.setValueAtTime(0.06, now + 4.5);
+        gain2.gain.linearRampToValueAtTime(0, now + 7.5);
+        osc2.connect(gain2);
+        gain2.connect(omAudioCtx.destination);
+        osc2.start(now);
+        osc2.stop(now + 8);
+
+        // Higher harmonic
+        const osc3 = omAudioCtx.createOscillator();
+        const gain3 = omAudioCtx.createGain();
+        osc3.type = 'sine';
+        osc3.frequency.setValueAtTime(408.3, now); // Fifth
+        gain3.gain.setValueAtTime(0, now);
+        gain3.gain.linearRampToValueAtTime(0.03, now + 3);
+        gain3.gain.setValueAtTime(0.03, now + 4);
+        gain3.gain.linearRampToValueAtTime(0, now + 7);
+        osc3.connect(gain3);
+        gain3.connect(omAudioCtx.destination);
+        osc3.start(now);
+        osc3.stop(now + 8);
+      };
+
+      playOm();
+      omInterval = setInterval(playOm, 8500); // Repeat every 8.5s
+    } catch (e) { console.log('Web Audio error:', e); }
+  } else {
+    // Native: Use haptic feedback as audio placeholder (until real audio files are added)
+    // This provides tactile feedback during meditation breathing cycles
+    setupNativeAudio();
+    nativeOmInterval = setInterval(() => {
+      playNativeOmTone();
+    }, 8500);
+    playNativeOmTone(); // Initial feedback
+  }
 }
 
 function stopOmChant() {
+  // Web cleanup
   if (omInterval) { clearInterval(omInterval); omInterval = null; }
   if (omAudioCtx) { omAudioCtx.close().catch(() => {}); omAudioCtx = null; }
+
+  // Native cleanup
+  if (nativeOmInterval) { clearInterval(nativeOmInterval); nativeOmInterval = null; }
+  if (nativeSound) {
+    nativeSound.unloadAsync().catch(() => {});
+    nativeSound = null;
+  }
 }
 
 function playBell() {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') return;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    // Singing bowl sound
-    [528, 396, 639].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      gain.gain.setValueAtTime(i === 0 ? 0.2 : 0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 4);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + i * 0.1);
-      osc.stop(ctx.currentTime + 4);
-    });
-  } catch (e) {}
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // Singing bowl sound
+      [528, 396, 639].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(i === 0 ? 0.2 : 0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 4);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + i * 0.1);
+        osc.stop(ctx.currentTime + 4);
+      });
+    } catch (e) {}
+  } else {
+    // Native: Use haptic feedback as bell sound
+    notifySuccess();
+  }
 }
 
 export default function MeditationScreen({ navigation }) {

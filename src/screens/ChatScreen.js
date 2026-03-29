@@ -552,7 +552,7 @@ export default function ChatScreen() {
             <TextInput
               style={{
                 flex: 1, fontSize: FontSizes.md, color: C.textPrimary,
-                paddingHorizontal: 12, paddingVertical: 8,
+                paddingHorizontal: 12, paddingVertical: Platform.OS === 'ios' ? 12 : 8,
                 maxHeight: 90, minHeight: 36, lineHeight: 20,
                 outlineStyle: 'none', // Remove blue focus outline on web
               }}
@@ -565,6 +565,12 @@ export default function ChatScreen() {
               underlineColorAndroid="transparent"
               onFocus={() => setInputFocused(true)}
               onBlur={() => setInputFocused(false)}
+              blurOnSubmit={false}
+              returnKeyType="default"
+              keyboardType="default"
+              autoCapitalize="sentences"
+              autoCorrect={true}
+              textAlignVertical="center"
             />
             {/* Character counter near limit */}
             {inputText.length > 400 && (
