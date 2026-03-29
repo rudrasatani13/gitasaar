@@ -1,16 +1,16 @@
 // src/screens/MeditationPlayerScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Slider from '@react-native-community/slider';
 import GlassCard from '../components/GlassCard';
+import AudioSettingsModal from '../components/AudioSettingsModal';
 import { useTheme } from '../theme/ThemeContext';
 import { useMeditation } from '../theme/MeditationContext';
 import { FontSizes } from '../theme/colors';
 import { StarfieldBackground } from '../components/SpiritualBackground';
 import * as Haptics from 'expo-haptics';
-import { getAudioManager, AUDIO_LIBRARY, speakGuidance, stopSpeaking } from '../utils/meditationAudio';
+import { getAudioManager, speakGuidance, stopSpeaking } from '../utils/meditationAudio';
 
 const { width } = Dimensions.get('window');
 
@@ -25,7 +25,7 @@ export default function MeditationPlayerScreen({ navigation, route }) {
   const [selectedAmbient, setSelectedAmbient] = useState('rain');
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.7);
-  const [showAudioControls, setShowAudioControls] = useState(false);
+  const [showAudioModal, setShowAudioModal] = useState(false);
   
   const totalSeconds = meditation.duration * 60;
 
@@ -188,113 +188,57 @@ export default function MeditationPlayerScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
 
-          {/* Audio Controls Toggle */}
-          <TouchableOpacity onPress={() => setShowAudioControls(!showAudioControls)} activeOpacity={0.8} style={{ marginBottom: showAudioControls ? 16 : 0 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 8 }}>
-              <MaterialCommunityIcons name="music" size={18} color={C.primary} />
-              <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.primary }}>Audio Settings</Text>
-              <MaterialCommunityIcons name={showAudioControls ? 'chevron-up' : 'chevron-down'} size={18} color={C.primary} />
+          {/* Music Settings Button */}
+          <TouchableOpacity 
+            onPress={() => {
+              setShowAudioModal(true);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }} 
+            activeOpacity={0.8}
+          >
+            <View style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: 8, 
+              paddingVertical: 14,
+              paddingHorizontal: 20,
+              backgroundColor: C.glassBg,
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: C.glassBorder,
+            }}>
+              <MaterialCommunityIcons name="music-circle" size={22} color={C.primary} />
+              <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.primary }}>Music Settings</Text>
+              <View style={{ 
+                paddingHorizontal: 10, 
+                paddingVertical: 4, 
+                borderRadius: 8, 
+                backgroundColor: isMuted ? C.glassBg : C.primarySoft 
+              }}>
+                <Text style={{ 
+                  fontSize: FontSizes.xs, 
+                  fontWeight: '700', 
+                  color: isMuted ? C.textMuted : C.primary 
+                }}>{isMuted ? 'OFF' : 'ON'}</Text>
+              </View>
             </View>
           </TouchableOpacity>
-
-          {/* Audio Settings Panel */}
-          {showAudioControls && (
-            <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: C.glassBorder }}>
-              
-              {/* Mute Toggle */}
-              <TouchableOpacity onPress={toggleMute} activeOpacity={0.8} style={{ marginBottom: 20 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 16, backgroundColor: C.glassBg, borderRadius: 14, borderWidth: 1, borderColor: isMuted ? C.glassBorder : C.primary }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                    <MaterialCommunityIcons name={isMuted ? 'volume-off' : 'volume-high'} size={24} color={isMuted ? C.textMuted : C.primary} />
-                    <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: isMuted ? C.textMuted : C.textPrimary }}>Sound</Text>
-                  </View>
-                  <View style={{ paddingHorizontal: 20, paddingVertical: 8, borderRadius: 12, backgroundColor: isMuted ? C.glassBg : C.primarySoft }}>
-                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: isMuted ? C.textMuted : C.primary }}>{isMuted ? 'OFF' : 'ON'}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              {/* Background Sound Selection */}
-              {!isMuted && (
-                <>
-                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>BACKGROUND SOUND</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      {Object.values(AUDIO_LIBRARY.ambient).map((ambient) => (
-                        <TouchableOpacity key={ambient.id} onPress={() => changeAmbient(ambient.id)} activeOpacity={0.8}>
-                          <View style={{
-                            paddingHorizontal: 18, paddingVertical: 12, borderRadius: 16,
-                            backgroundColor: selectedAmbient === ambient.id ? C.primary : C.glassBg,
-                            borderWidth: 1.5, borderColor: selectedAmbient === ambient.id ? C.primary : C.glassBorder,
-                            minWidth: 120,
-                          }}>
-                            <Text style={{
-                              fontSize: FontSizes.sm, fontWeight: selectedAmbient === ambient.id ? '700' : '600',
-                              color: selectedAmbient === ambient.id ? '#FFFFFF' : C.textPrimary,
-                              marginBottom: 4,
-                            }}>{ambient.name}</Text>
-                            <Text style={{
-                              fontSize: FontSizes.xs - 2, color: selectedAmbient === ambient.id ? 'rgba(255,255,255,0.8)' : C.textMuted,
-                            }}>{ambient.category}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </ScrollView>
-
-                  {/* Volume Slider - Draggable */}
-                  <View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                      <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 }}>VOLUME</Text>
-                      <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: C.primary }}>{Math.round(volume * 100)}%</Text>
-                    </View>
-                    
-                    {/* Draggable Volume Slider */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                      <MaterialCommunityIcons name="volume-low" size={20} color={C.textMuted} />
-                      <Slider
-                        style={{ flex: 1, height: 40 }}
-                        minimumValue={0}
-                        maximumValue={1}
-                        value={volume}
-                        onValueChange={(value) => {
-                          setVolume(value);
-                          adjustVolume(value);
-                        }}
-                        onSlidingComplete={(value) => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        }}
-                        minimumTrackTintColor={C.primary}
-                        maximumTrackTintColor={C.glassBg}
-                        thumbTintColor={C.primary}
-                      />
-                      <MaterialCommunityIcons name="volume-high" size={20} color={C.textMuted} />
-                    </View>
-                    
-                    {/* Quick Presets (Optional) */}
-                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-                      {[0.3, 0.5, 0.7, 1.0].map((vol) => (
-                        <TouchableOpacity key={vol} onPress={() => { setVolume(vol); adjustVolume(vol); }} activeOpacity={0.8} style={{ flex: 1 }}>
-                          <View style={{
-                            paddingVertical: 8, borderRadius: 10, alignItems: 'center',
-                            backgroundColor: Math.abs(volume - vol) < 0.05 ? C.primarySoft : C.glassBg,
-                            borderWidth: 1, borderColor: Math.abs(volume - vol) < 0.05 ? C.primary : C.glassBorder,
-                          }}>
-                            <Text style={{
-                              fontSize: FontSizes.xs, fontWeight: Math.abs(volume - vol) < 0.05 ? '700' : '500',
-                              color: Math.abs(volume - vol) < 0.05 ? C.primary : C.textMuted,
-                            }}>{Math.round(vol * 100)}%</Text>
-                          </View>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-                </>
-              )}
-            </View>
-          )}
         </GlassCard>
       </View>
+
+      {/* Audio Settings Modal */}
+      <AudioSettingsModal
+        visible={showAudioModal}
+        onClose={() => setShowAudioModal(false)}
+        isMuted={isMuted}
+        toggleMute={toggleMute}
+        selectedAmbient={selectedAmbient}
+        changeAmbient={changeAmbient}
+        volume={volume}
+        setVolume={setVolume}
+        adjustVolume={adjustVolume}
+      />
     </LinearGradient>
   );
 }
