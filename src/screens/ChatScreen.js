@@ -333,6 +333,7 @@ export default function ChatScreen() {
   const [memory, setMemory] = useState(null);
   const memoryContextRef = useRef('');
   const flatListRef = useRef(null);
+  const inputRef = useRef(null);
   const currentLang = profile.language || 'hinglish';
   const firstName = (displayName || '').split(' ')[0] || '';
 
@@ -499,9 +500,12 @@ export default function ChatScreen() {
         keyExtractor={(i) => i.id}
         contentContainerStyle={{ paddingHorizontal: 14, paddingTop: 16, paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         ListHeaderComponent={showSuggestions ? <WelcomeHero onTopicPress={sendMessage} greeting={greeting} /> : null}
         ListFooterComponent={isTyping ? <TypingIndicator /> : null}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="none"
+        removeClippedSubviews={false}
+        maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
       />
 
       {/* ─── Input Bar ─── */}
@@ -550,10 +554,11 @@ export default function ChatScreen() {
             ...(inputFocused ? C.glassShadow : {}),
           }}>
             <TextInput
+              ref={inputRef}
               style={{
                 flex: 1, fontSize: FontSizes.md, color: C.textPrimary,
-                paddingHorizontal: 12, paddingVertical: Platform.OS === 'ios' ? 12 : 8,
-                maxHeight: 90, minHeight: 36, lineHeight: 20,
+                paddingHorizontal: 12, paddingVertical: Platform.OS === 'ios' ? 12 : 10,
+                maxHeight: 90, minHeight: 42, lineHeight: 20,
                 outlineStyle: 'none', // Remove blue focus outline on web
               }}
               placeholder={tr('askAnything') || 'Ask Krishna anything...'}
@@ -571,6 +576,7 @@ export default function ChatScreen() {
               autoCapitalize="sentences"
               autoCorrect={true}
               textAlignVertical="center"
+              scrollEnabled={true}
             />
             {/* Character counter near limit */}
             {inputText.length > 400 && (

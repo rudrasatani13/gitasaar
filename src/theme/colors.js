@@ -51,21 +51,21 @@ export const LightColors = {
   textSanskrit:  '#6B4423',   // Warm deep brown for Sanskrit
   textGold:      '#9A6E22',   // Darker gold for readability on white
 
-  // Borders — clearly visible warm tones
-  border:           '#CEC0A4',   // Warm tan border (was #E0E0E0 — too light)
-  borderLight:      '#DDD2BC',   // Lighter tan
-  borderGold:       'rgba(194, 136, 64, 0.45)',   // Clearly visible gold
-  borderGoldStrong: 'rgba(194, 136, 64, 0.70)',   // Strong gold border
-  divider:          '#CEC0A4',   // Match border
+  // Borders — subtle in light mode to avoid "box in box" effect
+  border:           'rgba(206, 192, 164, 0.4)',   // Very subtle tan border
+  borderLight:      'rgba(221, 210, 188, 0.3)',   // Even lighter
+  borderGold:       'rgba(194, 136, 64, 0.25)',   // Subtle gold
+  borderGoldStrong: 'rgba(194, 136, 64, 0.45)',   // Medium gold for emphasis only
+  divider:          'rgba(206, 192, 164, 0.5)',   // Subtle divider
 
-  // GLASS TOKENS — solid white cards visible on warm background
-  glassBg:         '#FFFFFF',                       // Solid white (was 55% — invisible)
+  // GLASS TOKENS — solid white cards, minimal borders in light mode
+  glassBg:         '#FFFFFF',                       // Solid white
   glassBgStrong:   '#FFFFFF',                       // Solid white
   glassInputBg:    '#FFFFFF',                       // White inputs
-  glassBorder:     'rgba(164, 120, 60, 0.38)',      // Warm visible border (was 0.18)
-  glassBorderGold: 'rgba(194, 136, 64, 0.65)',      // Strong gold border (was 0.40)
-  glassHighlight:  'rgba(255, 255, 255, 1.0)',      // Solid white shimmer
-  glassShadow:     { shadowColor: '#9A6E22', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 6 },
+  glassBorder:     'rgba(206, 192, 164, 0.25)',     // Very subtle border (was 0.38)
+  glassBorderGold: 'rgba(194, 136, 64, 0.35)',      // Subtle gold border (was 0.65)
+  glassHighlight:  'rgba(255, 255, 255, 0)',        // No shimmer in light mode
+  glassShadow:     { shadowColor: '#9A6E22', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 12, elevation: 4 },
   glassShimmer:    'rgba(255, 252, 245, 0.90)',
 
   gradientWarm: ['#FDF8EF', '#FAF0DE', '#F5E8CC'],

@@ -27,13 +27,16 @@ export default function GlassInput({
   const { colors: C, isDark } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
-  const borderColor = isFocused ? C.glassBorderGold : (isDark ? C.glassBorder : C.border);
+  // Light mode: minimal/no border to avoid "box in box" effect
+  const borderColor = isFocused 
+    ? C.glassBorderGold 
+    : (isDark ? C.glassBorder : 'rgba(206, 192, 164, 0.2)');
   const shadowStyle = isFocused ? C.glassShadow : C.shadowLight;
 
   // Enhanced background for better frosted effect
   const enhancedInputBg = isDark
     ? 'rgba(10, 10, 10, 0.80)'
-    : 'rgba(255, 255, 255, 0.85)';
+    : '#FFFFFF'; // Solid white in light mode
 
   const inner = (
     <>
@@ -83,12 +86,13 @@ export default function GlassInput({
   const containerStyle = [
     {
       borderRadius: 16,
-      borderWidth: isFocused ? 1.5 : 1,
+      borderWidth: isDark ? (isFocused ? 1.5 : 1) : (isFocused ? 1 : 0.5), // Thinner border in light mode
       borderColor,
       overflow: 'hidden',
       marginBottom: 12,
       position: 'relative',
     },
+    !isDark && C.shadowLight, // Add shadow in light mode instead of heavy border
     style,
   ];
 

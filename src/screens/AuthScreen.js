@@ -12,7 +12,7 @@ import GlassCard from '../components/GlassCard';
 import GlassInput from '../components/GlassInput';
 
 export default function AuthScreen({ navigation }) {
-  const { colors: C } = useTheme();
+  const { colors: C, isDark } = useTheme();
   const [mode, setMode] = useState('login'); // login, signup, phone, otp
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -182,13 +182,13 @@ export default function AuthScreen({ navigation }) {
             {isEmailMode && (
               <>
                 {/* Toggle Login/Signup */}
-                <View style={{ flexDirection: 'row', backgroundColor: C.glassBg, borderRadius: 14, padding: 4, marginBottom: 20, borderWidth: 1, borderColor: C.glassBorder }}>
+                <View style={{ flexDirection: 'row', backgroundColor: isDark ? C.glassBg : 'rgba(250, 246, 239, 0.8)', borderRadius: 14, padding: 4, marginBottom: 20, borderWidth: isDark ? 1 : 0, borderColor: C.glassBorder }}>
                   <TouchableOpacity onPress={() => !isLogin && animateSwitch(() => setMode('login'))}
-                    style={{ flex: 1, paddingVertical: 11, borderRadius: 12, backgroundColor: isLogin ? C.bgCard : 'transparent', alignItems: 'center', ...(isLogin ? C.shadowLight : {}) }}>
+                    style={{ flex: 1, paddingVertical: 11, borderRadius: 12, backgroundColor: isLogin ? (isDark ? C.bgCard : '#FFFFFF') : 'transparent', alignItems: 'center', ...(isLogin ? C.shadowLight : {}) }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: isLogin ? '700' : '500', color: isLogin ? C.primary : C.textMuted }}>Login</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => !isSignup && animateSwitch(() => setMode('signup'))}
-                    style={{ flex: 1, paddingVertical: 11, borderRadius: 12, backgroundColor: isSignup ? C.bgCard : 'transparent', alignItems: 'center', ...(isSignup ? C.shadowLight : {}) }}>
+                    style={{ flex: 1, paddingVertical: 11, borderRadius: 12, backgroundColor: isSignup ? (isDark ? C.bgCard : '#FFFFFF') : 'transparent', alignItems: 'center', ...(isSignup ? C.shadowLight : {}) }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: isSignup ? '700' : '500', color: isSignup ? C.primary : C.textMuted }}>Sign Up</Text>
                   </TouchableOpacity>
                 </View>
@@ -330,31 +330,31 @@ export default function AuthScreen({ navigation }) {
                   {/* Google */}
                   <TouchableOpacity onPress={handleGoogle} disabled={!!loadingProvider} activeOpacity={0.8}
                     style={{ flex: 1, opacity: loadingProvider === 'google' ? 0.7 : 1 }}>
-                    <GlassCard noPadding style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }} intensity={35}>
+                    <View style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, backgroundColor: isDark ? C.glassBg : '#FFFFFF', borderWidth: isDark ? 1 : 0, borderColor: C.glassBorder, ...C.shadowLight }}>
                       <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
                       <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>
                         {loadingProvider === 'google' ? 'Wait...' : 'Google'}
                       </Text>
-                    </GlassCard>
+                    </View>
                   </TouchableOpacity>
 
                   {/* Apple */}
                   <TouchableOpacity onPress={handleApple} disabled={!!loadingProvider} activeOpacity={0.8}
                     style={{ flex: 1, opacity: loadingProvider === 'apple' ? 0.7 : 1 }}>
-                    <GlassCard noPadding style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }} intensity={35}>
+                    <View style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, backgroundColor: isDark ? C.glassBg : '#FFFFFF', borderWidth: isDark ? 1 : 0, borderColor: C.glassBorder, ...C.shadowLight }}>
                       <MaterialCommunityIcons name="apple" size={20} color={C.textPrimary} />
                       <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>
                         {loadingProvider === 'apple' ? 'Wait...' : 'Apple'}
                       </Text>
-                    </GlassCard>
+                    </View>
                   </TouchableOpacity>
 
                   {/* Phone */}
                   <TouchableOpacity onPress={() => animateSwitch(() => setMode('phone'))} activeOpacity={0.8} style={{ flex: 1 }}>
-                    <GlassCard noPadding style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }} intensity={35}>
+                    <View style={{ borderRadius: 14, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, backgroundColor: isDark ? C.glassBg : '#FFFFFF', borderWidth: isDark ? 1 : 0, borderColor: C.glassBorder, ...C.shadowLight }}>
                       <MaterialCommunityIcons name="phone-outline" size={20} color={C.peacockBlue} />
                       <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>Phone</Text>
-                    </GlassCard>
+                    </View>
                   </TouchableOpacity>
                 </View>
 

@@ -29,28 +29,28 @@ export default function GlassCard({
   // Enhanced blur intensities based on variant
   const blurIntensity = variant === 'strong' ? 100 : variant === 'subtle' ? 60 : intensity;
   
-  // Stronger borders for better definition
+  // Stronger borders for better definition - but no border in light mode to avoid "box in box"
   const borderColor = isDark 
     ? (variant === 'strong' ? C.glassBorderGold : C.glassBorder)
-    : (variant === 'strong' ? C.borderGoldStrong : C.border);
+    : 'transparent'; // Light mode: no visible border to avoid nested box appearance
 
   const containerStyle = [
     styles.base,
     {
       borderRadius: 20,
-      borderWidth: variant === 'strong' ? 1.5 : 1,
+      borderWidth: isDark ? (variant === 'strong' ? 1.5 : 1) : 0, // No border in light mode
       borderColor,
       padding: noPadding ? 0 : 18,
       overflow: 'hidden',
     },
-    variant === 'strong' ? C.shadowGold : C.shadowLight,
+    variant === 'strong' ? C.shadowGold : (isDark ? C.shadowLight : C.shadow), // Use shadow instead of border in light mode
     style,
   ];
 
   // Enhanced background opacity for better frosted effect
   const enhancedGlassBg = isDark
     ? (variant === 'strong' ? 'rgba(224, 168, 80, 0.12)' : 'rgba(10, 10, 10, 0.75)')
-    : (variant === 'strong' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.80)');
+    : (variant === 'strong' ? '#FFFFFF' : '#FFFFFF'); // Solid white in light mode - no transparency
 
   // Web: use backdropFilter CSS with enhanced blur
   if (Platform.OS === 'web') {
