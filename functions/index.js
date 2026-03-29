@@ -212,10 +212,10 @@ function cleanupRateLimits() {
   const now = Date.now();
   // Only run cleanup every 5 minutes
   if (now - lastCleanup < RATE_LIMIT_CLEANUP_INTERVAL) return;
-  
+
   lastCleanup = now;
   let cleaned = 0;
-  
+
   for (const [uid, entry] of rateLimits.entries()) {
     // Remove entries that are past their reset time + TTL buffer
     if (now > entry.resetAt + RATE_LIMIT_ENTRY_TTL) {
@@ -223,7 +223,7 @@ function cleanupRateLimits() {
       cleaned++;
     }
   }
-  
+
   if (cleaned > 0) {
     console.log(`[RateLimit] Cleaned up ${cleaned} stale entries. Active: ${rateLimits.size}`);
   }
@@ -231,10 +231,10 @@ function cleanupRateLimits() {
 
 function isRateLimited(uid, maxPerMinute) {
   const now   = Date.now();
-  
+
   // Trigger cleanup check on each rate limit call
   cleanupRateLimits();
-  
+
   const entry = rateLimits.get(uid) || { count: 0, resetAt: now + 60000 };
   if (now > entry.resetAt) {
     entry.count = 0; entry.resetAt = now + 60000;
