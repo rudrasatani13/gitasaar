@@ -3,6 +3,7 @@
 // AsyncStorage is used only for daily usage counters (non-security-critical).
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../utils/firebase';
@@ -20,7 +21,7 @@ const FREE_LIMITS = {
   adFree:           false,
 };
 
-const FREE_TEMPLATES = ['saffron', 'minimal'];
+const FREE_TEMPLATES = ['saffron', 'cosmos'];
 
 export function PremiumProvider({ children }) {
   const [isPremium,  setIsPremium]  = useState(false);
@@ -181,9 +182,14 @@ export function PremiumProvider({ children }) {
   const quizRemaining  = isPremium ? 'Unlimited' : Math.max(0, FREE_LIMITS.quizPlays        - usage.quizPlays);
 
   const cancelPremium = () => {
-    setIsPremium(false);
-    setPlanType(null);
-    setExpiryDate(null);
+    // Razorpay/Stripe subscriptions must be cancelled via the payment gateway dashboard.
+    // This only clears local state — Firestore will restore it on next launch.
+    // Show info instead of silently resetting.
+    Alert.alert(
+      'Cancel Subscription',
+      'To cancel your subscription, please visit Razorpay/Play Store subscription settings, or contact support at support@gitasaar.app.\n\nYour premium access will continue until the current period ends.',
+      [{ text: 'OK' }]
+    );
   };
 
   return (

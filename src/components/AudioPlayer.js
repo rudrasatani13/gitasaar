@@ -202,6 +202,15 @@ export default function AudioPlayer({ sanskrit, transliteration, hindi, english 
     }
   }, [isPlaying]);
 
+  // Cleanup: stop audio when component unmounts (navigation away)
+  useEffect(() => {
+    return () => {
+      stoppedRef.current = true;
+      if (Platform.OS === 'web') stopWebAudio();
+      else stopNativeAudio();
+    };
+  }, []);
+
   const stop = () => {
     stoppedRef.current = true;
     if (Platform.OS === 'web') stopWebAudio();

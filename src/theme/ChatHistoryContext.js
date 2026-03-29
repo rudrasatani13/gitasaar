@@ -1,6 +1,8 @@
 // src/theme/ChatHistoryContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth } from '../utils/firebase';
+import { onSyncComplete } from '../utils/userDataSync';
 
 const ChatHistoryContext = createContext();
 const HISTORY_KEY = '@gitasaar_chat_history';
@@ -9,7 +11,18 @@ export function ChatHistoryProvider({ children }) {
   const [conversations, setConversations] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+
+    // Re-read after cloud restore so chat history syncs across devices
+    const unsubSync = onSyncComplete(() => load());
+
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (!user) setConversations([]);
+    });
+
+    return () => { unsubSync(); unsubAuth(); };
+  }, []);
 
   const load = async () => {
     try {

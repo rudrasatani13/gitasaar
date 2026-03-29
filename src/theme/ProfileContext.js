@@ -27,7 +27,6 @@ export function ProfileProvider({ children }) {
     });
 
     const unsubAuth = auth.onAuthStateChanged((user) => {
-      console.log('[AUTH DEBUG] ProfileContext onAuthStateChanged — uid:', user?.uid ?? 'null');
       if (!user) {
         setProfile({ name: '', photo: null, language: 'english' });
         setLocalPhotoUri(null);
@@ -168,6 +167,7 @@ export function ProfileProvider({ children }) {
   };
 
   const displayName = profile.name || null;
+  const email = auth.currentUser?.email || '';
 
   const getPhotoSource = () => {
     if (localPhotoUri) return localPhotoUri;
@@ -178,7 +178,7 @@ export function ProfileProvider({ children }) {
   const profilePhoto = getPhotoSource();
 
   return (
-    <ProfileContext.Provider value={{ profile, displayName, profilePhoto, updateProfile, loaded }}>
+    <ProfileContext.Provider value={{ profile, displayName, email, profilePhoto, updateProfile, loaded }}>
       {children}
     </ProfileContext.Provider>
   );

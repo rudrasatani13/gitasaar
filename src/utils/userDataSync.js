@@ -207,8 +207,9 @@ export async function autoSync(uid) {
 export async function onUserLogout() {
   const uidToBackup = currentUid;
   currentUid = null;
-  await clearLocalData(); // Clear immediately — don't block logout on cloud backup
+  // Backup FIRST so last-session changes are not lost, then clear local
   if (uidToBackup) {
-    backupToCloud(uidToBackup).catch(() => {}); // Backup in background (issue 4)
+    try { await backupToCloud(uidToBackup); } catch (e) {}
   }
+  await clearLocalData();
 }
