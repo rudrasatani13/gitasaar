@@ -57,12 +57,12 @@ export default function MantraLibraryScreen({ navigation }) {
       </View>
 
       {/* Category Filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, paddingHorizontal: 16, marginBottom: 16 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 16 }} contentContainerStyle={{ paddingHorizontal: 16 }}>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {categories.map(cat => (
             <TouchableOpacity key={cat} onPress={() => setSelectedCategory(cat)} activeOpacity={0.8}>
               <View style={{
-                paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20,
+                paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
                 backgroundColor: selectedCategory === cat ? C.primary : C.glassBg,
                 borderWidth: 1, borderColor: selectedCategory === cat ? C.primary : C.glassBorder,
               }}>

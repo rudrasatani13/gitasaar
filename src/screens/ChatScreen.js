@@ -554,6 +554,7 @@ export default function ChatScreen() {
                 flex: 1, fontSize: FontSizes.md, color: C.textPrimary,
                 paddingHorizontal: 12, paddingVertical: 8,
                 maxHeight: 90, minHeight: 36, lineHeight: 20,
+                outlineStyle: 'none', // Remove blue focus outline on web
               }}
               placeholder={tr('askAnything') || 'Ask Krishna anything...'}
               placeholderTextColor={C.textMuted}
