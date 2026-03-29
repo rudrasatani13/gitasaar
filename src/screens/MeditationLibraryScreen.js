@@ -83,14 +83,15 @@ export default function MeditationLibraryScreen({ navigation }) {
                 activeOpacity={0.8}
               >
                 <View style={{
-                  paddingHorizontal: 14,
+                  paddingHorizontal: 16,
                   paddingVertical: 7,
                   borderRadius: 18,
                   backgroundColor: selectedCategory === cat ? C.primary : C.glassBg,
                   borderWidth: 1,
                   borderColor: selectedCategory === cat ? C.primary : C.glassBorder,
-                  minWidth: 70,
+                  minWidth: cat === 'all' ? 50 : cat === 'beginner' ? 90 : cat === 'intermediate' ? 115 : cat === 'advanced' ? 95 : cat === 'sleep' ? 65 : 70,
                   alignItems: 'center',
+                  justifyContent: 'center',
                 }}>
                   <Text style={{
                     fontSize: FontSizes.sm - 1,

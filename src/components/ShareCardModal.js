@@ -28,106 +28,137 @@ function loadHtml2Canvas() {
 // ========== TEMPLATES ==========
 function TemplateSaffron({ verse }) {
   return (
-    <LinearGradient colors={['#FDF8EF', '#F5E0BE', '#EDD0A0']} style={{ width: CW, height: CH, borderRadius: 20, padding: 28 }}>
+    <LinearGradient colors={['#FDF8EF', '#F5E0BE', '#EDD0A0']} style={{ width: CW, height: CH, borderRadius: 20, padding: 24 }}>
       <View style={{ position: 'absolute', top: 12, left: 12, width: 24, height: 24, borderTopWidth: 2, borderLeftWidth: 2, borderColor: '#C28840', borderTopLeftRadius: 6, opacity: 0.35 }} />
       <View style={{ position: 'absolute', top: 12, right: 12, width: 24, height: 24, borderTopWidth: 2, borderRightWidth: 2, borderColor: '#C28840', borderTopRightRadius: 6, opacity: 0.35 }} />
       <View style={{ position: 'absolute', bottom: 12, left: 12, width: 24, height: 24, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: '#C28840', borderBottomLeftRadius: 6, opacity: 0.35 }} />
       <View style={{ position: 'absolute', bottom: 12, right: 12, width: 24, height: 24, borderBottomWidth: 2, borderRightWidth: 2, borderColor: '#C28840', borderBottomRightRadius: 6, opacity: 0.35 }} />
-      <View style={{ alignItems: 'center', marginBottom: 16 }}>
+      
+      {/* Header - Om Symbol & Reference */}
+      <View style={{ alignItems: 'center', marginBottom: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View style={{ width: 30, height: 1, backgroundColor: '#C28840', opacity: 0.4 }} />
-          <Text style={{ fontSize: 28, color: '#C28840' }}>{'\u0950'}</Text>
+          <Text style={{ fontSize: 26, color: '#C28840' }}>{'\u0950'}</Text>
           <View style={{ width: 30, height: 1, backgroundColor: '#C28840', opacity: 0.4 }} />
         </View>
-        <View style={{ backgroundColor: 'rgba(194,136,64,0.12)', paddingHorizontal: 14, paddingVertical: 5, borderRadius: 999, marginTop: 8 }}>
-          <Text style={{ fontSize: 11, fontWeight: '800', color: '#9E6B2C', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
+        <View style={{ backgroundColor: 'rgba(194,136,64,0.12)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999, marginTop: 10 }}>
+          <Text style={{ fontSize: 10, fontWeight: '800', color: '#9E6B2C', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
         </View>
       </View>
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Text style={{ fontSize: 18, color: '#5C3018', lineHeight: 30, textAlign: 'center', marginBottom: 16 }}>{verse.sanskrit}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16, paddingHorizontal: 20 }}>
+      
+      {/* Content - Sanskrit & English */}
+      <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 8 }}>
+        <Text style={{ fontSize: 16, color: '#5C3018', lineHeight: 26, textAlign: 'center', marginBottom: 14, paddingHorizontal: 4 }}>{verse.sanskrit}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14, paddingHorizontal: 20 }}>
           <View style={{ flex: 1, height: 1, backgroundColor: '#C28840', opacity: 0.25 }} />
           <View style={{ width: 6, height: 6, backgroundColor: '#C28840', opacity: 0.4, transform: [{ rotate: '45deg' }] }} />
           <View style={{ flex: 1, height: 1, backgroundColor: '#C28840', opacity: 0.25 }} />
         </View>
-        <Text style={{ fontSize: 14, color: '#6B4F27', lineHeight: 22, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 8 }}>"{verse.english}"</Text>
+        <Text style={{ fontSize: 13, color: '#6B4F27', lineHeight: 20, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 12 }}>"{verse.english}"</Text>
       </View>
-      <View style={{ alignItems: 'center', marginTop: 12 }}><Text style={{ fontSize: 11, fontWeight: '700', color: '#C28840', letterSpacing: 2 }}>GITASAAR</Text></View>
+      
+      {/* Footer - App Name */}
+      <View style={{ alignItems: 'center', marginTop: 10, paddingTop: 8 }}>
+        <Text style={{ fontSize: 10, fontWeight: '700', color: '#C28840', letterSpacing: 2 }}>GITASAAR</Text>
+      </View>
     </LinearGradient>
   );
 }
 
 function TemplateRoyal({ verse }) {
   return (
-    <LinearGradient colors={['#1A1209', '#2A1F12', '#1A1209']} style={{ width: CW, height: CH, borderRadius: 20, padding: 28 }}>
+    <LinearGradient colors={['#1A1209', '#2A1F12', '#1A1209']} style={{ width: CW, height: CH, borderRadius: 20, padding: 24 }}>
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 20, borderWidth: 1.5, borderColor: 'rgba(219,160,78,0.25)' }} />
-      <View style={{ alignItems: 'center', marginBottom: 16 }}>
-        <Text style={{ fontSize: 30, color: '#DBA04E' }}>{'\u0950'}</Text>
-        <View style={{ backgroundColor: 'rgba(219,160,78,0.12)', paddingHorizontal: 14, paddingVertical: 5, borderRadius: 999, marginTop: 8 }}>
-          <Text style={{ fontSize: 11, fontWeight: '800', color: '#DBA04E', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
+      
+      {/* Header */}
+      <View style={{ alignItems: 'center', marginBottom: 12 }}>
+        <Text style={{ fontSize: 28, color: '#DBA04E' }}>{'\u0950'}</Text>
+        <View style={{ backgroundColor: 'rgba(219,160,78,0.12)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999, marginTop: 10 }}>
+          <Text style={{ fontSize: 10, fontWeight: '800', color: '#DBA04E', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
         </View>
       </View>
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Text style={{ fontSize: 18, color: '#E8B465', lineHeight: 30, textAlign: 'center', marginBottom: 16 }}>{verse.sanskrit}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16, paddingHorizontal: 20 }}>
+      
+      {/* Content */}
+      <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 8 }}>
+        <Text style={{ fontSize: 16, color: '#E8B465', lineHeight: 26, textAlign: 'center', marginBottom: 14, paddingHorizontal: 4 }}>{verse.sanskrit}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14, paddingHorizontal: 20 }}>
           <View style={{ flex: 1, height: 1, backgroundColor: '#DBA04E', opacity: 0.2 }} />
           <View style={{ width: 6, height: 6, backgroundColor: '#DBA04E', opacity: 0.35, transform: [{ rotate: '45deg' }] }} />
           <View style={{ flex: 1, height: 1, backgroundColor: '#DBA04E', opacity: 0.2 }} />
         </View>
-        <Text style={{ fontSize: 14, color: '#C8B696', lineHeight: 22, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 8 }}>"{verse.english}"</Text>
+        <Text style={{ fontSize: 13, color: '#C8B696', lineHeight: 20, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 12 }}>"{verse.english}"</Text>
       </View>
-      <View style={{ alignItems: 'center', marginTop: 12 }}><Text style={{ fontSize: 11, fontWeight: '700', color: '#DBA04E', letterSpacing: 2 }}>GITASAAR</Text></View>
+      
+      {/* Footer */}
+      <View style={{ alignItems: 'center', marginTop: 10, paddingTop: 8 }}>
+        <Text style={{ fontSize: 10, fontWeight: '700', color: '#DBA04E', letterSpacing: 2 }}>GITASAAR</Text>
+      </View>
     </LinearGradient>
   );
 }
 
 function TemplateCosmos({ verse }) {
   return (
-    <LinearGradient colors={['#000000', '#0D0800', '#1A1000']} style={{ width: CW, height: CH, borderRadius: 20, padding: 28 }}>
+    <LinearGradient colors={['#000000', '#0D0800', '#1A1000']} style={{ width: CW, height: CH, borderRadius: 20, padding: 24 }}>
       {/* Gold & white star dots */}
       {[[10,20],[50,8],[80,15],[20,45],[70,35],[90,50],[15,70],[55,65],[85,80],[30,90],[60,25],[40,75]].map(([l,t], i) => (
         <View key={i} style={{ position: 'absolute', left: `${l}%`, top: `${t}%`, width: i%3===0?3:2, height: i%3===0?3:2, borderRadius: 2, backgroundColor: i%4===0 ? '#FCD34D' : '#FFFFFF', opacity: 0.35 + (i*0.04) }} />
       ))}
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(224,168,80,0.22)' }} />
-      <View style={{ alignItems: 'center', marginBottom: 16 }}>
-        <Text style={{ fontSize: 28, color: '#E0A850' }}>{'\u0950'}</Text>
-        <View style={{ backgroundColor: 'rgba(224,168,80,0.12)', paddingHorizontal: 14, paddingVertical: 5, borderRadius: 999, marginTop: 8 }}>
-          <Text style={{ fontSize: 11, fontWeight: '800', color: '#E0A850', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
+      
+      {/* Header */}
+      <View style={{ alignItems: 'center', marginBottom: 12 }}>
+        <Text style={{ fontSize: 26, color: '#E0A850' }}>{'\u0950'}</Text>
+        <View style={{ backgroundColor: 'rgba(224,168,80,0.12)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999, marginTop: 10 }}>
+          <Text style={{ fontSize: 10, fontWeight: '800', color: '#E0A850', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
         </View>
       </View>
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Text style={{ fontSize: 18, color: '#FFCC80', lineHeight: 30, textAlign: 'center', marginBottom: 16 }}>{verse.sanskrit}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16, paddingHorizontal: 20 }}>
+      
+      {/* Content */}
+      <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 8 }}>
+        <Text style={{ fontSize: 16, color: '#FFCC80', lineHeight: 26, textAlign: 'center', marginBottom: 14, paddingHorizontal: 4 }}>{verse.sanskrit}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14, paddingHorizontal: 20 }}>
           <View style={{ flex: 1, height: 1, backgroundColor: '#E0A850', opacity: 0.30 }} />
           <View style={{ width: 6, height: 6, backgroundColor: '#F5C842', opacity: 0.7, transform: [{ rotate: '45deg' }] }} />
           <View style={{ flex: 1, height: 1, backgroundColor: '#E0A850', opacity: 0.30 }} />
         </View>
-        <Text style={{ fontSize: 14, color: 'rgba(255,248,220,0.82)', lineHeight: 22, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 8 }}>"{verse.english}"</Text>
+        <Text style={{ fontSize: 13, color: 'rgba(255,248,220,0.82)', lineHeight: 20, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 12 }}>"{verse.english}"</Text>
       </View>
-      <View style={{ alignItems: 'center', marginTop: 12 }}><Text style={{ fontSize: 11, fontWeight: '700', color: '#E0A850', letterSpacing: 2 }}>GITASAAR</Text></View>
+      
+      {/* Footer */}
+      <View style={{ alignItems: 'center', marginTop: 10, paddingTop: 8 }}>
+        <Text style={{ fontSize: 10, fontWeight: '700', color: '#E0A850', letterSpacing: 2 }}>GITASAAR</Text>
+      </View>
     </LinearGradient>
   );
 }
 
 function TemplatePeacock({ verse }) {
   return (
-    <LinearGradient colors={['#0A4F4F', '#0E6B6B', '#0A4F4F']} style={{ width: CW, height: CH, borderRadius: 20, padding: 28 }}>
-      <View style={{ alignItems: 'center', marginBottom: 16 }}>
-        <Text style={{ fontSize: 28, color: '#E8B465' }}>{'\u0950'}</Text>
-        <View style={{ backgroundColor: 'rgba(232,180,101,0.12)', paddingHorizontal: 14, paddingVertical: 5, borderRadius: 999, marginTop: 8 }}>
-          <Text style={{ fontSize: 11, fontWeight: '800', color: '#E8B465', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
+    <LinearGradient colors={['#0A4F4F', '#0E6B6B', '#0A4F4F']} style={{ width: CW, height: CH, borderRadius: 20, padding: 24 }}>
+      {/* Header */}
+      <View style={{ alignItems: 'center', marginBottom: 12 }}>
+        <Text style={{ fontSize: 26, color: '#E8B465' }}>{'\u0950'}</Text>
+        <View style={{ backgroundColor: 'rgba(232,180,101,0.12)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999, marginTop: 10 }}>
+          <Text style={{ fontSize: 10, fontWeight: '800', color: '#E8B465', letterSpacing: 1 }}>BHAGAVAD GITA {verse.chapter}.{verse.verse}</Text>
         </View>
       </View>
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Text style={{ fontSize: 18, color: '#FFFFFF', lineHeight: 30, textAlign: 'center', marginBottom: 16 }}>{verse.sanskrit}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16, paddingHorizontal: 20 }}>
+      
+      {/* Content */}
+      <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 8 }}>
+        <Text style={{ fontSize: 16, color: '#FFFFFF', lineHeight: 26, textAlign: 'center', marginBottom: 14, paddingHorizontal: 4 }}>{verse.sanskrit}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14, paddingHorizontal: 20 }}>
           <View style={{ flex: 1, height: 1, backgroundColor: '#E8B465', opacity: 0.2 }} />
           <View style={{ width: 6, height: 6, backgroundColor: '#E8B465', opacity: 0.35, transform: [{ rotate: '45deg' }] }} />
           <View style={{ flex: 1, height: 1, backgroundColor: '#E8B465', opacity: 0.2 }} />
         </View>
-        <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', lineHeight: 22, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 8 }}>"{verse.english}"</Text>
+        <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 20, textAlign: 'center', fontStyle: 'italic', paddingHorizontal: 12 }}>"{verse.english}"</Text>
       </View>
-      <View style={{ alignItems: 'center', marginTop: 12 }}><Text style={{ fontSize: 11, fontWeight: '700', color: '#E8B465', letterSpacing: 2 }}>GITASAAR</Text></View>
+      
+      {/* Footer */}
+      <View style={{ alignItems: 'center', marginTop: 10, paddingTop: 8 }}>
+        <Text style={{ fontSize: 10, fontWeight: '700', color: '#E8B465', letterSpacing: 2 }}>GITASAAR</Text>
+      </View>
     </LinearGradient>
   );
 }
