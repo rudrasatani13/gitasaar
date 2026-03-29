@@ -7,16 +7,19 @@ All 700 verses, Sanskrit/Hindi/English translations, AI chat (Ask Krishna), spir
 ## Tech Stack
 - React Native + Expo SDK 55
 - Firebase (Auth + Firestore)
-- Google Gemini AI (geminiApi.js)
+- Google Gemini AI (via Cloud Functions)
+- ElevenLabs TTS (via Cloud Functions)
+- Razorpay Payment Gateway
 - Expo AV, Notifications, Haptics, LinearGradient, BlurView
 
 ## Architecture
 - `/app/App.js` — Root with ErrorBoundary + all context providers
-- `/app/src/screens/` — 23 screens
-- `/app/src/components/` — 16 components
+- `/app/src/screens/` — 28+ screens
+- `/app/src/components/` — 16+ components
 - `/app/src/theme/` — ThemeContext, colors, contexts for Bookmarks/Journal/Chat/Tracker/Premium etc.
 - `/app/src/navigation/AppNavigator.js` — Auth flow + bottom tab navigator
 - `/app/src/utils/` — Firebase, Gemini API, haptics, notifications, payment
+- `/app/functions/index.js` — Firebase Cloud Functions (Gemini, Razorpay, ElevenLabs)
 
 ## User Personas
 - Spiritual seekers wanting daily Gita wisdom
@@ -36,54 +39,69 @@ All 700 verses, Sanskrit/Hindi/English translations, AI chat (Ask Krishna), spir
 
 ## What's Been Implemented
 
-### Final Theme System (2026 — v3)**Light Mode**: Original warm spiritual parchment (cream, saffron, gold accents)
-**Dark Mode**: Pure black (#000000) + twinkling starfield (gold/white stars) + starlight gold accents
-- `colors.js` — Proper `LightColors` (parchment restored) + new `DarkColors` (pure black + gold/white)
-- `ThemeContext.js` — Toggle restored, defaults to dark mode (space)
-- `SpiritualBackground.js` — Starfield only renders in dark mode; gold glow blobs; 70% white + 20% gold + 10% ivory stars
-- `AppNavigator.js` — Tab bar gold border in dark, warm gold in light; proper light/dark BlurView
-- `SettingsScreen.js` — Dark mode toggle restored ("Space Mode" / "Light Mode" labels)
-- `SplashScreen.js` — Theme-aware gold glow pulses and ring dots
-- `ShareCardModal.js` — "Starlight" card template (pure black + gold stars)
-- `AppLogo.js` — Gold tint in dark, natural black in light
-Replaced purple/space palette with Serene Ocean palette:
-- `colors.js` → `SpaceColors` fully updated: deep midnight navy backgrounds (`#000D1A → #002550`), sky-ocean blue (`#0EA5E9`), teal (`#14B8A6`), bright cyan (`#22D3EE`), turquoise (`#2DD4BF`), seafoam text (`#E8F7FC`). Spiritual gold (`#E0A850`) preserved as primary accent.
-- `SpiritualBackground.js` → Ocean glow blobs (sky blue, teal, deep ocean blue, gold). Stars now have subtle cyan/white tint for variety.
-- `AppNavigator.js` → Tab bar with `rgba(34,211,238,0.28)` cyan border, inactive icons `rgba(34,211,238,0.45)`.
-- `SplashScreen.js` → Ocean glow pulses (sky-blue + gold), ring dots use cyan/teal/gold.
-- `ShareCardModal.js` → "Cosmos" template renamed "Ocean" with deep-ocean teal gradient + cyan accents.
-- `SettingsScreen.js` → "Ocean Theme: Active" badge with teal styling.
-- `OnboardingScreen.js` → Slides updated: gold, ocean-cyan, teal, amber, sky-blue.
-- `colors.js` — New `SpaceColors` palette: deep space black backgrounds (#000005), nebula purple (#8B5CF6), cosmic blue (#3B82F6), starlight cyan (#00D4FF), spiritual gold (#E0A850) as primary accent. All glassmorphism tokens updated to cosmic purple-tinted glass.
-- `ThemeContext.js` — Space theme always active (isDark=true, no toggle)
-- `SpiritualBackground.js` — 90 animated twinkling stars in 5 groups with independent pulse animations + 5 nebula blob overlays (purple, blue, cyan, violet, gold). Replaces all god-image backgrounds.
-- `App.js` — Error boundary and loading screen use space black (#000005)
-- `AppLogo.js` — Always gold tint
-- `AppNavigator.js` — Tab bar with cosmic purple border (rgba(139,92,246,0.30)), dark blur tint
-- `SettingsScreen.js` — Dark mode toggle replaced with "Space Theme: Active" badge
-- `SplashScreen.js` — Nebula glow pulses (purple + gold) + starfield + colored ring dots
-- `OnboardingScreen.js` — Slide colors updated to space palette (gold, cyan, purple, amber, emerald)
-- `MeditationScreen.js` — Deep space background
-- `VerseReminderScreen.js`, `ProfileEditScreen.js`, `PremiumScreen.js` — All hardcoded light colors fixed
-- `ShlokaCard.js` — Sanskrit bubble uses space gradient, chapter badge uses space colors
-- `ShareCardModal.js` — New "Cosmos" template (space gradient with stars) added, set as default
+### Authentication System
+- Email/Password signup & login
+- Google OAuth (web)
+- Apple OAuth (web)
+- Phone OTP authentication
+- Password reset flow
+- Firebase Auth persistence
+
+### Premium Features
+- Razorpay integration via Cloud Functions
+- Server-side payment verification (HMAC-SHA256)
+- Firestore-based premium status (single source of truth)
+- Daily usage limits for free users
+- Premium gating on 30+ meditation sessions, 6 premium mantras, 6 learning paths
+
+### AI Integration
+- Gemini 2.5 Pro via Cloud Functions
+- Multi-turn conversation support
+- Conversation memory across sessions
+- Quiz generation
+- ElevenLabs TTS for audio recitation
+
+### New Features (Jan 2026)
+- Badge & Milestone system (25+ badges)
+- Meditation Library (30+ sessions)
+- Breathing Exercises (6 pranayama practices)
+- Mantra Library (10 sacred mantras)
+- Personalized Learning Paths (6 life-based journeys)
+- Enhanced Glassmorphic UI
+
+## QA Audit Findings (Jan 2026)
+
+### Critical Bugs Identified:
+1. **Missing Audio Assets** - `/app/assets/sounds/` directory missing, causes crash
+2. **Firebase API Key Fallback** - Empty string fallback causes auth failures
+3. **Premium Offline Lockout** - Paying users lose access when offline
+
+### High Priority Bugs:
+4. Payment key validation needed
+5. Voice input has no native fallback
+6. Post-login navigation race condition
+7. Cloud Functions rate limit memory leak
 
 ## Prioritized Backlog
 
-### P0 — Critical
-- None at this time
+### P0 — Critical (Fix Before Release)
+- [ ] Create audio assets OR guard meditationAudio.js imports
+- [ ] Add Firebase API key startup validation
+- [ ] Cache premium status in AsyncStorage for offline
 
 ### P1 — Important
-- Shooting star animation for SplashScreen
-- Constellation patterns as subtle background overlays per screen
-- Space-themed share card template (Cosmos) — done
+- [ ] Add expo-speech-recognition for native voice input
+- [ ] Add timeout fallback for cloud restore
+- [ ] Validate Razorpay key at startup
 
 ### P2 — Nice to Have
-- Light theme sunset/aurora variant
-- Parallax star effect on scroll
-- Nebula gradient per screen type (blue for chat, purple for journal, gold for home)
+- [ ] Firestore-based rate limiting for scale
+- [ ] Shooting star animation for SplashScreen
+- [ ] Constellation patterns as subtle background overlays
 
 ## Next Tasks
-- Test on device for star animation performance
-- Fine-tune star density/opacity for readability
-- Consider adding a "deep space" meditation background effect
+1. Fix critical audio assets bug
+2. Add Firebase key validation
+3. Implement premium offline caching
+4. Test complete auth flow on device
+5. Test payment flow end-to-end
