@@ -44,7 +44,7 @@ export default function MeditationLibraryScreen({ navigation }) {
       <StarfieldBackground />
       
       {/* Header */}
-      <View style={{ paddingHorizontal: 16, paddingTop: 56, paddingBottom: 16 }}>
+      <View style={{ paddingHorizontal: 16, paddingTop: 56, paddingBottom: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
             <MaterialCommunityIcons name="arrow-left" size={24} color={C.textPrimary} />
@@ -56,7 +56,7 @@ export default function MeditationLibraryScreen({ navigation }) {
         </View>
 
         {/* Stats */}
-        <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+        <View style={{ flexDirection: 'row', gap: 10, marginTop: 12, marginBottom: 8 }}>
           <GlassCard noPadding variant="subtle" style={{ flex: 1, paddingVertical: 12, alignItems: 'center' }}>
             <Text style={{ fontSize: FontSizes.xl, fontWeight: '800', color: C.primary }}>{sessionCount}</Text>
             <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }}>Sessions</Text>
@@ -69,33 +69,41 @@ export default function MeditationLibraryScreen({ navigation }) {
       </View>
 
       {/* Category Filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 16 }} contentContainerStyle={{ paddingHorizontal: 16 }}>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {categories.map(cat => (
-            <TouchableOpacity
-              key={cat}
-              onPress={() => setSelectedCategory(cat)}
-              activeOpacity={0.8}
-            >
-              <View style={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                borderRadius: 20,
-                backgroundColor: selectedCategory === cat ? C.primary : C.glassBg,
-                borderWidth: 1,
-                borderColor: selectedCategory === cat ? C.primary : C.glassBorder,
-              }}>
-                <Text style={{
-                  fontSize: FontSizes.sm,
-                  fontWeight: selectedCategory === cat ? '700' : '500',
-                  color: selectedCategory === cat ? '#FFFFFF' : C.textSecondary,
-                  textTransform: 'capitalize',
-                }}>{cat}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+      <View style={{ marginBottom: 20 }}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 4 }}
+        >
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {categories.map(cat => (
+              <TouchableOpacity
+                key={cat}
+                onPress={() => setSelectedCategory(cat)}
+                activeOpacity={0.8}
+              >
+                <View style={{
+                  paddingHorizontal: 14,
+                  paddingVertical: 7,
+                  borderRadius: 18,
+                  backgroundColor: selectedCategory === cat ? C.primary : C.glassBg,
+                  borderWidth: 1,
+                  borderColor: selectedCategory === cat ? C.primary : C.glassBorder,
+                  minWidth: 70,
+                  alignItems: 'center',
+                }}>
+                  <Text style={{
+                    fontSize: FontSizes.sm - 1,
+                    fontWeight: selectedCategory === cat ? '700' : '500',
+                    color: selectedCategory === cat ? '#FFFFFF' : C.textSecondary,
+                    textTransform: 'capitalize',
+                  }}>{cat}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
 
       {/* Meditation List */}
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
