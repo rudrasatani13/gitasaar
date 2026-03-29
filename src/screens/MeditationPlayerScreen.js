@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Slider from '@react-native-community/slider';
 import GlassCard from '../components/GlassCard';
 import { useTheme } from '../theme/ThemeContext';
 import { useMeditation } from '../theme/MeditationContext';
@@ -198,79 +199,97 @@ export default function MeditationPlayerScreen({ navigation, route }) {
 
           {/* Audio Settings Panel */}
           {showAudioControls && (
-            <View>
+            <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: C.glassBorder }}>
+              
               {/* Mute Toggle */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingVertical: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <MaterialCommunityIcons name={isMuted ? 'volume-off' : 'volume-high'} size={20} color={C.textPrimary} />
-                  <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: C.textPrimary }}>Sound</Text>
-                </View>
-                <TouchableOpacity onPress={toggleMute} activeOpacity={0.8}>
-                  <View style={{ paddingHorizontal: 16, paddingVertical: 6, borderRadius: 12, backgroundColor: isMuted ? C.glassBg : C.primarySoft, borderWidth: 1, borderColor: isMuted ? C.glassBorder : C.primary }}>
-                    <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: isMuted ? C.textMuted : C.primary }}>{isMuted ? 'OFF' : 'ON'}</Text>
+              <TouchableOpacity onPress={toggleMute} activeOpacity={0.8} style={{ marginBottom: 20 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 16, backgroundColor: C.glassBg, borderRadius: 14, borderWidth: 1, borderColor: isMuted ? C.glassBorder : C.primary }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <MaterialCommunityIcons name={isMuted ? 'volume-off' : 'volume-high'} size={24} color={isMuted ? C.textMuted : C.primary} />
+                    <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: isMuted ? C.textMuted : C.textPrimary }}>Sound</Text>
                   </View>
-                </TouchableOpacity>
-              </View>
+                  <View style={{ paddingHorizontal: 20, paddingVertical: 8, borderRadius: 12, backgroundColor: isMuted ? C.glassBg : C.primarySoft }}>
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: isMuted ? C.textMuted : C.primary }}>{isMuted ? 'OFF' : 'ON'}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
 
-              {/* Ambient Sound Selection */}
+              {/* Background Sound Selection */}
               {!isMuted && (
-                <View style={{ marginBottom: 16 }}>
-                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Background Sound</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                <>
+                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>BACKGROUND SOUND</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
                       {Object.values(AUDIO_LIBRARY.ambient).map((ambient) => (
                         <TouchableOpacity key={ambient.id} onPress={() => changeAmbient(ambient.id)} activeOpacity={0.8}>
                           <View style={{
-                            paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14,
+                            paddingHorizontal: 18, paddingVertical: 12, borderRadius: 16,
                             backgroundColor: selectedAmbient === ambient.id ? C.primary : C.glassBg,
-                            borderWidth: 1, borderColor: selectedAmbient === ambient.id ? C.primary : C.glassBorder,
+                            borderWidth: 1.5, borderColor: selectedAmbient === ambient.id ? C.primary : C.glassBorder,
+                            minWidth: 120,
                           }}>
                             <Text style={{
-                              fontSize: FontSizes.xs, fontWeight: selectedAmbient === ambient.id ? '700' : '500',
-                              color: selectedAmbient === ambient.id ? '#FFFFFF' : C.textSecondary,
+                              fontSize: FontSizes.sm, fontWeight: selectedAmbient === ambient.id ? '700' : '600',
+                              color: selectedAmbient === ambient.id ? '#FFFFFF' : C.textPrimary,
+                              marginBottom: 4,
                             }}>{ambient.name}</Text>
                             <Text style={{
-                              fontSize: FontSizes.xs - 2, color: selectedAmbient === ambient.id ? 'rgba(255,255,255,0.7)' : C.textMuted, marginTop: 2
+                              fontSize: FontSizes.xs - 2, color: selectedAmbient === ambient.id ? 'rgba(255,255,255,0.8)' : C.textMuted,
                             }}>{ambient.category}</Text>
                           </View>
                         </TouchableOpacity>
                       ))}
                     </View>
                   </ScrollView>
-                </View>
-              )}
 
-              {/* Volume Control */}
-              {!isMuted && (
-                <View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 }}>Volume</Text>
-                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: C.primary }}>{Math.round(volume * 100)}%</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                    <MaterialCommunityIcons name="volume-low" size={18} color={C.textMuted} />
-                    <View style={{ flex: 1, height: 4, backgroundColor: C.glassBg, borderRadius: 2, overflow: 'hidden' }}>
-                      <View style={{ height: '100%', width: `${volume * 100}%`, backgroundColor: C.primary, borderRadius: 2 }} />
+                  {/* Volume Slider - Draggable */}
+                  <View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 }}>VOLUME</Text>
+                      <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: C.primary }}>{Math.round(volume * 100)}%</Text>
                     </View>
-                    <MaterialCommunityIcons name="volume-high" size={18} color={C.textMuted} />
+                    
+                    {/* Draggable Volume Slider */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                      <MaterialCommunityIcons name="volume-low" size={20} color={C.textMuted} />
+                      <Slider
+                        style={{ flex: 1, height: 40 }}
+                        minimumValue={0}
+                        maximumValue={1}
+                        value={volume}
+                        onValueChange={(value) => {
+                          setVolume(value);
+                          adjustVolume(value);
+                        }}
+                        onSlidingComplete={(value) => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }}
+                        minimumTrackTintColor={C.primary}
+                        maximumTrackTintColor={C.glassBg}
+                        thumbTintColor={C.primary}
+                      />
+                      <MaterialCommunityIcons name="volume-high" size={20} color={C.textMuted} />
+                    </View>
+                    
+                    {/* Quick Presets (Optional) */}
+                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                      {[0.3, 0.5, 0.7, 1.0].map((vol) => (
+                        <TouchableOpacity key={vol} onPress={() => { setVolume(vol); adjustVolume(vol); }} activeOpacity={0.8} style={{ flex: 1 }}>
+                          <View style={{
+                            paddingVertical: 8, borderRadius: 10, alignItems: 'center',
+                            backgroundColor: Math.abs(volume - vol) < 0.05 ? C.primarySoft : C.glassBg,
+                            borderWidth: 1, borderColor: Math.abs(volume - vol) < 0.05 ? C.primary : C.glassBorder,
+                          }}>
+                            <Text style={{
+                              fontSize: FontSizes.xs, fontWeight: Math.abs(volume - vol) < 0.05 ? '700' : '500',
+                              color: Math.abs(volume - vol) < 0.05 ? C.primary : C.textMuted,
+                            }}>{Math.round(vol * 100)}%</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
                   </View>
-                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-                    {[0.3, 0.5, 0.7, 1.0].map((vol) => (
-                      <TouchableOpacity key={vol} onPress={() => adjustVolume(vol)} activeOpacity={0.8} style={{ flex: 1 }}>
-                        <View style={{
-                          paddingVertical: 6, borderRadius: 8, alignItems: 'center',
-                          backgroundColor: volume === vol ? C.primarySoft : C.glassBg,
-                          borderWidth: 1, borderColor: volume === vol ? C.primary : C.glassBorder,
-                        }}>
-                          <Text style={{
-                            fontSize: FontSizes.xs, fontWeight: volume === vol ? '700' : '500',
-                            color: volume === vol ? C.primary : C.textMuted,
-                          }}>{Math.round(vol * 100)}%</Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
+                </>
               )}
             </View>
           )}
