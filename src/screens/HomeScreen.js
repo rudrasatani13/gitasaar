@@ -199,8 +199,8 @@ export default function HomeScreen({ navigation }) {
 
         {/* Quick Actions */}
         <FadeSlide delay={140}>
-          <View style={{ flexDirection: "row", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-            <TouchableOpacity onPress={() => navigation.navigate("Quiz")} activeOpacity={0.8} style={{ width: (width - 40 - 10) / 2 }}>
+          <View style={{ flexDirection: "row", gap: 10, marginBottom: 8 }}>
+            <TouchableOpacity onPress={() => navigation.navigate("Quiz")} activeOpacity={0.8} style={{ flex: 1 }}>
               <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={80} variant="default">
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: C.saffronSoft, justifyContent: "center", alignItems: "center" }}>
@@ -213,7 +213,7 @@ export default function HomeScreen({ navigation }) {
                 </View>
               </GlassCard>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("MeditationLibrary")} activeOpacity={0.8} style={{ width: (width - 40 - 10) / 2 }}>
+            <TouchableOpacity onPress={() => navigation.navigate("MeditationLibrary")} activeOpacity={0.8} style={{ flex: 1 }}>
               <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={80} variant="default">
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: C.peacockBlue + '14', justifyContent: "center", alignItems: "center" }}>
