@@ -163,36 +163,23 @@ export default function BreathingScreen({ navigation, route }) {
       {/* Controls */}
       <View style={{ paddingHorizontal: 16, paddingBottom: 100 }}>
         <GlassCard noPadding style={{ padding: 20 }}>
-          <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary, marginBottom: 8 }}>About This Exercise</Text>
-          <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, lineHeight: 22, marginBottom: 16 }}>{exercise.description}</Text>
+          <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.textPrimary, marginBottom: 8, textAlign: 'center' }}>About This Exercise</Text>
+          <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, lineHeight: 22, marginBottom: 20, textAlign: 'center' }}>{exercise.description}</Text>
           
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            {!isActive ? (
-              <TouchableOpacity onPress={handleStart} activeOpacity={0.8} style={{ flex: 1 }}>
-                <LinearGradient colors={[C.peacockBlue, C.primary]} style={{ paddingVertical: 16, borderRadius: 16, alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <MaterialCommunityIcons name="play" size={20} color="#FFFFFF" />
-                    <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: '#FFFFFF' }}>Start</Text>
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
-            ) : (
-              <>
-                <TouchableOpacity onPress={handlePause} activeOpacity={0.8} style={{ flex: 1 }}>
-                  <View style={{ paddingVertical: 16, borderRadius: 16, alignItems: 'center', backgroundColor: C.glassBg, borderWidth: 1.5, borderColor: C.primary }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <MaterialCommunityIcons name="pause" size={20} color={C.primary} />
-                      <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.primary }}>Pause</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleReset} activeOpacity={0.8} style={{ width: 56 }}>
-                  <View style={{ paddingVertical: 16, borderRadius: 16, alignItems: 'center', backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder }}>
-                    <MaterialCommunityIcons name="refresh" size={20} color={C.textSecondary} />
-                  </View>
-                </TouchableOpacity>
-              </>
-            )}
+          <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity onPress={handleReset} activeOpacity={0.8} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
+              <MaterialCommunityIcons name="refresh" size={24} color={C.textSecondary} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity onPress={isActive ? handlePause : handleStart} activeOpacity={0.8}>
+              <LinearGradient colors={[C.peacockBlue, C.primary]} style={{ width: 72, height: 72, borderRadius: 36, justifyContent: 'center', alignItems: 'center' }}>
+                <MaterialCommunityIcons name={isActive ? 'pause' : 'play'} size={32} color="#FFFFFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {}} activeOpacity={0.8} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
+              <MaterialCommunityIcons name="fast-forward" size={24} color={C.textSecondary} />
+            </TouchableOpacity>
           </View>
         </GlassCard>
       </View>

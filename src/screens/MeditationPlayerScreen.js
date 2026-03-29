@@ -91,7 +91,7 @@ export default function MeditationPlayerScreen({ navigation, route }) {
         <GlassCard noPadding style={{ padding: 20 }}>
           <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, lineHeight: 22, marginBottom: 20, textAlign: 'center' }}>{meditation.description}</Text>
           
-          <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center' }}>
+          <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
             <TouchableOpacity onPress={() => { setElapsed(0); setIsPlaying(false); }} activeOpacity={0.8} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassBorder, justifyContent: 'center', alignItems: 'center' }}>
               <MaterialCommunityIcons name="refresh" size={24} color={C.textSecondary} />
             </TouchableOpacity>
