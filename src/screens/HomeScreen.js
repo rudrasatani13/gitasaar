@@ -200,28 +200,56 @@ export default function HomeScreen({ navigation }) {
         {/* Quick Actions */}
         <FadeSlide delay={140}>
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-            <TouchableOpacity onPress={() => navigation.navigate("Quiz")} activeOpacity={0.8} style={{ width: 155 }}>
-              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={40}>
+            <TouchableOpacity onPress={() => navigation.navigate("Quiz")} activeOpacity={0.8} style={{ width: (width - 40 - 10) / 2 }}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={80} variant="default">
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: C.saffronSoft, justifyContent: "center", alignItems: "center" }}>
                     <MaterialCommunityIcons name="head-question-outline" size={18} color={C.saffron} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Daily Quiz</Text>
-                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Test your knowledge</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Test knowledge</Text>
                   </View>
                 </View>
               </GlassCard>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("ChatHistory")} activeOpacity={0.8} style={{ flex: 1 }}>
-              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={40}>
+            <TouchableOpacity onPress={() => navigation.navigate("MeditationLibrary")} activeOpacity={0.8} style={{ width: (width - 40 - 10) / 2 }}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={80} variant="default">
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: C.peacockBlue + '14', justifyContent: "center", alignItems: "center" }}>
-                    <MaterialCommunityIcons name="chat-outline" size={18} color={C.peacockBlue} />
+                    <MaterialCommunityIcons name="meditation" size={18} color={C.peacockBlue} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Chat History</Text>
-                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Past conversations</Text>
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Meditate</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Guided sessions</Text>
+                  </View>
+                </View>
+              </GlassCard>
+            </TouchableOpacity>
+          </View>
+          <View style={{ flexDirection: "row", gap: 10, marginBottom: 8 }}>
+            <TouchableOpacity onPress={() => navigation.navigate("MantraLibrary")} activeOpacity={0.8} style={{ flex: 1 }}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={80} variant="default">
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: C.primary + '18', justifyContent: "center", alignItems: "center" }}>
+                    <MaterialCommunityIcons name="om" size={18} color={C.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Mantras</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Sacred chants</Text>
+                  </View>
+                </View>
+              </GlassCard>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("LearningPaths")} activeOpacity={0.8} style={{ flex: 1 }}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={80} variant="default">
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: "#14918E14", justifyContent: "center", alignItems: "center" }}>
+                    <MaterialCommunityIcons name="compass" size={18} color="#14918E" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Learning Path</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>Guided journey</Text>
                   </View>
                 </View>
               </GlassCard>
@@ -229,7 +257,7 @@ export default function HomeScreen({ navigation }) {
           </View>
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 16 }}>
             <TouchableOpacity onPress={() => navigation.navigate("Streak")} activeOpacity={0.8} style={{ flex: 1 }}>
-              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={40}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={80} variant="default">
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: "#E8793A14", justifyContent: "center", alignItems: "center" }}>
                     <MaterialCommunityIcons name="fire" size={18} color="#E8793A" />
@@ -242,14 +270,14 @@ export default function HomeScreen({ navigation }) {
               </GlassCard>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate("MoodTracker")} activeOpacity={0.8} style={{ flex: 1 }}>
-              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={40}>
+              <GlassCard noPadding style={{ borderRadius: 16, padding: 16 }} intensity={80} variant="default">
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: "#14918E14", justifyContent: "center", alignItems: "center" }}>
                     <MaterialCommunityIcons name="emoticon-happy-outline" size={18} color="#14918E" />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: "700", color: C.textPrimary }} numberOfLines={1}>Mood Tracker</Text>
-                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>How are you today?</Text>
+                    <Text style={{ fontSize: FontSizes.xs, color: C.textMuted }} numberOfLines={1}>How are you?</Text>
                   </View>
                 </View>
               </GlassCard>

@@ -6,21 +6,22 @@ import { useTheme } from '../theme/ThemeContext';
 import { FontSizes } from '../theme/colors';
 
 /**
- * GlassInput — Glassmorphism-styled text input.
+ * GlassInput — Enhanced Glassmorphism-styled text input.
  * Drop-in replacement for the plain View+TextInput pattern used throughout the app.
+ * Updated with stronger frosted glass effect.
  *
  * Props mirror TextInput, plus:
  *  leftIcon    — JSX element shown on the left
  *  rightIcon   — JSX element shown on the right
  *  focused     — controlled "focused" state for border glow
- *  intensity   — blur intensity (default 40)
+ *  intensity   — blur intensity (default 70 for enhanced frosted effect)
  */
 export default function GlassInput({
   leftIcon,
   rightIcon,
   style,
   inputStyle,
-  intensity = 40,
+  intensity = 70,
   ...textInputProps
 }) {
   const { colors: C, isDark } = useTheme();
@@ -28,6 +29,11 @@ export default function GlassInput({
 
   const borderColor = isFocused ? C.glassBorderGold : (isDark ? C.glassBorder : C.border);
   const shadowStyle = isFocused ? C.glassShadow : C.shadowLight;
+
+  // Enhanced background for better frosted effect
+  const enhancedInputBg = isDark
+    ? 'rgba(10, 10, 10, 0.80)'
+    : 'rgba(255, 255, 255, 0.85)';
 
   const inner = (
     <>
@@ -42,12 +48,12 @@ export default function GlassInput({
           backgroundColor: C.glassHighlight,
         }}
       />
-      {/* Translucent overlay */}
+      {/* Enhanced translucent overlay */}
       <View
         style={{
           position: 'absolute',
           top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: C.glassInputBg,
+          backgroundColor: enhancedInputBg,
           borderRadius: 16,
         }}
       />
@@ -92,9 +98,9 @@ export default function GlassInput({
         style={[
           containerStyle,
           {
-            backgroundColor: isDark ? C.glassInputBg : '#FFFFFF',
-            backdropFilter: `blur(${intensity}px)`,
-            WebkitBackdropFilter: `blur(${intensity}px)`,
+            backgroundColor: enhancedInputBg,
+            backdropFilter: `blur(${intensity}px) saturate(180%)`,
+            WebkitBackdropFilter: `blur(${intensity}px) saturate(180%)`,
           },
         ]}
       >
@@ -105,9 +111,9 @@ export default function GlassInput({
 
   return (
     <BlurView
-      intensity={isDark ? intensity : 0}
+      intensity={intensity}
       tint={isDark ? 'dark' : 'light'}
-      style={[containerStyle, { backgroundColor: isDark ? 'transparent' : '#FFFFFF' }]}
+      style={[containerStyle, { backgroundColor: 'transparent' }]}
     >
       {inner}
     </BlurView>

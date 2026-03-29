@@ -36,6 +36,12 @@ import AboutScreen from "../screens/AboutScreen";
 import PremiumScreen from "../screens/PremiumScreen";
 import QuizScreen from "../screens/QuizScreen";
 import ChatHistoryScreen from "../screens/ChatHistoryScreen";
+import MeditationLibraryScreen from "../screens/MeditationLibraryScreen";
+import BreathingScreen from "../screens/BreathingScreen";
+import MantraLibraryScreen from "../screens/MantraLibraryScreen";
+import LearningPathsScreen from "../screens/LearningPathsScreen";
+import MeditationPlayerScreen from "../screens/MeditationPlayerScreen";
+import MantraPlayerScreen from "../screens/MantraPlayerScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -225,6 +231,12 @@ export default function AppNavigator() {
       <Stack.Screen name="Quiz" component={QuizScreen} options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="ChatHistory" component={ChatHistoryScreen} options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="Language" component={LanguageScreen} options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="MeditationLibrary" component={MeditationLibraryScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="Breathing" component={BreathingScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="MantraLibrary" component={MantraLibraryScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="LearningPaths" component={LearningPathsScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="MeditationPlayer" component={MeditationPlayerScreen} options={{ animation: "slide_from_bottom" }} />
+      <Stack.Screen name="MantraPlayer" component={MantraPlayerScreen} options={{ animation: "slide_from_bottom" }} />
     </>
   );
 

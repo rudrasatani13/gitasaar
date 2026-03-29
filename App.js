@@ -48,6 +48,10 @@ import { ChatHistoryProvider } from "./src/theme/ChatHistoryContext";
 import { ReadingGoalProvider } from "./src/theme/ReadingGoalContext";
 import { OfflineProvider } from './src/theme/OfflineContext';
 import { PremiumProvider } from './src/theme/PremiumContext';
+import { BadgeProvider } from './src/theme/BadgeContext';
+import { MeditationProvider } from './src/theme/MeditationContext';
+import { MantraProvider } from './src/theme/MantraContext';
+import { LearningPathProvider } from './src/theme/LearningPathContext';
 import { initSecurity } from './src/utils/security';
 import AppNavigator from './src/navigation/AppNavigator';
 
@@ -87,9 +91,17 @@ export default function App() {
             <JournalProvider>
               <ReadingGoalProvider>
               <PremiumProvider>
+              <BadgeProvider>
+              <MeditationProvider>
+              <MantraProvider>
+              <LearningPathProvider>
               <ChatHistoryProvider>
                 <AppContent />
               </ChatHistoryProvider>
+              </LearningPathProvider>
+              </MantraProvider>
+              </MeditationProvider>
+              </BadgeProvider>
               </PremiumProvider>
               </ReadingGoalProvider>
             </JournalProvider>

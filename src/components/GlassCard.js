@@ -5,53 +5,67 @@ import { BlurView } from 'expo-blur';
 import { useTheme } from '../theme/ThemeContext';
 
 /**
- * GlassCard — Glassmorphism card for the entire app.
+ * GlassCard — Enhanced Glassmorphism card matching iOS/modern design standards.
  * Uses BlurView on native iOS/Android, backdropFilter on web.
+ * Updated to match reference frosted glass aesthetic.
  *
  * Props:
- *  intensity   — blur intensity (default 50)
+ *  intensity   — blur intensity (default 80 for strong frosted effect)
  *  noPadding   — remove default padding
  *  style       — additional styles
  *  noBlur      — skip blur (for performance-sensitive areas)
+ *  variant     — 'default' | 'strong' | 'subtle'
  */
 export default function GlassCard({
   children,
   style,
   noPadding = false,
-  intensity = 50,
+  intensity = 80,
   noBlur = false,
+  variant = 'default',
 }) {
   const { colors: C, isDark } = useTheme();
 
-  const borderColor = isDark ? C.glassBorder : C.border;
+  // Enhanced blur intensities based on variant
+  const blurIntensity = variant === 'strong' ? 100 : variant === 'subtle' ? 60 : intensity;
+  
+  // Stronger borders for better definition
+  const borderColor = isDark 
+    ? (variant === 'strong' ? C.glassBorderGold : C.glassBorder)
+    : (variant === 'strong' ? C.borderGoldStrong : C.border);
 
   const containerStyle = [
     styles.base,
     {
       borderRadius: 20,
-      borderWidth: 1,
+      borderWidth: variant === 'strong' ? 1.5 : 1,
       borderColor,
       padding: noPadding ? 0 : 18,
       overflow: 'hidden',
     },
-    C.shadowLight,
+    variant === 'strong' ? C.shadowGold : C.shadowLight,
     style,
   ];
 
-  // Web: use backdropFilter CSS
+  // Enhanced background opacity for better frosted effect
+  const enhancedGlassBg = isDark
+    ? (variant === 'strong' ? 'rgba(224, 168, 80, 0.12)' : 'rgba(10, 10, 10, 0.75)')
+    : (variant === 'strong' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.80)');
+
+  // Web: use backdropFilter CSS with enhanced blur
   if (Platform.OS === 'web') {
     return (
       <View
         style={[
           containerStyle,
           {
-            backgroundColor: C.glassBg,
-            backdropFilter: `blur(${intensity}px)`,
-            WebkitBackdropFilter: `blur(${intensity}px)`,
+            backgroundColor: enhancedGlassBg,
+            backdropFilter: `blur(${blurIntensity}px) saturate(180%)`,
+            WebkitBackdropFilter: `blur(${blurIntensity}px) saturate(180%)`,
           },
         ]}
       >
-        {/* Top shimmer line */}
+        {/* Top shimmer line - more prominent */}
         <View
           style={{
             position: 'absolute',
@@ -60,6 +74,7 @@ export default function GlassCard({
             right: 0,
             height: 1,
             backgroundColor: C.glassHighlight,
+            opacity: 0.6,
           }}
         />
         {children}
@@ -67,19 +82,22 @@ export default function GlassCard({
     );
   }
 
-  // iOS only: BlurView with tint — Android BlurView renders grey/white regardless of theme
-  if (!noBlur && Platform.OS === 'ios') {
+  // iOS & Android: Enhanced BlurView
+  if (!noBlur) {
     return (
       <BlurView
-        intensity={intensity}
+        intensity={blurIntensity}
         tint={isDark ? 'dark' : 'light'}
         style={[containerStyle, { backgroundColor: 'transparent' }]}
       >
-        {/* Translucent overlay for color tinting */}
+        {/* Enhanced translucent overlay for stronger frosted effect */}
         <View
           style={[
             StyleSheet.absoluteFillObject,
-            { backgroundColor: C.glassBg, borderRadius: 20 },
+            { 
+              backgroundColor: enhancedGlassBg, 
+              borderRadius: 20,
+            },
           ]}
         />
         {/* Top shimmer highlight */}
@@ -91,6 +109,7 @@ export default function GlassCard({
             right: 0,
             height: 1,
             backgroundColor: C.glassHighlight,
+            opacity: 0.5,
           }}
         />
         {children}
@@ -98,10 +117,10 @@ export default function GlassCard({
     );
   }
 
-  // Android + noBlur: solid white card with elevation shadow in light mode
+  // Fallback: solid card with subtle transparency
   return (
     <View style={[containerStyle, {
-      backgroundColor: isDark ? C.glassBg : '#FFFFFF',
+      backgroundColor: enhancedGlassBg,
     }]}>
       {children}
     </View>

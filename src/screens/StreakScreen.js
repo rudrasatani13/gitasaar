@@ -5,8 +5,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { useTracker } from '../theme/TrackerContext';
+import { useBadges, BADGES as ALL_BADGES } from '../theme/BadgeContext';
 import { FontSizes } from '../theme/colors';
 import GlassCard from '../components/GlassCard';
+import BadgeDisplay from '../components/BadgeDisplay';
 
 const { width } = Dimensions.get('window');
 const CELL = Math.floor((width - 60) / 7);
@@ -38,6 +40,7 @@ function getMonthDays(year, month) {
 export default function StreakScreen({ navigation }) {
   const { colors: C } = useTheme();
   const { streak: streakObj, totalRead, totalPercent, getChapterProgress, readDates } = useTracker();
+  const { unlockedBadges, badgeCount, totalBadges } = useBadges();
   const streak = streakObj?.count || 0;
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
   const [calYear, setCalYear] = useState(new Date().getFullYear());
@@ -182,27 +185,19 @@ export default function StreakScreen({ navigation }) {
           </GlassCard>
         </View>
 
-        {/* Badges */}
+        {/* Badges - Using New Badge System */}
         <View style={{ paddingHorizontal: 20, marginBottom: 30 }}>
-          <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 12 }}>BADGES & ACHIEVEMENTS</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5 }}>BADGES & ACHIEVEMENTS</Text>
+            <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: C.peacockBlue }}>{badgeCount}/{totalBadges}</Text>
+          </View>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {BADGES.map((b) => {
-              const earned = isBadgeEarned(b);
+            {Object.values(ALL_BADGES).slice(0, 12).map((badge) => {
+              const unlocked = unlockedBadges.includes(badge.id);
               return (
-                <GlassCard key={b.id} noPadding style={{ width: (width - 50) / 2, borderRadius: 16, padding: 16, borderWidth: 1.5, borderColor: earned ? b.color + '40' : C.glassBorder, opacity: earned ? 1 : 0.5 }} intensity={35}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                    <View style={{ width: 40, height: 40, borderRadius: 20,
-                      backgroundColor: earned ? b.color + '15' : C.glassBg,
-                      justifyContent: 'center', alignItems: 'center',
-                      borderWidth: 1.5, borderColor: earned ? b.color + '30' : C.glassBorder,
-                    }}>
-                      <MaterialCommunityIcons name={b.icon} size={20} color={earned ? b.color : C.textMuted} />
-                    </View>
-                    {earned && <MaterialCommunityIcons name="check-circle" size={16} color={b.color} />}
-                  </View>
-                  <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: earned ? C.textPrimary : C.textMuted }}>{b.title}</Text>
-                  <Text style={{ fontSize: 10, color: C.textMuted, marginTop: 2 }}>{b.desc}</Text>
-                </GlassCard>
+                <View key={badge.id} style={{ width: (width - 50) / 2 }}>
+                  <BadgeDisplay badge={badge} unlocked={unlocked} size="medium" />
+                </View>
               );
             })}
           </View>

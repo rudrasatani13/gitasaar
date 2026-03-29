@@ -180,7 +180,7 @@ export default function SettingsScreen() {
 
         {/* Preferences */}
         <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 12 }}>{tr('preferences')}</Text>
-        <GlassCard noPadding style={{ marginBottom: 12, borderRadius: 16 }} intensity={40}>
+        <GlassCard noPadding style={{ marginBottom: 12, borderRadius: 16 }} intensity={80}>
           <SettingRow C={C} icon="translate" label={tr('language')} sublabel={langLabel}
             onPress={() => navigation.navigate('Language')}
             right={<MaterialCommunityIcons name="chevron-right" size={18} color={C.textMuted} />} />
@@ -237,8 +237,16 @@ export default function SettingsScreen() {
         )}
 
         {/* About */}
+        <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 12, marginTop: 12 }}>FEATURES</Text>
+        <GlassCard noPadding style={{ marginBottom: 12, borderRadius: 16 }} intensity={80}>
+          <SettingRow C={C} icon="meditation" label="Meditation Library" sublabel="Guided sessions & practices" onPress={() => navigation.navigate("MeditationLibrary")} />
+          <SettingRow C={C} icon="om" label="Mantra Chanting" sublabel="Sacred sounds library" onPress={() => navigation.navigate("MantraLibrary")} />
+          <SettingRow C={C} icon="compass" label="Learning Paths" sublabel="Personalized Gita journey" onPress={() => navigation.navigate("LearningPaths")} />
+          <SettingRow C={C} icon="lungs" label="Breathing Exercises" sublabel="Pranayama practices" onPress={() => navigation.navigate("Breathing", { exercise: { id: 'box_breathing', name: 'Box Breathing', duration: 5, isPremium: false, description: 'Equal inhale, hold, exhale, hold (4-4-4-4)', pattern: [4, 4, 4, 4], benefit: 'Calm mind, reduce stress' } })} isLast />
+        </GlassCard>
+
         <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: C.primary, letterSpacing: 1.5, marginBottom: 12, marginTop: 12 }}>{tr('about')}</Text>
-        <GlassCard noPadding style={{ marginBottom: 24, borderRadius: 16 }} intensity={40}>
+        <GlassCard noPadding style={{ marginBottom: 24, borderRadius: 16 }} intensity={80}>
           <SettingRow C={C} icon="star-outline" label="Rate GitaSaar" sublabel="Share your experience" onPress={handleRate} />
           <SettingRow C={C} icon="bell-ring-outline" label="Verse Reminders" sublabel="Daily shloka notifications" onPress={() => navigation.navigate("VerseReminder")}
           />
